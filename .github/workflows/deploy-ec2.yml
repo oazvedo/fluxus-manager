@@ -1,18 +1,12 @@
 name: Deploy EC2
 
-# Release: quando o PR dev → main é mergeado e o CI da main fica verde, conecta na EC2 por SSH
-# e atualiza o servidor com a main. Também pode ser disparado manualmente (a partir da main).
+# Atualiza o servidor da AWS com a main: conecta na EC2 por SSH e roda o deploy/update.sh.
+# Chamado pelo CI (job "Deploy (AWS)") num push na main — ou seja, no merge do PR de release
+# dev → main —, depois que build e testes passam. Também pode ser disparado manualmente a partir da main.
 # Fica desligado até a variável de repositório DEPLOY_EC2_ENABLED=true (ver README → Deploy automático).
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
+  workflow_call:
   workflow_dispatch:
-
-concurrency:
-  group: deploy-ec2
-  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -20,9 +14,10 @@ permissions:
 jobs:
   deploy:
     name: Atualizar servidor
-    if: >-
-      vars.DEPLOY_EC2_ENABLED == 'true' &&
-      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    if: vars.DEPLOY_EC2_ENABLED == 'true'
+    concurrency:
+      group: deploy-ec2
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
