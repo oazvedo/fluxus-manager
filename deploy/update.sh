@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Atualiza o servidor com a última versão da branch de deploy (padrão: dev) e recria os containers.
-# Rodado pelo workflow "Deploy EC2" a cada merge na dev, ou manualmente no servidor.
+# Atualiza o servidor com a última versão da branch de deploy (padrão: main) e recria os containers.
+# Rodado pelo workflow "Deploy EC2" a cada release (merge dev → main), ou manualmente no servidor.
 # Uso (na raiz do repositório, no servidor): deploy/update.sh
 set -euo pipefail
 
-BRANCH="${DEPLOY_BRANCH:-dev}"
+BRANCH="${DEPLOY_BRANCH:-main}"
 COMPOSE=(docker compose -f deploy/docker-compose.yml)
 
 cd "$(dirname "$0")/.."

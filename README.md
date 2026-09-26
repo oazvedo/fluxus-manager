@@ -59,14 +59,20 @@ docker compose -f deploy/docker-compose.yml up -d --build
 
 Acesse `http://<ip-publico>/` (frontend), `http://<ip-publico>/api/health` e `http://<ip-publico>/api/swagger`.
 
-**3. Atualizar**: automático a cada merge na `dev` (abaixo) ou manual com `deploy/update.sh`.
+**3. Atualizar**: automático a cada release (merge `dev` → `main`, abaixo) ou manual com `deploy/update.sh`.
 
 Logs: `docker compose -f deploy/docker-compose.yml logs -f api`
 
-### Deploy automático
+### Deploy automático (release)
 
-Depois do CI verde na `dev`, o workflow **Deploy EC2** entra no servidor por SSH, roda o `deploy/update.sh`
-(sincroniza com a `dev` e reconstrói os containers) e confere o `/api/health`.
+O servidor na AWS roda a **`main`**. Fluxo de release:
+
+1. Abra um PR `dev` → `main` (título `release: ...`) e aguarde o CI verde.
+2. Aprove e mergeie o PR.
+3. O CI roda na `main` e, verde, o workflow **Deploy EC2** entra no servidor por SSH, roda o `deploy/update.sh`
+   (sincroniza com a `main` e reconstrói os containers) e confere o `/api/health`.
+
+Merges na `dev` não vão para a AWS.
 
 Configuração (uma vez):
 
@@ -82,11 +88,11 @@ Configuração (uma vez):
    variável de repositório `DEPLOY_EC2_ENABLED=true`.
 4. No Security Group, a **porta 22** precisa aceitar conexões do GitHub Actions (IPs variáveis; o acesso é só por chave).
 
-Deploy manual: **Actions → Deploy EC2 → Run workflow**.
+Deploy manual: **Actions → Deploy EC2 → Run workflow** (branch `main`).
 
 ## Fluxo de branches e commits
 
-- **`main`**: produção. Nunca recebe commit direto — só PR vindo da `dev`, `release/*` ou `hotfix/*`, com CI verde.
+- **`main`**: produção (é o que roda na AWS). Nunca recebe commit direto — só PR vindo da `dev`, `release/*` ou `hotfix/*`, com CI verde.
 - **`dev`**: integração. Aceita commit direto.
 - **Branches de issue** (`feat`, `bugfix`, `hotfix`): `<tipo>/<issue>-<descricao>` em minúsculas.
   Ex.: `feat/1-multi-tenant`, `bugfix/42-token-expirado`.

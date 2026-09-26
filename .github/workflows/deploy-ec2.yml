@@ -1,12 +1,13 @@
 name: Deploy EC2
 
-# Após o CI verde na dev (ou manualmente), conecta na EC2 por SSH e roda o deploy/update.sh.
+# Release: quando o PR dev → main é mergeado e o CI da main fica verde, conecta na EC2 por SSH
+# e atualiza o servidor com a main. Também pode ser disparado manualmente (a partir da main).
 # Fica desligado até a variável de repositório DEPLOY_EC2_ENABLED=true (ver README → Deploy automático).
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-    branches: [dev]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -54,7 +55,7 @@ jobs:
           APP_DIR: ${{ vars.EC2_APP_DIR || '~/fluxus-manager' }}
         run: |
           ssh -i ~/.ssh/deploy_key -o ServerAliveInterval=30 "$USER@$HOST" \
-            "cd $APP_DIR && bash deploy/update.sh"
+            "cd $APP_DIR && DEPLOY_BRANCH=main bash deploy/update.sh"
 
       - name: Verificar de fora
         run: |
