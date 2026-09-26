@@ -1,0 +1,4 @@
+# Copie para backend.hcl e use: terraform init -backend-config=backend.hcl
+# O nome do bucket é o output "state_bucket" do bootstrap.
+bucket = "fluxus-manager-tfstate-<ACCOUNT_ID>"
+region = "sa-east-1"

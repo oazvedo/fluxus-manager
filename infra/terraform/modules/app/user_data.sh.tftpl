@@ -1,0 +1,26 @@
+#!/bin/bash
+# Preparação da EC2 (roda uma vez, na criação): Docker + Compose e volume de dados montado em /data.
+set -euxo pipefail
+
+dnf install -y docker
+systemctl enable --now docker
+
+mkdir -p /usr/libexec/docker/cli-plugins
+curl -fsSL "https://github.com/docker/compose/releases/download/v5.5.1/docker-compose-linux-aarch64" \
+  -o /usr/libexec/docker/cli-plugins/docker-compose
+chmod +x /usr/libexec/docker/cli-plugins/docker-compose
+
+# O volume EBS aparece como NVMe; o id do volume (sem hífen) está no serial do dispositivo.
+device="/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_${replace(data_volume_id, "-", "")}"
+for _ in $(seq 1 60); do [ -e "$device" ] && break; sleep 5; done
+
+if ! blkid "$device"; then
+  mkfs.xfs "$device"
+fi
+
+mkdir -p /data
+uuid=$(blkid -s UUID -o value "$device")
+grep -q "$uuid" /etc/fstab || echo "UUID=$uuid /data xfs defaults,nofail 0 2" >> /etc/fstab
+mount -a
+
+mkdir -p /data/postgres /opt/fluxus
