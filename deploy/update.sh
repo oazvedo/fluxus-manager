@@ -1,12 +1,32 @@
 #!/usr/bin/env bash
-# Atualiza o servidor com a versão mais recente da branch atual e recria os containers.
+# Atualiza o servidor com a última versão da branch de deploy (padrão: dev) e recria os containers.
+# Rodado pelo workflow "Deploy EC2" a cada merge na dev, ou manualmente no servidor.
 # Uso (na raiz do repositório, no servidor): deploy/update.sh
 set -euo pipefail
 
+BRANCH="${DEPLOY_BRANCH:-dev}"
+COMPOSE=(docker compose -f deploy/docker-compose.yml)
+
 cd "$(dirname "$0")/.."
 
-git pull --ff-only
-docker compose -f deploy/docker-compose.yml up -d --build --remove-orphans
+# O servidor espelha a branch remota (o deploy/.env fica fora do git e é preservado).
+git fetch -q origin "$BRANCH"
+git checkout -q "$BRANCH"
+git reset -q --hard "origin/$BRANCH"
+echo "Versão: $(git log -1 --format='%h %s')"
+
+"${COMPOSE[@]}" up -d --build --remove-orphans
 docker image prune -f >/dev/null
 
-docker compose -f deploy/docker-compose.yml ps
+for _ in $(seq 1 30); do
+  if curl -fsS http://localhost/api/health >/dev/null 2>&1; then
+    "${COMPOSE[@]}" ps
+    echo "✓ Deploy concluído"
+    exit 0
+  fi
+  sleep 4
+done
+
+echo "✗ /api/health não respondeu. Últimos logs da API:"
+"${COMPOSE[@]}" logs --tail 80 api
+exit 1
