@@ -1,3 +1,5 @@
+using System.Globalization;
+using FluentValidation;
 using FluxusManager.Application.Interfaces;
 using FluxusManager.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,7 @@ public static class ApplicationModule
     public static IServiceCollection AddApplicationModule(this IServiceCollection services)
     {
         AddServices(services);
+        AddValidators(services);
 
         return services;
     }
@@ -20,5 +23,13 @@ public static class ApplicationModule
     private static void AddServices(IServiceCollection services)
     {
         services.AddScoped<ITenantContext, TenantContext>();
+    }
+
+    private static void AddValidators(IServiceCollection services)
+    {
+        // Todo AbstractValidator<T> desta camada é registrado automaticamente e executado pelo ValidationFilter da API.
+        services.AddValidatorsFromAssembly(typeof(ApplicationModule).Assembly);
+
+        ValidatorOptions.Global.LanguageManager.Culture = new CultureInfo("pt-BR");
     }
 }

@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<TenantFilter>();
+    options.Filters.Add<ValidationFilter>();
     options.Filters.Add<ExceptionFilter>();
 });
 builder.Services.AddProblemDetails();
