@@ -1,0 +1,57 @@
+name: Deploy EC2
+
+# Após o CI verde na dev (ou manualmente), conecta na EC2 por SSH e roda o deploy/update.sh.
+# Fica desligado até a variável de repositório DEPLOY_EC2_ENABLED=true (ver README → Deploy automático).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Atualizar servidor
+    if: >-
+      vars.DEPLOY_EC2_ENABLED == 'true' &&
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: ec2
+      url: http://${{ vars.EC2_HOST }}
+    steps:
+      - name: Configurar SSH
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ vars.EC2_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy
+        env:
+          HOST: ${{ vars.EC2_HOST }}
+          USER: ${{ vars.EC2_USER }}
+          APP_DIR: ${{ vars.EC2_APP_DIR || '~/fluxus-manager' }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o ServerAliveInterval=30 "$USER@$HOST" \
+            "cd $APP_DIR && ./deploy/update.sh"
+
+      - name: Verificar de fora
+        run: |
+          for _ in $(seq 1 10); do
+            curl -fsS "http://${{ vars.EC2_HOST }}/api/health" && exit 0
+            sleep 5
+          done
+          echo "API não respondeu em http://${{ vars.EC2_HOST }}/api/health"
+          exit 1

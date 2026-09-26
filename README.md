@@ -59,9 +59,30 @@ docker compose -f deploy/docker-compose.yml up -d --build
 
 Acesse `http://<ip-publico>/` (frontend), `http://<ip-publico>/api/health` e `http://<ip-publico>/api/swagger`.
 
-**3. Atualizar** (depois de novos merges): `deploy/update.sh`
+**3. Atualizar**: automático a cada merge na `dev` (abaixo) ou manual com `deploy/update.sh`.
 
 Logs: `docker compose -f deploy/docker-compose.yml logs -f api`
+
+### Deploy automático
+
+Depois do CI verde na `dev`, o workflow **Deploy EC2** entra no servidor por SSH, roda o `deploy/update.sh`
+(sincroniza com a `dev` e reconstrói os containers) e confere o `/api/health`.
+
+Configuração (uma vez):
+
+1. No servidor, crie a chave usada pelo GitHub e permita o Docker sem `sudo`:
+   ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N "" -C github-deploy
+   cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys
+   sudo usermod -aG docker $USER
+   cat ~/.ssh/github_deploy   # copie a chave privada inteira
+   ```
+2. GitHub → **Settings → Environments → `ec2` → Add environment secret**: `EC2_SSH_KEY` = a chave copiada.
+3. Variáveis do environment `ec2`: `EC2_HOST` (IP público — de preferência um Elastic IP) e `EC2_USER` (ex.: `ubuntu`);
+   variável de repositório `DEPLOY_EC2_ENABLED=true`.
+4. No Security Group, a **porta 22** precisa aceitar conexões do GitHub Actions (IPs variáveis; o acesso é só por chave).
+
+Deploy manual: **Actions → Deploy EC2 → Run workflow**.
 
 ## Fluxo de branches e commits
 
