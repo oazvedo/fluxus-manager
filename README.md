@@ -7,6 +7,7 @@ Sistema de gestão empresarial multi-tenant.
 - **Backend:** .NET 10 (ASP.NET Core + EF Core), em camadas — API, Application, Domain, Infrastructure
 - **Banco:** PostgreSQL 18 (Docker)
 - **Frontend:** React + TypeScript (Vite), Tailwind e shadcn/ui, organizado por feature
+- **Infra:** AWS (EC2, CloudFront, S3, ECR) com Terraform; deploy automático da `dev` em staging — ver [docs/deploy-aws.md](docs/deploy-aws.md)
 
 ## Rodando localmente
 
