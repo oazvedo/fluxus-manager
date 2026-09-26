@@ -6,7 +6,12 @@ using FluxusManager.Infrastructure.Database;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers(options => options.Filters.Add<TenantFilter>());
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<TenantFilter>();
+    options.Filters.Add<ExceptionFilter>();
+});
+builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationModule();
@@ -15,6 +20,10 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("postgres");
 
 var app = builder.Build();
+
+// Erros fora dos controllers (middlewares, rotas inexistentes) também saem como ProblemDetails.
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.MapOpenApi();
 app.UseSwaggerUI(options =>
