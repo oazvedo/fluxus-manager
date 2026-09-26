@@ -34,8 +34,17 @@ jobs:
           HOST: ${{ vars.EC2_HOST }}
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          # Remove \r (chave colada no Windows) e espaços nas bordas das linhas.
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
+            echo "::error::O secret EC2_SSH_KEY não é uma chave privada válida. Cole o conteúdo inteiro de ~/.ssh/github_deploy, das linhas -----BEGIN até -----END."
+            head -1 ~/.ssh/deploy_key | cut -c1-40
+            echo "linhas: $(wc -l < ~/.ssh/deploy_key)"
+            exit 1
+          fi
+
           ssh-keyscan -T 15 "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Deploy
