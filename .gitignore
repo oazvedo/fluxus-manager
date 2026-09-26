@@ -1,0 +1,7 @@
+.env
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
