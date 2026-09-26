@@ -1,0 +1,66 @@
+name: Conventions
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  conventions:
+    name: Conventions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validar branch, título do PR e commits
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.event.after }}
+        run: |
+          source .githooks/lib/conventions.sh
+          failed=0
+
+          if [[ "$EVENT" == "pull_request" ]]; then
+            echo "Branch: $HEAD_REF → $BASE_REF"
+            validate_branch "$HEAD_REF" || failed=1
+
+            if [[ "$BASE_REF" == "main" && ! "$HEAD_REF" =~ $MAIN_SOURCE_REGEX ]]; then
+              echo "✗ PR para a main só pode vir da dev, release/* ou hotfix/* (veio de '$HEAD_REF')."
+              failed=1
+            fi
+
+            echo "Título do PR: $PR_TITLE"
+            validate_commit_msg "$PR_TITLE" || failed=1
+
+            range="$PR_BASE_SHA..$PR_HEAD_SHA"
+          else
+            if [[ "$PUSH_BEFORE" =~ ^0+$ ]]; then
+              range="$PUSH_AFTER -1"
+            else
+              range="$PUSH_BEFORE..$PUSH_AFTER"
+            fi
+          fi
+
+          echo "Commits ($range):"
+          while read -r sha; do
+            [[ -z "$sha" ]] && continue
+            msg=$(git log -1 --format=%B "$sha")
+            echo "  ${sha:0:7} $(printf '%s\n' "$msg" | head -n1)"
+            validate_commit_msg "$msg" || failed=1
+          done < <(git rev-list $range)
+
+          exit $failed
