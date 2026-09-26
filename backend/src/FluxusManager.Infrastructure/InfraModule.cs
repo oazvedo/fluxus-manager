@@ -1,6 +1,8 @@
+using FluxusManager.Application.Interfaces;
 using FluxusManager.Domain.Interfaces;
 using FluxusManager.Infrastructure.Database;
 using FluxusManager.Infrastructure.Repositories;
+using FluxusManager.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,7 @@ public static class InfraModule
     {
         AddDatabase(services, configuration);
         AddRepositories(services);
+        AddSecurity(services);
 
         return services;
     }
@@ -39,6 +42,12 @@ public static class InfraModule
         // Repositório genérico para entidades sem consultas próprias; os específicos são registrados abaixo.
         services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
-        // services.AddScoped<IEmpresaRepository, EmpresaRepository>();
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+    }
+
+    private static void AddSecurity(IServiceCollection services)
+    {
+        // Sem estado: uma única instância serve a aplicação inteira.
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
     }
 }

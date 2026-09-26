@@ -23,6 +23,7 @@ public static class ApplicationModule
     private static void AddServices(IServiceCollection services)
     {
         services.AddScoped<ITenantContext, TenantContext>();
+        services.AddScoped<IUsuarioService, UsuarioService>();
     }
 
     private static void AddValidators(IServiceCollection services)
