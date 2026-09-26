@@ -25,3 +25,18 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Fluxo de branches e commits
+
+- **`main`**: produção. Nunca recebe commit direto — só PR vindo da `dev`, `release/*` ou `hotfix/*`, com CI verde.
+- **`dev`**: integração. Aceita commit direto.
+- **Demais branches**: `<tipo>/<descricao>` em minúsculas — tipos `feat`, `bugfix`, `hotfix`, `chore`, `docs`, `refactor`, `test`, `ci`, `release`.
+  Ex.: `feat/1-multi-tenant`, `bugfix/login-token-expirado`.
+- **Commits** (e títulos de PR): `<tipo>(escopo opcional): descrição` — tipos `feat`, `fix`, `bugfix`, `hotfix`, `chore`, `docs`, `refactor`, `test`, `ci`, `perf`, `style`, `build`, `release`, `revert`.
+  Ex.: `feat(empresa): cadastro de empresas`.
+
+As regras ficam em `.githooks/lib/conventions.sh` e são validadas no GitHub (workflow **Conventions**) e localmente pelos hooks. Ative os hooks uma vez por clone:
+
+```bash
+git config core.hooksPath .githooks
+```

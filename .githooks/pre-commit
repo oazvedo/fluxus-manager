@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Bloqueia commit direto na main e em branches fora do padrão.
+source "$(git rev-parse --show-toplevel)/.githooks/lib/conventions.sh"
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null) || exit 0  # detached HEAD (rebase etc.)
+
+if [[ "$branch" == "main" ]]; then
+  echo "✗ Commit direto na main não é permitido. Use a dev ou uma branch <tipo>/<descricao>."
+  exit 1
+fi
+
+validate_branch "$branch" || exit 1
