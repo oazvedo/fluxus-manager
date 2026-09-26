@@ -1,4 +1,6 @@
+using FluxusManager.Domain.Interfaces;
 using FluxusManager.Infrastructure.Database;
+using FluxusManager.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,10 +30,15 @@ public static class InfraModule
             .UseNpgsql(connectionString, npgsql =>
                 npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName))
             .UseSnakeCaseNamingConvention());
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 
     private static void AddRepositories(IServiceCollection services)
     {
+        // Repositório genérico para entidades sem consultas próprias; os específicos são registrados abaixo.
+        services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
+
         // services.AddScoped<IEmpresaRepository, EmpresaRepository>();
     }
 }
