@@ -11,7 +11,8 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<TenantFilter>();
     options.Filters.Add<ValidationFilter>();
     options.Filters.Add<ExceptionFilter>();
-});
+})
+.ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = InvalidModelStateResponse.Create);
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 
@@ -25,7 +26,7 @@ var app = builder.Build();
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await app.Services.MigrateDatabaseAsync();
 
-// Na AWS a API fica atrás do CloudFront em /api (PathBase=/api); localmente não há prefixo.
+// No servidor a API fica atrás do nginx em /api (PathBase=/api); localmente não há prefixo.
 var pathBase = app.Configuration["PathBase"];
 if (!string.IsNullOrEmpty(pathBase))
     app.UsePathBase(pathBase);

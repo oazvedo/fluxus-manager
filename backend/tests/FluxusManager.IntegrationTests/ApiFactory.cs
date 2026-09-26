@@ -18,6 +18,8 @@ public class ApiFactory(string environment) : WebApplicationFactory<Program>
     {
         builder.UseEnvironment(environment);
         builder.UseSetting("ConnectionStrings:DefaultConnection", "Host=localhost;Database=fluxus_tests");
+        // Nos testes não há PostgreSQL; o banco (quando usado) é criado pelo ApiComBancoFactory.
+        builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.ConfigureServices(services =>
             services.AddControllers().AddApplicationPart(typeof(ApiFactory).Assembly));
     }
