@@ -54,7 +54,7 @@ jobs:
           APP_DIR: ${{ vars.EC2_APP_DIR || '~/fluxus-manager' }}
         run: |
           ssh -i ~/.ssh/deploy_key -o ServerAliveInterval=30 "$USER@$HOST" \
-            "cd $APP_DIR && ./deploy/update.sh"
+            "cd $APP_DIR && bash deploy/update.sh"
 
       - name: Verificar de fora
         run: |
