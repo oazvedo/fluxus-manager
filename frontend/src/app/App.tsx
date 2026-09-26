@@ -1,8 +1,12 @@
+import { RouterProvider } from 'react-router'
+import { AppProviders } from '@/app/providers/AppProviders'
+import { router } from '@/app/router/router'
+
 function App() {
   return (
-    <main className="flex min-h-svh items-center justify-center">
-      <h1 className="text-2xl font-semibold">FluxusManager</h1>
-    </main>
+    <AppProviders>
+      <RouterProvider router={router} />
+    </AppProviders>
   )
 }
 

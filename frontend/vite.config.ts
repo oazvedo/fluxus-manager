@@ -11,4 +11,14 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      // Em dev a API roda sem o prefixo /api (dotnet run); em produção o nginx mantém o prefixo.
+      '/api': {
+        target: process.env.API_PROXY_TARGET ?? 'http://localhost:5250',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api/, ''),
+      },
+    },
+  },
 })
