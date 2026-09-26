@@ -7,7 +7,7 @@ Sistema de gestão empresarial multi-tenant.
 - **Backend:** .NET 10 (ASP.NET Core + EF Core), em camadas — API, Application, Domain, Infrastructure
 - **Banco:** PostgreSQL 18 (Docker)
 - **Frontend:** React + TypeScript (Vite), Tailwind e shadcn/ui, organizado por feature
-- **Infra:** AWS (EC2, CloudFront, S3, ECR) com Terraform; deploy automático da `dev` em staging — ver [docs/deploy-aws.md](docs/deploy-aws.md)
+- **Deploy:** Docker Compose em um servidor (EC2) — ver [Deploy em servidor](#deploy-em-servidor-ec2)
 
 ## Rodando localmente
 
@@ -26,6 +26,42 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## Deploy em servidor (EC2)
+
+Banco, API e frontend sobem juntos com Docker Compose; o nginx do frontend repassa `/api` para a API.
+
+**1. Docker na máquina** (uma vez)
+
+```bash
+# Amazon Linux 2023
+sudo dnf install -y docker git && sudo systemctl enable --now docker
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose && sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Ubuntu
+curl -fsSL https://get.docker.com | sudo sh
+
+sudo usermod -aG docker $USER   # saia e entre de novo na sessão
+```
+
+No Security Group da EC2, libere a **porta 80** (HTTP). Instâncias com menos de 2 GB de RAM podem
+travar no build — crie swap: `sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile`.
+
+**2. Primeira subida**
+
+```bash
+cp deploy/.env.example deploy/.env
+sed -i "s/troque-esta-senha/$(openssl rand -hex 24)/" deploy/.env
+docker compose -f deploy/docker-compose.yml up -d --build
+```
+
+Acesse `http://<ip-publico>/` (frontend), `http://<ip-publico>/api/health` e `http://<ip-publico>/api/swagger`.
+
+**3. Atualizar** (depois de novos merges): `deploy/update.sh`
+
+Logs: `docker compose -f deploy/docker-compose.yml logs -f api`
 
 ## Fluxo de branches e commits
 
