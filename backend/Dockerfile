@@ -1,5 +1,5 @@
 # Imagem da API. Compila na arquitetura da máquina de build e gera binário para a arquitetura alvo
-# (ex.: build em amd64 no GitHub Actions → imagem arm64 para a EC2 Graviton), sem emulação.
+# (ex.: build em amd64 gerando imagem arm64), sem emulação.
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /src
