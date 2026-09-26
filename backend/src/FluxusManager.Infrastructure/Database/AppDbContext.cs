@@ -80,7 +80,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext
 
             case EntityState.Modified or EntityState.Deleted:
                 if (tenantId.IsModified)
-                    throw new InvalidOperationException("O tenant de um registro não pode ser alterado.");
+                {
+                    // Update() marca todas as colunas como alteradas; só é erro se o valor realmente mudou.
+                    if (!Equals(tenantId.CurrentValue, tenantId.OriginalValue))
+                        throw new InvalidOperationException("O tenant de um registro não pode ser alterado.");
+
+                    tenantId.IsModified = false;
+                }
 
                 if ((Guid)tenantId.OriginalValue! != CurrentTenantId)
                     throw new InvalidOperationException("Não é permitido alterar registros de outro tenant.");
