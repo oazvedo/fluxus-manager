@@ -40,8 +40,8 @@ jobs:
 
           if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
             echo "::error::O secret EC2_SSH_KEY não é uma chave privada válida. Cole o conteúdo inteiro de ~/.ssh/github_deploy, das linhas -----BEGIN até -----END."
-            head -1 ~/.ssh/deploy_key | cut -c1-40
-            echo "linhas: $(wc -l < ~/.ssh/deploy_key)"
+            grep -q -- '-----BEGIN OPENSSH PRIVATE KEY-----' ~/.ssh/deploy_key || echo "Falta a linha -----BEGIN OPENSSH PRIVATE KEY-----"
+            grep -q -- '-----END OPENSSH PRIVATE KEY-----' ~/.ssh/deploy_key || echo "Falta a linha -----END OPENSSH PRIVATE KEY-----"
             exit 1
           fi
 
