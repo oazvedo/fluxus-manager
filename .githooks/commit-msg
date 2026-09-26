@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# Valida a mensagem do commit.
+# Valida a mensagem do commit e a referência à issue da branch.
 source "$(git rev-parse --show-toplevel)/.githooks/lib/conventions.sh"
 
-validate_commit_msg "$(cat "$1")" || exit 1
+msg=$(grep -v '^#' "$1")
+validate_commit_msg "$msg" || exit 1
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null) || exit 0
+validate_issue_ref "$msg" "$(issue_from_branch "$branch")" || exit 1

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Acrescenta "Refs #<issue>" à mensagem quando a branch tem número de issue (ex.: feat/1-multi-tenant).
+source "$(git rev-parse --show-toplevel)/.githooks/lib/conventions.sh"
+
+msg_file="$1"
+source_type="$2"
+
+# Merge, squash e amend de commit existente ficam como estão.
+[[ "$source_type" == "merge" || "$source_type" == "squash" || "$source_type" == "commit" ]] && exit 0
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null) || exit 0
+issue=$(issue_from_branch "$branch")
+[[ -z "$issue" ]] && exit 0
+
+# Já referencia a issue? Não duplica.
+grep -v '^#' "$msg_file" | grep -qE "#${issue}([^0-9]|$)" && exit 0
+
+# Insere antes do bloco de comentários do editor (se houver); senão, no fim.
+awk -v ref="Refs #${issue}" '
+  !done && /^#/ { print ""; print ref; print ""; done = 1 }
+  { print }
+  END { if (!done) { print ""; print ref } }
+' "$msg_file" > "$msg_file.tmp" && mv "$msg_file.tmp" "$msg_file"

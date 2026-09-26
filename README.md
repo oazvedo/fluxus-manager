@@ -30,10 +30,17 @@ npm run dev
 
 - **`main`**: produção. Nunca recebe commit direto — só PR vindo da `dev`, `release/*` ou `hotfix/*`, com CI verde.
 - **`dev`**: integração. Aceita commit direto.
-- **Demais branches**: `<tipo>/<descricao>` em minúsculas — tipos `feat`, `bugfix`, `hotfix`, `chore`, `docs`, `refactor`, `test`, `ci`, `release`.
-  Ex.: `feat/1-multi-tenant`, `bugfix/login-token-expirado`.
+- **Branches de issue** (`feat`, `bugfix`, `hotfix`): `<tipo>/<issue>-<descricao>` em minúsculas.
+  Ex.: `feat/1-multi-tenant`, `bugfix/42-token-expirado`.
+- **Demais branches** (`chore`, `docs`, `refactor`, `test`, `ci`, `release`): `<tipo>/<descricao>` — número da issue opcional.
 - **Commits** (e títulos de PR): `<tipo>(escopo opcional): descrição` — tipos `feat`, `fix`, `bugfix`, `hotfix`, `chore`, `docs`, `refactor`, `test`, `ci`, `perf`, `style`, `build`, `release`, `revert`.
   Ex.: `feat(empresa): cadastro de empresas`.
+
+### Rastreabilidade issue → branch → commit → PR
+
+- Comece uma issue com `scripts/start-issue.sh <issue> <descricao> [tipo]`: cria a branch vinculada à issue (seção *Development*), faz checkout, atribui a issue a você e move o card para **In Progress**.
+- Em branches com número de issue, todo commit precisa referenciar a issue — o hook acrescenta `Refs #<issue>` automaticamente.
+- A descrição do PR precisa conter `Closes #<issue>`; ao mergear na `dev` a issue é fechada.
 
 As regras ficam em `.githooks/lib/conventions.sh` e são validadas no GitHub (workflow **Conventions**) e localmente pelos hooks. Ative os hooks uma vez por clone:
 

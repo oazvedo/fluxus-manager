@@ -19,13 +19,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validar branch, título do PR e commits
+      - name: Validar branch, PR e commits
         shell: bash
         env:
           EVENT: ${{ github.event_name }}
           HEAD_REF: ${{ github.head_ref }}
           BASE_REF: ${{ github.base_ref }}
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
@@ -33,6 +34,7 @@ jobs:
         run: |
           source .githooks/lib/conventions.sh
           failed=0
+          issue=""
 
           if [[ "$EVENT" == "pull_request" ]]; then
             echo "Branch: $HEAD_REF → $BASE_REF"
@@ -44,7 +46,16 @@ jobs:
             fi
 
             echo "Título do PR: $PR_TITLE"
-            validate_commit_msg "$PR_TITLE" || failed=1
+            validate_commit_msg "$PR_TITLE" "Título do PR" || failed=1
+
+            issue=$(issue_from_branch "$HEAD_REF")
+            if [[ -n "$issue" ]]; then
+              echo "Issue da branch: #$issue"
+              if [[ ! "$PR_BODY" =~ (Closes|Fixes|Resolves)\ \#$issue([^0-9]|$) ]]; then
+                echo "✗ A descrição do PR precisa conter 'Closes #$issue'."
+                failed=1
+              fi
+            fi
 
             range="$PR_BASE_SHA..$PR_HEAD_SHA"
           else
@@ -61,6 +72,7 @@ jobs:
             msg=$(git log -1 --format=%B "$sha")
             echo "  ${sha:0:7} $(printf '%s\n' "$msg" | head -n1)"
             validate_commit_msg "$msg" || failed=1
+            validate_issue_ref "$msg" "$issue" || failed=1
           done < <(git rev-list $range)
 
           exit $failed
