@@ -1,3 +1,5 @@
+using FluxusManager.Application.Interfaces;
+using FluxusManager.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FluxusManager.Application;
@@ -17,6 +19,6 @@ public static class ApplicationModule
 
     private static void AddServices(IServiceCollection services)
     {
-        // services.AddScoped<IEmpresaService, EmpresaService>();
+        services.AddScoped<ITenantContext, TenantContext>();
     }
 }
