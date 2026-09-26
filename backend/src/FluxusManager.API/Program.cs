@@ -1,3 +1,4 @@
+using FluxusManager.API.Filters;
 using FluxusManager.Application;
 using FluxusManager.Infrastructure;
 using FluxusManager.Infrastructure.Database;
@@ -5,7 +6,7 @@ using FluxusManager.Infrastructure.Database;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<TenantFilter>());
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationModule();
