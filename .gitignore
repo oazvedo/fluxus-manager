@@ -5,3 +5,10 @@ bin/
 obj/
 *.user
 .vs/
+
+# Terraform (o .terraform.lock.hcl é versionado)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+backend.hcl
