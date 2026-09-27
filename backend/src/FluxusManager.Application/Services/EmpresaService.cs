@@ -9,27 +9,17 @@ namespace FluxusManager.Application.Services;
 
 public class EmpresaService(IEmpresaRepository empresas, IUnitOfWork unitOfWork) : IEmpresaService
 {
-    private const string CnpjUnicoIndex = "ix_empresas_cnpj";
-
     public async Task<EmpresaResponse> CriarAsync(CriarEmpresaRequest request, CancellationToken cancellationToken = default)
     {
         var cnpj = Cnpj.Normalizar(request.Cnpj);
 
         if (await empresas.CnpjEmUsoAsync(cnpj, cancellationToken))
-            throw new ConflictException(CnpjEmUso(cnpj));
+            throw new ConflictException($"Já existe uma empresa com o CNPJ {Cnpj.Formatar(cnpj)}.");
 
         var empresa = new Empresa(request.RazaoSocial.Trim(), NomeFantasia(request.NomeFantasia), cnpj);
 
         empresas.Add(empresa);
-        try
-        {
-            await unitOfWork.CommitAsync(cancellationToken);
-        }
-        catch (DuplicateKeyException ex) when (ex.Constraint == CnpjUnicoIndex)
-        {
-            // Outro cadastro do mesmo CNPJ gravou entre a checagem acima e o commit.
-            throw new ConflictException(CnpjEmUso(cnpj), ex);
-        }
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return EmpresaResponse.DeEntidade(empresa);
     }
@@ -77,8 +67,6 @@ public class EmpresaService(IEmpresaRepository empresas, IUnitOfWork unitOfWork)
     private async Task<Empresa> BuscarAsync(Guid id, CancellationToken cancellationToken)
         => await empresas.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException("Empresa", id);
-
-    private static string CnpjEmUso(string cnpj) => $"Já existe uma empresa com o CNPJ {Cnpj.Formatar(cnpj)}.";
 
     // Nome fantasia é opcional: em branco vira null.
     private static string? NomeFantasia(string? nomeFantasia)

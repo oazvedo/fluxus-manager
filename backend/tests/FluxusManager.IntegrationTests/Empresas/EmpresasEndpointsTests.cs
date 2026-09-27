@@ -138,9 +138,8 @@ public sealed class EmpresasEndpointsTests(PostgresFixture postgres) : IAsyncLif
         await using var scope = _factory.Services.CreateAsyncScope();
         scope.ServiceProvider.GetRequiredService<IEmpresaRepository>().Add(new Empresa("Outra", null, "11222333000181"));
 
-        var erro = await Assert.ThrowsAsync<DuplicateKeyException>(() =>
+        await Assert.ThrowsAsync<DuplicateKeyException>(() =>
             scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync());
-        Assert.Equal("ix_empresas_cnpj", erro.Constraint);
     }
 
     [Fact]

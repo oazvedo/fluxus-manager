@@ -19,14 +19,11 @@ public class NotFoundException(string message) : DomainException(message)
 public class ConflictException(string message, Exception? innerException = null) : DomainException(message, innerException);
 
 /// <summary>
-/// O banco recusou a gravação por violar um índice único (ex.: dois cadastros simultâneos do mesmo CNPJ,
-/// que passaram juntos pela checagem prévia). Os services trocam pela mensagem específica do campo.
+/// O banco recusou a gravação por violar um índice único. Acontece quando dois cadastros simultâneos
+/// passam juntos pela checagem prévia do service (ex.: mesmo CNPJ); o normal é a checagem responder antes.
 /// </summary>
-public class DuplicateKeyException(string constraint, Exception innerException)
-    : ConflictException("Este registro já existe. Atualize a página e confira os dados.", innerException)
-{
-    public string Constraint { get; } = constraint;
-}
+public class DuplicateKeyException(Exception innerException)
+    : ConflictException("Este registro já existe. Atualize a página e confira os dados.", innerException);
 
 /// <summary>Operação válida no formato, mas que viola uma regra de negócio → 422.</summary>
 public class BusinessRuleException(string message) : DomainException(message);

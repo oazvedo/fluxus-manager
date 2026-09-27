@@ -18,14 +18,17 @@ public static class Cnpj
     /// <summary>Confere formato e dígitos verificadores de um CNPJ já normalizado.</summary>
     public static bool EhValido(string cnpj)
     {
-        if (cnpj.Length != Length
-            || !cnpj[..12].All(c => char.IsAsciiDigit(c) || char.IsAsciiLetterUpper(c))
+        if (cnpj.Length != Length)
+            return false;
+
+        var raiz = cnpj[..12];
+        if (!raiz.All(c => char.IsAsciiDigit(c) || char.IsAsciiLetterUpper(c))
             || !cnpj[12..].All(char.IsAsciiDigit)
             || cnpj.All(c => c == cnpj[0]))
             return false;
 
-        var first = DigitoVerificador(cnpj[..12], FirstWeights);
-        var second = DigitoVerificador(cnpj[..12] + first, SecondWeights);
+        var first = DigitoVerificador(raiz, FirstWeights);
+        var second = DigitoVerificador(raiz + first, SecondWeights);
 
         return cnpj[12] == first && cnpj[13] == second;
     }

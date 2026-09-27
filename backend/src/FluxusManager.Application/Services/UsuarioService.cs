@@ -12,19 +12,17 @@ public class UsuarioService(
     IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher) : IUsuarioService
 {
-    private const string EmailUnicoIndex = "ix_usuarios_email";
-
     public async Task<UsuarioResponse> CriarAsync(CriarUsuarioRequest request, CancellationToken cancellationToken = default)
     {
         var email = NormalizarEmail(request.Email);
 
         if (await usuarios.EmailEmUsoAsync(email, cancellationToken: cancellationToken))
-            throw new ConflictException(EmailEmUso(email));
+            throw new ConflictException($"O e-mail '{email}' já está em uso.");
 
         var usuario = new Usuario(request.Nome.Trim(), email, passwordHasher.Hash(request.Senha));
 
         usuarios.Add(usuario);
-        await CommitAsync(email, cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return UsuarioResponse.DeEntidade(usuario);
     }
@@ -49,10 +47,10 @@ public class UsuarioService(
         var email = NormalizarEmail(request.Email);
 
         if (await usuarios.EmailEmUsoAsync(email, ignorarId: id, cancellationToken))
-            throw new ConflictException(EmailEmUso(email));
+            throw new ConflictException($"O e-mail '{email}' já está em uso.");
 
         usuario.Atualizar(request.Nome.Trim(), email);
-        await CommitAsync(email, cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
 
         return UsuarioResponse.DeEntidade(usuario);
     }
@@ -76,21 +74,6 @@ public class UsuarioService(
     private async Task<Usuario> BuscarAsync(Guid id, CancellationToken cancellationToken)
         => await usuarios.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException("Usuário", id);
-
-    // Outro cadastro com o mesmo e-mail pode gravar entre a checagem e o commit.
-    private async Task CommitAsync(string email, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await unitOfWork.CommitAsync(cancellationToken);
-        }
-        catch (DuplicateKeyException ex) when (ex.Constraint == EmailUnicoIndex)
-        {
-            throw new ConflictException(EmailEmUso(email), ex);
-        }
-    }
-
-    private static string EmailEmUso(string email) => $"O e-mail '{email}' já está em uso.";
 
     private static string NormalizarEmail(string email) => email.Trim().ToLowerInvariant();
 }

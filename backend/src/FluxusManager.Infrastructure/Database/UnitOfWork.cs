@@ -59,12 +59,9 @@ public class UnitOfWork(AppDbContext context, IAuditContext auditContext) : IUni
         {
             return await context.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
-            SqlState: PostgresErrorCodes.UniqueViolation,
-        } postgres)
-        {
-            throw new DuplicateKeyException(postgres.ConstraintName ?? string.Empty, ex);
+            throw new DuplicateKeyException(ex);
         }
     }
 
