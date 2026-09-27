@@ -9,5 +9,6 @@ public interface IUsuarioRepository : IRepository<Usuario>
     /// Na atualização, informe <paramref name="ignorarId"/> para não contar o próprio usuário.
     /// </summary>
     Task<bool> EmailEmUsoAsync(string email, Guid? ignorarId = null, CancellationToken cancellationToken = default);
-}
 
+    Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default);
+}

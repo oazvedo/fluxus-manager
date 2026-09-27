@@ -53,5 +53,6 @@ public static class InfraModule
     {
         // Sem estado: uma única instância serve a aplicação inteira.
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IJwtTokenIssuer, JwtTokenIssuer>();
     }
 }
