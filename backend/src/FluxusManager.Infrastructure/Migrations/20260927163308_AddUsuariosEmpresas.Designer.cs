@@ -3,6 +3,7 @@ using System;
 using FluxusManager.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FluxusManager.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260927163308_AddUsuariosEmpresas")]
+    partial class AddUsuariosEmpresas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,66 +75,6 @@ namespace FluxusManager.Infrastructure.Migrations
                         .HasFilter("excluido = false");
 
                     b.ToTable("empresas", (string)null);
-                });
-
-            modelBuilder.Entity("FluxusManager.Domain.Entities.Filial", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<DateTime?>("AtualizadoEm")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("atualizado_em");
-
-                    b.Property<string>("Cnpj")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("character(14)")
-                        .HasColumnName("cnpj")
-                        .IsFixedLength();
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("criado_em");
-
-                    b.Property<string>("Endereco")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)")
-                        .HasColumnName("endereco");
-
-                    b.Property<bool>("Excluido")
-                        .HasColumnType("boolean")
-                        .HasColumnName("excluido");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
-                        .HasColumnName("nome");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("tenant_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_filiais");
-
-                    b.HasIndex("Cnpj")
-                        .IsUnique()
-                        .HasDatabaseName("ix_filiais_cnpj")
-                        .HasFilter("excluido = false");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("ix_filiais_tenant_id");
-
-                    b.ToTable("filiais", (string)null);
                 });
 
             modelBuilder.Entity("FluxusManager.Domain.Entities.Usuario", b =>
@@ -252,16 +195,6 @@ namespace FluxusManager.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_usuarios_empresas_usuarios_usuario_id");
-                });
-
-            modelBuilder.Entity("FluxusManager.Domain.Entities.Filial", b =>
-                {
-                    b.HasOne("FluxusManager.Domain.Entities.Empresa", null)
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_filiais_empresas_tenant_id");
                 });
 #pragma warning restore 612, 618
         }
