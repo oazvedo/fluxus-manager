@@ -103,13 +103,15 @@ export const empresasKeys = {
 
 - `/login` é pública; as demais rotas passam por `RequireSession` antes de montar o layout ou consultar cadastros.
   Depois do login, o usuário retorna ao caminho interno solicitado, incluindo os parâmetros da URL.
-- `core/auth` mantém os tokens e os dados de sessão **somente na memória da aba**. Recarregar ou fechar a página
-  exige novo login; não há credenciais em localStorage, sessionStorage ou cookies. Cada aba autentica separadamente.
+- `core/auth` mantém a sessão em memória e em **sessionStorage**, restaurando antes de montar as rotas.
+  Atualizar a página preserva o login, o caminho e os filtros. Não usa localStorage; o armazenamento acompanha a
+  sessão da aba. Dados inválidos ou com refresh expirado são descartados. Com armazenamento bloqueado, funciona
+  em memória e exige novo login ao recarregar. A autorização continua sendo validada pela API.
 - `http` acrescenta o Bearer e, em um 401, renova a sessão uma vez e repete a chamada. Chamadas simultâneas
   compartilham a mesma renovação; um 401 atrasado usa o token já renovado. Login, refresh e logout não entram nesse ciclo.
 - Uma falha de renovação encerra a sessão, inclusive em resposta perdida: o refresh pode já ter sido consumido.
   403 não renova e não repete automaticamente. Respostas de sessões anteriores não restauram um login encerrado.
-- `Sair da conta` limpa a sessão e o cache imediatamente e revoga a família no servidor. Falha de conexão avisa
+- `Sair da conta` limpa a memória, o sessionStorage e o cache imediatamente e revoga a família no servidor. Falha de conexão avisa
   que a revogação não foi confirmada. JWTs já emitidos mantêm a validade original.
 - `SessionBoundary` limpa o React Query ao mudar a identidade da sessão. A renovação normal preserva o cache.
 

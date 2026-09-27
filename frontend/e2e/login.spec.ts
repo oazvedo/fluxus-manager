@@ -44,7 +44,7 @@ test('login, cadastros autenticados, renovação e logout com API real', async (
   expect(errors).toEqual([])
 })
 
-test('login responsivo e sem sessão persistida após recarregar', async ({ page }, testInfo) => {
+test('login responsivo preserva sessão após recarregar e logout remove persistência', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 375, height: 740 })
   await page.goto('/login')
   await expect(page.getByRole('heading', { name: 'Entrar na sua conta' })).toBeVisible()
@@ -54,7 +54,28 @@ test('login responsivo e sem sessão persistida após recarregar', async ({ page
   await page.getByLabel('Senha', { exact: true }).fill('senha-exclusiva-e2e-59')
   await page.getByRole('button', { name: 'Entrar', exact: true }).click()
   await expect(page).toHaveURL('/')
+  await page.goto('/empresas?pagina=1')
+  await expect(page.getByRole('link', { name: 'Fluxus Desenvolvimento Ltda' })).toBeVisible()
   await page.reload()
-  await expect(page).toHaveURL('/login')
+  await expect(page).toHaveURL('/empresas?pagina=1')
+  await expect(page.getByRole('link', { name: 'Fluxus Desenvolvimento Ltda' })).toBeVisible()
+
+  // O JWT restaurado também pode expirar: a renovação usa o refresh persistido e grava o sucessor.
+  let refreshes = 0
+  page.on('request', (request) => { if (request.url().endsWith('/auth/refresh')) refreshes++ })
+  await page.route('**/api/empresas?*', (route) => route.fulfill({ status: 401, json: { status: 401 } }), { times: 1 })
+  await page.reload()
+  await expect(page.getByRole('link', { name: 'Fluxus Desenvolvimento Ltda' })).toBeVisible()
+  expect(refreshes).toBe(1)
+  await page.reload()
+  await expect(page.getByRole('link', { name: 'Fluxus Desenvolvimento Ltda' })).toBeVisible()
+  expect(refreshes).toBe(1)
+
+  await page.setViewportSize({ width: 1280, height: 800 })
+  const logout = page.waitForResponse((response) => response.url().endsWith('/auth/logout') && response.status() === 204)
+  await page.getByRole('button', { name: 'Sair da conta', exact: true }).click()
+  await logout
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Entrar na sua conta' })).toBeVisible()
   expect(await page.evaluate(() => Object.keys(localStorage).length + Object.keys(sessionStorage).length)).toBe(0)
 })
