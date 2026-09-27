@@ -25,7 +25,7 @@ const modules: Module[] = [
     description: 'Pessoas com acesso e seus vínculos com as empresas.',
     to: '/usuarios',
     icon: Users,
-    available: false,
+    available: true,
   },
   {
     title: 'Perfis e permissões',
