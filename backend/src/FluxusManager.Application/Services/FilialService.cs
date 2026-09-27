@@ -1,9 +1,11 @@
 using FluxusManager.Application.DTOs.FiliaisDtos;
 using FluxusManager.Application.Interfaces;
+using FluxusManager.Application.Options;
 using FluxusManager.Domain.Common;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Exceptions;
 using FluxusManager.Domain.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace FluxusManager.Application.Services;
 
@@ -11,13 +13,14 @@ public class FilialService(
     IFilialRepository filiais,
     IEmpresaRepository empresas,
     ITenantContext tenantContext,
-    IUnitOfWork unitOfWork) : IFilialService
+    IUnitOfWork unitOfWork,
+    IOptions<FilialOptions> options) : IFilialService
 {
     public async Task<FilialResponse> CriarAsync(CriarFilialRequest request, CancellationToken cancellationToken = default)
     {
         var empresa = await EmpresaAtualAsync(cancellationToken);
         var cnpj = Cnpj.Normalizar(request.Cnpj);
-        if (cnpj[..8] != empresa.Cnpj[..8])
+        if (options.Value.ValidarRaizCnpjDaEmpresa && cnpj[..8] != empresa.Cnpj[..8])
             throw new BusinessRuleException("O CNPJ da filial deve ter a mesma raiz de CNPJ da empresa.");
         if (await filiais.CnpjEmUsoAsync(cnpj, cancellationToken))
             throw new ConflictException($"Já existe uma filial com o CNPJ {Cnpj.Formatar(cnpj)}.");

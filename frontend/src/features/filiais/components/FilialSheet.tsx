@@ -8,7 +8,7 @@ import { FilialForm } from './FilialForm'
 export function FilialSheet({ creating, editingId, onClose }: { creating: boolean; editingId: string | null; onClose: () => void }) {
   const open = creating || editingId !== null
   return <Sheet open={open} onOpenChange={(next) => !next && onClose()}><SheetContent className="sm:max-w-md">
-    <SheetHeader className="border-b pr-12"><SheetTitle>{editingId ? 'Editar filial' : 'Nova filial'}</SheetTitle><SheetDescription>{editingId ? 'Nome e endereço da unidade.' : 'A filial já começa ativa e usa a raiz do CNPJ da empresa.'}</SheetDescription></SheetHeader>
+    <SheetHeader className="border-b pr-12"><SheetTitle>{editingId ? 'Editar filial' : 'Nova filial'}</SheetTitle><SheetDescription>{editingId ? 'Nome e endereço da unidade.' : 'A filial já começa ativa. Informe o CNPJ e o endereço da unidade.'}</SheetDescription></SheetHeader>
     {editingId ? <EditarFilial id={editingId} onSaved={onClose} /> : <FilialForm onSaved={onClose} />}
   </SheetContent></Sheet>
 }

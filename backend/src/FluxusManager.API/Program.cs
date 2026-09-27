@@ -1,6 +1,7 @@
 using FluxusManager.API.Filters;
 using FluxusManager.API.Logging;
 using FluxusManager.Application;
+using FluxusManager.Application.Options;
 using FluxusManager.Infrastructure;
 using FluxusManager.Infrastructure.Database;
 
@@ -22,6 +23,7 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationModule();
+builder.Services.Configure<FilialOptions>(builder.Configuration.GetSection(FilialOptions.SectionName));
 builder.Services.AddInfraModule(builder.Configuration);
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("postgres");
