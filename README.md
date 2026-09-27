@@ -27,6 +27,29 @@ npm install
 npm run dev
 ```
 
+## Testes
+
+```bash
+cd backend
+dotnet test
+```
+
+- `FluxusManager.UnitTests`: Domain, Application e regras do `AppDbContext` (SQLite em memória).
+- `FluxusManager.IntegrationTests`: API em memória (`WebApplicationFactory`) com **PostgreSQL de verdade**.
+  Cada teste ganha um banco próprio, com as migrations aplicadas.
+
+Os testes de integração sobem um container do PostgreSQL com Testcontainers, então precisam do Docker.
+Sem acesso ao Docker (ex.: WSL sem a integração do Docker Desktop), aponte para o banco do `docker compose`:
+
+```bash
+export FLUXUS_TEST_POSTGRES="Host=localhost;Port=5432;Username=fluxus;Password=fluxus"
+dotnet test
+```
+
+Os bancos `fluxus_test_*` criados nesse modo são apagados ao final da execução.
+
+O CI roda format, build e todos os testes em todo PR e em todo push na `dev` e na `main`; a `main` só aceita merge com o check verde.
+
 ## Deploy em servidor (EC2)
 
 Banco, API e frontend sobem juntos com Docker Compose; o nginx do frontend repassa `/api` para a API.
