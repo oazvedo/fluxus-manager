@@ -2,18 +2,24 @@ using System.Net;
 using System.Net.Http.Json;
 using FluxusManager.Application.DTOs.UsuariosDtos;
 using FluxusManager.Domain.Common;
+using FluxusManager.IntegrationTests.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FluxusManager.IntegrationTests.Usuarios;
 
-public sealed class UsuariosEndpointsTests : IDisposable
+[Collection(PostgresCollection.Name)]
+public sealed class UsuariosEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 {
-    private readonly ApiComBancoFactory _factory = new();
-    private readonly HttpClient _client;
+    private ApiComBancoFactory _factory = null!;
+    private HttpClient _client = null!;
 
-    public UsuariosEndpointsTests() => _client = _factory.CreateClient();
+    public async Task InitializeAsync()
+    {
+        _factory = new ApiComBancoFactory(await postgres.CreateDatabaseAsync());
+        _client = _factory.CreateClient();
+    }
 
-    public void Dispose() => _factory.Dispose();
+    public async Task DisposeAsync() => await _factory.DisposeAsync();
 
     private async Task<UsuarioResponse> CriarAsync(string email = "ana@fluxus.com")
     {
