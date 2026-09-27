@@ -16,7 +16,7 @@ namespace FluxusManager.IntegrationTests;
 /// Sobe a API em memória, incluindo os controllers de teste deste assembly.
 /// Não acessa o banco: a connection string só precisa existir para o InfraModule.
 /// </summary>
-public class ApiFactory(string environment, bool useTestAuthentication = true) : WebApplicationFactory<Program>
+public class ApiFactory(string environment, bool useTestAuthentication = true, bool useRealAuthService = false) : WebApplicationFactory<Program>
 {
     public ApiFactory() : this("Development")
     {
@@ -29,6 +29,7 @@ public class ApiFactory(string environment, bool useTestAuthentication = true) :
         builder.UseSetting("Jwt:SigningKey", "integration-tests-only-signing-key-32-bytes-minimum");
         // Sem banco por padrão; testes que precisam dele usam o ApiComBancoFactory.
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("RefreshTokens:LimpezaHabilitada", "false");
         builder.UseSetting("Filiais:ValidarRaizCnpjDaEmpresa", "false");
         // A migration já cria as partições da auditoria; a rotina diária não é necessária nos testes.
         builder.UseSetting("Auditoria:ManutencaoParticoes", "false");
@@ -43,8 +44,11 @@ public class ApiFactory(string environment, bool useTestAuthentication = true) :
                     options.DefaultScheme = "IntegrationTests";
                 }).AddScheme<AuthenticationSchemeOptions, IntegrationTestAuthHandler>("IntegrationTests", _ => { });
             }
-            services.RemoveAll<IAuthService>();
-            services.AddSingleton<IAuthService, IntegrationTestAuthService>();
+            if (!useRealAuthService)
+            {
+                services.RemoveAll<IAuthService>();
+                services.AddSingleton<IAuthService, IntegrationTestAuthService>();
+            }
             services.AddControllers().AddApplicationPart(typeof(ApiFactory).Assembly);
         });
     }
@@ -76,6 +80,10 @@ internal sealed class IntegrationTestAuthHandler(
 internal sealed class IntegrationTestAuthService : IAuthService
 {
     public Task<TokenResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default) => Task.FromResult<TokenResponse?>(null);
+
+    public Task<TokenResponse?> RefreshAsync(RefreshRequest request, CancellationToken cancellationToken = default) => Task.FromResult<TokenResponse?>(null);
+
+    public Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     public Task<TokenResponse> SwitchTenantAsync(Guid userId, Guid empresaId, CancellationToken cancellationToken = default)
         => throw new NotImplementedException();

@@ -1,4 +1,6 @@
 using FluxusManager.Application.Interfaces;
+using FluxusManager.Application.Options;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using FluxusManager.Domain.Interfaces;
 using FluxusManager.Infrastructure.Database;
 using FluxusManager.Infrastructure.Repositories;
@@ -20,6 +22,11 @@ public static class InfraModule
         AddDatabase(services, configuration);
         AddRepositories(services);
         AddSecurity(services);
+        services.AddOptions<RefreshTokenOptions>().Bind(configuration.GetSection(RefreshTokenOptions.SectionName))
+            .Validate(o => o.DuracaoDias is >= 1 and <= 90, "RefreshTokens:DuracaoDias deve estar entre 1 e 90.")
+            .ValidateOnStart();
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddHostedService<RefreshTokenCleanup>();
 
         return services;
     }
@@ -43,6 +50,7 @@ public static class InfraModule
         // Repositório genérico para entidades sem consultas próprias; os específicos são registrados abaixo.
         services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IEmpresaRepository, EmpresaRepository>();
         services.AddScoped<IUsuarioEmpresaRepository, UsuarioEmpresaRepository>();

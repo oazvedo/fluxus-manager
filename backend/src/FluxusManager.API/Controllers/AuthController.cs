@@ -9,6 +9,7 @@ namespace FluxusManager.API.Controllers;
 
 [ApiController]
 [Route("auth")]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [AllowAnonymous]
@@ -17,6 +18,24 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var token = await authService.LoginAsync(request, cancellationToken);
         return token is null ? Unauthorized(new ProblemDetails { Title = "Credenciais inválidas ou usuário sem vínculo ativo com uma empresa." }) : Ok(token);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(RefreshRequest request, CancellationToken cancellationToken)
+    {
+        var response = await authService.RefreshAsync(request, cancellationToken);
+        return response is null
+            ? Unauthorized(new ProblemDetails { Title = "Sessão inválida ou expirada. Faça login novamente." })
+            : Ok(response);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(LogoutRequest request, CancellationToken cancellationToken)
+    {
+        await authService.LogoutAsync(request, cancellationToken);
+        return NoContent();
     }
 
     [Authorize]
