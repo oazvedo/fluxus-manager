@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router'
 import { AppLayout } from '@/app/layout/AppLayout'
 import { dashboardRoutes } from '@/features/dashboard'
 import { empresasRoutes } from '@/features/empresas'
+import { filiaisRoutes } from '@/features/filiais'
 import { usuariosRoutes } from '@/features/usuarios'
 import { ComingSoon } from '@/shared/components/common/ComingSoon'
 import { NotFound } from '@/shared/components/common/NotFound'
@@ -24,7 +25,7 @@ export const router = createBrowserRouter([
       ...dashboardRoutes,
       ...empresasRoutes,
       ...usuariosRoutes,
-      comingSoon('filiais', 'Filiais'),
+      ...filiaisRoutes,
       comingSoon('perfis', 'Perfis e permissões'),
       { path: '*', Component: NotFound, handle: { title: 'Página não encontrada' } satisfies RouteHandle },
     ],
