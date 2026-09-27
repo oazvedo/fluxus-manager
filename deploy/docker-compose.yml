@@ -1,5 +1,5 @@
 # Deploy em um servidor (ex.: EC2): banco + API + frontend, tudo construído na própria máquina.
-#   cp deploy/.env.example deploy/.env   (troque a senha e gere JWT_SIGNING_KEY com openssl rand -hex 32)
+#   cp deploy/.env.example deploy/.env   (troque a senha, gere JWT_SIGNING_KEY com openssl rand -hex 32 e configure o SMTP em EMAIL_*)
 #   docker compose -f deploy/docker-compose.yml up -d --build
 # Acesso: http://<ip-do-servidor>/ (frontend) e http://<ip-do-servidor>/api/swagger (API)
 name: fluxus
@@ -37,6 +37,12 @@ services:
       Database__MigrateOnStartup: "true"
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=fluxus_manager;Username=fluxus;Password=${POSTGRES_PASSWORD};Gss Encryption Mode=Disable"
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?configure JWT_SIGNING_KEY em deploy/.env}
+      Email__Host: ${EMAIL_HOST:?configure EMAIL_HOST em deploy/.env}
+      Email__Port: ${EMAIL_PORT:-587}
+      Email__Seguranca: ${EMAIL_SEGURANCA:-StartTls}
+      Email__Usuario: ${EMAIL_USUARIO:-}
+      Email__Senha: ${EMAIL_SENHA:-}
+      Email__RemetenteEmail: ${EMAIL_REMETENTE:?configure EMAIL_REMETENTE em deploy/.env}
     logging: *logging
 
   web:

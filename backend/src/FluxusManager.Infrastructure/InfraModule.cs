@@ -3,6 +3,7 @@ using FluxusManager.Application.Options;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using FluxusManager.Domain.Interfaces;
 using FluxusManager.Infrastructure.Database;
+using FluxusManager.Infrastructure.Email;
 using FluxusManager.Infrastructure.Repositories;
 using FluxusManager.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ public static class InfraModule
         AddDatabase(services, configuration);
         AddRepositories(services);
         AddSecurity(services);
+        AddEmail(services, configuration);
         services.AddOptions<RefreshTokenOptions>().Bind(configuration.GetSection(RefreshTokenOptions.SectionName))
             .Validate(o => o.DuracaoDias is >= 1 and <= 90, "RefreshTokens:DuracaoDias deve estar entre 1 e 90.")
             .ValidateOnStart();
@@ -63,5 +65,20 @@ public static class InfraModule
         // Sem estado: uma única instância serve a aplicação inteira.
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenIssuer, JwtTokenIssuer>();
+    }
+
+    private static void AddEmail(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<EmailOptions>().Bind(configuration.GetSection(EmailOptions.SectionName))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.Host), "Email:Host é obrigatório.")
+            .Validate(o => o.Port is >= 1 and <= 65535, "Email:Port deve estar entre 1 e 65535.")
+            .Validate(o => Enum.IsDefined(o.Seguranca), "Email:Seguranca deve ser Nenhuma, StartTls ou SslTls.")
+            .Validate(o => System.Net.Mail.MailAddress.TryCreate(o.RemetenteEmail, out var endereco) && endereco.Address == o.RemetenteEmail,
+                "Email:RemetenteEmail deve ser um e-mail válido.")
+            .Validate(o => o.TimeoutSegundos is >= 1 and <= 300, "Email:TimeoutSegundos deve estar entre 1 e 300.")
+            .ValidateOnStart();
+
+        // Sem estado: cada envio abre a própria conexão SMTP.
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
     }
 }

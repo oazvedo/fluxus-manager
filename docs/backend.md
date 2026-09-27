@@ -413,3 +413,36 @@ reuso. Esta limpeza de credenciais efêmeras é uma exceção à exclusão lógi
 As credenciais são 256 bits aleatórios e somente seu hash SHA-256 fica em `refresh_tokens`. A migration habilita
 auditoria excluindo `token_hash` dos valores registrados. Respostas de autenticação usam `Cache-Control: no-store`.
 A política de rotação e revogação segue a [seção 4.14 da RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14).
+
+## E-mail
+
+Services enviam e-mail por `IEmailSender.EnviarAsync(MensagemEmail)` (`Application/Interfaces`). A implementação
+`SmtpEmailSender` (`Infrastructure/Email`, MailKit) abre uma conexão por mensagem e lança exceção se o envio falhar;
+quem chama decide se a falha interrompe o caso de uso. O log registra o `Message-ID` e o assunto, nunca o destinatário.
+
+Os textos ficam em `Application/Email/EmailTemplates`, um método por e-mail, gerando HTML e texto:
+
+```csharp
+var mensagem = EmailTemplates.Convite(email, empresa.RazaoSocial, link, TimeSpan.FromHours(48));
+await emailSender.EnviarAsync(mensagem, cancellationToken);
+```
+
+- `Convite(para, nomeEmpresa, link, validade)` e `RecuperacaoSenha(para, nome, link, validade)`.
+- O link chega pronto (com o token) e precisa ser uma URL absoluta HTTP(S). Os valores são escapados no HTML.
+- E-mail novo: um método em `EmailTemplates` que reutiliza o layout comum, com teste em `UnitTests/Email`.
+
+Configuração na seção `Email`, validada na subida da API:
+
+| Chave | Padrão | Observação |
+| --- | --- | --- |
+| `Host` | — | Obrigatório. |
+| `Port` | `587` | 1–65535. |
+| `Seguranca` | `StartTls` | `StartTls` (exige STARTTLS), `SslTls` (TLS desde a conexão, porta 465) ou `Nenhuma` (só local). |
+| `Usuario`, `Senha` | vazio | Sem usuário, envia sem autenticação. A senha vai por secret/variável, nunca no repositório. |
+| `RemetenteEmail` | — | Obrigatório. Apenas o endereço, sem nome. |
+| `RemetenteNome` | `FluxusManager` | |
+| `TimeoutSegundos` | `30` | 1–300. |
+
+Em Development, `appsettings.Development.json` aponta para o **Mailpit** do `docker compose` (SMTP em `localhost:1025`,
+sem TLS). Todo e-mail enviado fica na caixa de entrada em http://localhost:8025, e nada sai para a internet.
+No deploy, configure `EMAIL_HOST`, `EMAIL_REMETENTE` e, se o servidor exigir, `EMAIL_USUARIO` e `EMAIL_SENHA` em `deploy/.env`.
