@@ -5,6 +5,7 @@ import { empresasRoutes } from '@/features/empresas'
 import { filiaisRoutes } from '@/features/filiais'
 import { usuariosRoutes } from '@/features/usuarios'
 import { perfisRoutes } from '@/features/perfis'
+import { aceiteConviteRoutes, convitesRoutes } from '@/features/convites'
 import { NotFound } from '@/shared/components/common/NotFound'
 import { authRoutes } from '@/features/auth'
 import { RequireSession } from './RequireSession'
@@ -15,6 +16,7 @@ export type RouteHandle = { title: string }
 
 export const router = createBrowserRouter([
   ...authRoutes,
+  ...aceiteConviteRoutes,
   {
     Component: RequireSession,
     HydrateFallback: PageLoading,
@@ -28,6 +30,7 @@ export const router = createBrowserRouter([
           ...usuariosRoutes,
           ...filiaisRoutes,
           ...perfisRoutes,
+          ...convitesRoutes,
           { path: '*', Component: NotFound, handle: { title: 'Página não encontrada' } satisfies RouteHandle },
         ],
       },

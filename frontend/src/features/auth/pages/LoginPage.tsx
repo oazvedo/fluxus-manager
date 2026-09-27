@@ -13,8 +13,10 @@ export function LoginPage() {
   const session = useSession()
   const location = useLocation()
   const login = useLogin()
+  // Vindo do aceite de convite, o e-mail já chega preenchido.
+  const email: unknown = location.state?.email
   const { register, handleSubmit, setError, formState: { errors } } = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema), defaultValues: { email: '', senha: '' },
+    resolver: zodResolver(loginSchema), defaultValues: { email: typeof email === 'string' ? email : '', senha: '' },
   })
   const from: unknown = location.state?.from
   const destination = typeof from === 'string' && from.startsWith('/') && !from.startsWith('//')

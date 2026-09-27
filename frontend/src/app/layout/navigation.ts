@@ -1,4 +1,4 @@
-import { Building2, House, ShieldCheck, Store, Users, type LucideIcon } from 'lucide-react'
+import { Building2, House, MailPlus, ShieldCheck, Store, Users, type LucideIcon } from 'lucide-react'
 
 export type NavItem = { title: string; to: string; icon: LucideIcon }
 export type NavGroup = { label: string; items: NavItem[] }
@@ -18,6 +18,9 @@ export const navigation: NavGroup[] = [
   },
   {
     label: 'Acesso',
-    items: [{ title: 'Perfis e permissões', to: '/perfis', icon: ShieldCheck }],
+    items: [
+      { title: 'Perfis e permissões', to: '/perfis', icon: ShieldCheck },
+      { title: 'Convites', to: '/convites', icon: MailPlus },
+    ],
   },
 ]

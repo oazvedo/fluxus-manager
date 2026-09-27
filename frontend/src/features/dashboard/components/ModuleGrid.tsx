@@ -1,4 +1,4 @@
-import { ArrowUpRight, Building2, ShieldCheck, Store, Users, type LucideIcon } from 'lucide-react'
+import { ArrowUpRight, Building2, MailPlus, ShieldCheck, Store, Users, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -32,6 +32,13 @@ const modules: Module[] = [
     description: 'O que cada perfil pode ver e fazer no sistema.',
     to: '/perfis',
     icon: ShieldCheck,
+    available: true,
+  },
+  {
+    title: 'Convites',
+    description: 'Convide pessoas por e-mail para acessar a empresa.',
+    to: '/convites',
+    icon: MailPlus,
     available: true,
   },
 ]
