@@ -1,6 +1,8 @@
 using FluxusManager.Application.Interfaces;
+using FluxusManager.Domain.Exceptions;
 using FluxusManager.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace FluxusManager.Infrastructure.Database;
 
@@ -14,9 +16,9 @@ public class UnitOfWork(AppDbContext context, IAuditContext auditContext) : IUni
     {
         // Já dentro de ExecuteInTransactionAsync (contexto aplicado) ou sem nada a gravar: não abre outra transação.
         if (context.Database.CurrentTransaction is not null || !context.ChangeTracker.HasChanges())
-            return context.SaveChangesAsync(cancellationToken);
+            return SaveAsync(cancellationToken);
 
-        return InTransactionAsync(context.SaveChangesAsync, cancellationToken);
+        return InTransactionAsync(SaveAsync, cancellationToken);
     }
 
     public Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default)
@@ -30,7 +32,7 @@ public class UnitOfWork(AppDbContext context, IAuditContext auditContext) : IUni
         => InTransactionAsync(async ct =>
         {
             var result = await action(ct);
-            await context.SaveChangesAsync(ct);
+            await SaveAsync(ct);
             return result;
         }, cancellationToken);
 
@@ -49,6 +51,18 @@ public class UnitOfWork(AppDbContext context, IAuditContext auditContext) : IUni
 
             return result;
         }, cancellationToken);
+    }
+
+    private async Task<int> SaveAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            throw new DuplicateKeyException(ex);
+        }
     }
 
     private async Task ApplyAuditContextAsync(CancellationToken cancellationToken)

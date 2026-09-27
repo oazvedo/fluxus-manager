@@ -25,6 +25,7 @@ public static class ApplicationModule
         services.AddScoped<ITenantContext, TenantContext>();
         services.AddScoped<IAuditContext, AuditContext>();
         services.AddScoped<IUsuarioService, UsuarioService>();
+        services.AddScoped<IEmpresaService, EmpresaService>();
     }
 
     private static void AddValidators(IServiceCollection services)

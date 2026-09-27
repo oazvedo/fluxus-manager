@@ -44,6 +44,7 @@ public static class InfraModule
         services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IEmpresaRepository, EmpresaRepository>();
     }
 
     private static void AddSecurity(IServiceCollection services)
