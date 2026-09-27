@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { isValidCnpj } from '../lib/cnpj'
+import { isValidCnpj } from '@/shared/lib/cnpj'
 
 // Mesmas regras dos validators da API; a API continua sendo a fonte da verdade.
 // Na edição o CNPJ vem preenchido (e válido) e não é enviado: ele não é alterável.

@@ -4,7 +4,7 @@ import { StatusBadge } from '@/shared/components/common/StatusBadge'
 import { TableSkeletonRows } from '@/shared/components/common/TableStates'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table'
 import { formatDate, formatDateTime } from '@/shared/lib/format'
-import { formatCnpj } from '../lib/cnpj'
+import { formatCnpj } from '@/shared/lib/cnpj'
 import type { Empresa } from '../types/empresa'
 import { EmpresaActions } from './EmpresaActions'
 

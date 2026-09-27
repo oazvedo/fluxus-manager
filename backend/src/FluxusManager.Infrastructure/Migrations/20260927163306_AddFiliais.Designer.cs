@@ -3,6 +3,7 @@ using System;
 using FluxusManager.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FluxusManager.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260927163306_AddFiliais")]
+    partial class AddFiliais
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,74 +187,6 @@ namespace FluxusManager.Infrastructure.Migrations
                         .HasFilter("excluido = false");
 
                     b.ToTable("usuarios", (string)null);
-                });
-
-            modelBuilder.Entity("FluxusManager.Domain.Entities.UsuarioEmpresa", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean")
-                        .HasColumnName("ativo");
-
-                    b.Property<DateTime?>("AtualizadoEm")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("atualizado_em");
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("criado_em");
-
-                    b.Property<Guid>("EmpresaId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("empresa_id");
-
-                    b.Property<bool>("Excluido")
-                        .HasColumnType("boolean")
-                        .HasColumnName("excluido");
-
-                    b.Property<string>("Perfil")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("perfil");
-
-                    b.Property<Guid>("UsuarioId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("usuario_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_usuarios_empresas");
-
-                    b.HasIndex("EmpresaId")
-                        .HasDatabaseName("ix_usuarios_empresas_empresa_id");
-
-                    b.HasIndex("UsuarioId", "EmpresaId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_usuarios_empresas_usuario_id_empresa_id")
-                        .HasFilter("excluido = false");
-
-                    b.ToTable("usuarios_empresas", (string)null);
-                });
-
-            modelBuilder.Entity("FluxusManager.Domain.Entities.UsuarioEmpresa", b =>
-                {
-                    b.HasOne("FluxusManager.Domain.Entities.Empresa", null)
-                        .WithMany()
-                        .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_usuarios_empresas_empresas_empresa_id");
-
-                    b.HasOne("FluxusManager.Domain.Entities.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_usuarios_empresas_usuarios_usuario_id");
                 });
 
             modelBuilder.Entity("FluxusManager.Domain.Entities.Filial", b =>

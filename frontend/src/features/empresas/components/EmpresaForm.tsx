@@ -8,7 +8,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/s
 import { Input } from '@/shared/components/ui/input'
 import { SheetClose, SheetFooter } from '@/shared/components/ui/sheet'
 import { useAtualizarEmpresa, useCriarEmpresa } from '../hooks/use-empresas'
-import { formatCnpj, normalizeCnpj } from '../lib/cnpj'
+import { formatCnpj, normalizeCnpj } from '@/shared/lib/cnpj'
 import { empresaFormSchema, type EmpresaFormValues } from '../schemas/empresa'
 import type { Empresa } from '../types/empresa'
 
