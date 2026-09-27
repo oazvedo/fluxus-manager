@@ -1,3 +1,4 @@
+using FluxusManager.Application.Services;
 using FluxusManager.Infrastructure.Database;
 using FluxusManager.Infrastructure.Repositories;
 using FluxusManager.UnitTests.MultiTenant;
@@ -19,7 +20,7 @@ public sealed class RepositoryBaseTests : IDisposable
         var repository = new RepositoryBase<Registro>(context);
         var registros = nomes.Select(n => new Registro(n)).ToList();
         registros.ForEach(repository.Add);
-        await new UnitOfWork(context).CommitAsync();
+        await new UnitOfWork(context, new AuditContext(new TenantContext())).CommitAsync();
         return registros;
     }
 
@@ -102,7 +103,7 @@ public sealed class RepositoryBaseTests : IDisposable
             alterar.Nome = "alterado";
             repository.Update(alterar);
             repository.Remove((await repository.GetByIdAsync(registros[1].Id))!);
-            await new UnitOfWork(context).CommitAsync();
+            await new UnitOfWork(context, new AuditContext(new TenantContext())).CommitAsync();
         }
 
         await using var leitura = _database.CreateContext(TenantA);
@@ -117,7 +118,7 @@ public sealed class RepositoryBaseTests : IDisposable
         await using (var context = _database.CreateContext(TenantA))
         {
             var repository = new RepositoryBase<Registro>(context);
-            var id = await new UnitOfWork(context).ExecuteInTransactionAsync(ct =>
+            var id = await new UnitOfWork(context, new AuditContext(new TenantContext())).ExecuteInTransactionAsync(ct =>
             {
                 var registro = new Registro("na transação");
                 repository.Add(registro);
@@ -136,7 +137,7 @@ public sealed class RepositoryBaseTests : IDisposable
         await using (var context = _database.CreateContext(TenantA))
         {
             var repository = new RepositoryBase<Registro>(context);
-            var unitOfWork = new UnitOfWork(context);
+            var unitOfWork = new UnitOfWork(context, new AuditContext(new TenantContext()));
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => unitOfWork.ExecuteInTransactionAsync(async ct =>
             {

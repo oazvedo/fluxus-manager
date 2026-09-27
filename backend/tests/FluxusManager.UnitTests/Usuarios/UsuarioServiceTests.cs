@@ -21,7 +21,7 @@ public sealed class UsuarioServiceTests : IDisposable
     private (UsuarioService service, AppDbContext context) CriarService()
     {
         var context = _database.CreateContext(tenantId: null);
-        var service = new UsuarioService(new UsuarioRepository(context), new UnitOfWork(context), _hasher);
+        var service = new UsuarioService(new UsuarioRepository(context), new UnitOfWork(context, new AuditContext(new TenantContext())), _hasher);
         return (service, context);
     }
 

@@ -9,3 +9,9 @@ export const http = axios.create({
   baseURL: env.apiUrl,
   timeout: 15_000,
 })
+
+// Tela que originou a requisição: a API grava na auditoria (audit.change_log.frontend_url).
+http.interceptors.request.use((config) => {
+  config.headers.set('X-Frontend-Url', window.location.pathname)
+  return config
+})
