@@ -115,6 +115,19 @@ export const empresasKeys = {
   que a revogação não foi confirmada. JWTs já emitidos mantêm a validade original.
 - `SessionBoundary` limpa o React Query ao mudar a identidade da sessão. A renovação normal preserva o cache.
 
+### Convites
+
+- `/convites` (dentro do layout) lista os convites da empresa com o status (`Pendente`, `Expirado`, `Aceito`,
+  `Cancelado`), envia novos (`?novo`, atalho `N`) e, pelo menu da linha, reenvia ou cancela. Não há edição: a linha
+  não abre painel. O perfil é escolhido num `<select>` nativo com o visual do `Input` (o shadcn do projeto não tem select).
+- `/convites/aceitar?token=...` é **pública**, como `/login`: fica fora do `RequireSession` e funciona com ou sem
+  sessão aberta. Consulta o convite, mostra empresa, perfil e validade, e aceita: quem já tem conta só confirma;
+  quem não tem informa nome e senha (mesmas regras da API, com repetição da senha). O token vai no corpo das
+  chamadas, nunca na URL da API. Erros do link (não encontrado, expirado, cancelado, já aceito) mostram a mensagem da
+  API e o caminho para o login. Depois do aceite, o login abre com o e-mail preenchido.
+- Link estilizado como botão: `cn(buttonVariants(...))`. Sem o `cn`, as classes conflitantes do cva (ex.: borda) não
+  são resolvidas.
+
 ### Testes de autenticação
 
 `npm test` verifica os interceptors, concorrência, falhas e respostas tardias. `npm run test:e2e` sobe a API e o Vite
