@@ -34,9 +34,9 @@ public class AuthService(
         foreach (var vinculo in vinculosAtivos)
         {
             var empresa = await empresas.GetByIdAsync(vinculo.EmpresaId, cancellationToken);
-            if (empresa is { Ativo: true })
+            if (empresa is { Ativo: true } && vinculo.Perfil is { Ativo: true } perfil && perfil.TenantId == empresa.Id)
             {
-                var response = CriarToken(usuario, empresa.Id, vinculo.Perfil);
+                var response = CriarToken(usuario, empresa.Id, perfil);
                 var secret = RefreshTokenSecret.Create();
                 // Precisão de segundos mantém a mesma expiração na resposta inicial e após persistir no PostgreSQL.
                 var expiresAt = clock.GetUtcNow().AddDays(refreshOptions.Value.DuracaoDias);
@@ -55,7 +55,9 @@ public class AuthService(
         var usuario = await usuarios.GetByIdAsync(userId, cancellationToken);
         var vinculo = await vinculos.ObterVinculoAsync(userId, empresaId, cancellationToken);
         var empresa = await empresas.GetByIdAsync(empresaId, cancellationToken);
-        if (usuario is not { Ativo: true } || vinculo is not { Ativo: true } || empresa is not { Ativo: true })
+        if (usuario is not { Ativo: true } || vinculo is not { Ativo: true }
+            || empresa is not { Ativo: true } || vinculo.Perfil is not { Ativo: true }
+            || vinculo.Perfil.TenantId != empresaId)
             throw new NotFoundException("Vínculo usuário-empresa ativo", $"{userId}/{empresaId}");
 
         return CriarToken(usuario, empresaId, vinculo.Perfil);
@@ -117,15 +119,10 @@ public class AuthService(
         }, cancellationToken);
     }
 
-    private TokenResponse CriarToken(Usuario usuario, Guid empresaId, string perfil)
+    private TokenResponse CriarToken(Usuario usuario, Guid empresaId, Perfil perfil)
     {
-        var permissions = perfil.Trim().ToLowerInvariant() switch
-        {
-            "administrador" or "admin" => PermissionCatalog.All,
-            "consulta" or "leitura" or "read-only" => PermissionCatalog.ReadOnly,
-            _ => []
-        };
-        var (token, expiresIn) = tokenIssuer.Create(usuario.Id, usuario.Email, empresaId, perfil, permissions);
-        return new TokenResponse(token, "Bearer", expiresIn, empresaId, perfil, permissions);
+        var permissions = perfil.Permissoes.Select(permissao => permissao.Codigo).Distinct(StringComparer.Ordinal).ToArray();
+        var (token, expiresIn) = tokenIssuer.Create(usuario.Id, usuario.Email, empresaId, perfil.Nome, permissions);
+        return new TokenResponse(token, "Bearer", expiresIn, empresaId, perfil.Nome, permissions);
     }
 }

@@ -29,6 +29,7 @@ public static class ApplicationModule
         services.AddScoped<IEmpresaService, EmpresaService>();
         services.AddScoped<IUsuarioEmpresaService, UsuarioEmpresaService>();
         services.AddScoped<IFilialService, FilialService>();
+        services.AddScoped<IPerfilService, PerfilService>();
     }
 
     private static void AddValidators(IServiceCollection services)

@@ -5,5 +5,5 @@ namespace FluxusManager.Application.Validators.UsuariosEmpresasValidators;
 
 public class AtualizarPerfilUsuarioEmpresaRequestValidator : AbstractValidator<AtualizarPerfilUsuarioEmpresaRequest>
 {
-    public AtualizarPerfilUsuarioEmpresaRequestValidator() => RuleFor(x => x.Perfil).NotEmpty().MaximumLength(50);
+    public AtualizarPerfilUsuarioEmpresaRequestValidator() => RuleFor(x => x.PerfilId).NotEmpty();
 }

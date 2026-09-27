@@ -91,12 +91,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext
         switch (entry.State)
         {
             case EntityState.Added:
-                var current = CurrentTenantId
-                    ?? throw new InvalidOperationException("Não é possível incluir um registro multi-tenant sem tenant na requisição.");
-
-                if ((Guid)tenantId.CurrentValue! == Guid.Empty)
+                var tenantValue = (Guid)tenantId.CurrentValue!;
+                var tenant = CurrentTenantId;
+                if (tenantValue == Guid.Empty && tenant is Guid current)
                     tenantId.CurrentValue = current;
-                else if ((Guid)tenantId.CurrentValue! != current)
+                else if (tenantValue == Guid.Empty || tenantValue != tenant
+                    && !ChangeTracker.Entries<Empresa>().Any(entry => entry.State == EntityState.Added && entry.Entity.Id == tenantValue))
                     throw new InvalidOperationException("Não é permitido incluir registros em outro tenant.");
                 break;
 

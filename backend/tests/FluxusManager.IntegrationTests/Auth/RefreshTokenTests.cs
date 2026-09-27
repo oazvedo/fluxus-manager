@@ -36,9 +36,12 @@ public sealed class RefreshTokenTests(PostgresFixture postgres) : IAsyncLifetime
         var user = new Usuario("Ana", "ana@fluxus.com", hasher.Hash("segredo123"));
         var company = new Empresa("Fluxus", null, "11222333000181");
         var secondCompany = new Empresa("Outra", null, "11444777000161");
-        db.AddRange(user, company, secondCompany,
-            new UsuarioEmpresa(user.Id, company.Id, "Administrador"),
-            new UsuarioEmpresa(user.Id, secondCompany.Id, "Consulta"));
+        var admin = Perfil.CriarPadrao(company.Id, "Administrador", "", PermissionCatalog.All);
+        var consulta = Perfil.CriarPadrao(company.Id, "Consulta", "", PermissionCatalog.ReadOnly);
+        var secondCompanyConsulta = Perfil.CriarPadrao(secondCompany.Id, "Consulta", "", PermissionCatalog.ReadOnly);
+        db.AddRange(user, company, secondCompany, admin, consulta, secondCompanyConsulta,
+            new UsuarioEmpresa(user.Id, company.Id, admin.Id),
+            new UsuarioEmpresa(user.Id, secondCompany.Id, secondCompanyConsulta.Id));
         await db.SaveChangesAsync();
         _userId = user.Id;
         _companyId = company.Id;
@@ -203,7 +206,8 @@ public sealed class RefreshTokenTests(PostgresFixture postgres) : IAsyncLifetime
         await using (var scope = _factory.Services.CreateAsyncScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            (await db.Set<UsuarioEmpresa>().SingleAsync(v => v.UsuarioId == _userId && v.EmpresaId == _companyId)).AtualizarPerfil("Consulta");
+            (await db.Set<UsuarioEmpresa>().SingleAsync(v => v.UsuarioId == _userId && v.EmpresaId == _companyId))
+                .AtualizarPerfil(await db.Set<Perfil>().SingleAsync(p => p.TenantId == _companyId && p.Nome == "Consulta"));
             await db.SaveChangesAsync();
         }
         var rotated = await RotateAsync(login.RefreshToken!);

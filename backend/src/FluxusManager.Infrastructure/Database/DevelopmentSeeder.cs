@@ -1,6 +1,7 @@
 using FluxusManager.Application.Interfaces;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Interfaces;
+using FluxusManager.Application.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,7 +52,9 @@ public static class DevelopmentSeeder
             var admin = new Usuario("Administrador local", AdminEmail, hasher.Hash(password));
             db.Add(admin).Property(u => u.Id).CurrentValue = AdminId;
             var empresa = new Empresa("Fluxus Desenvolvimento Ltda", "Fluxus Desenvolvimento", EmpresaCnpj);
-            db.AddRange(empresa, new UsuarioEmpresa(admin.Id, empresa.Id, "Administrador"));
+            var adminProfile = Perfil.CriarPadrao(empresa.Id, "Administrador", "Acesso completo à empresa.", PermissionCatalog.All);
+            var consultationProfile = Perfil.CriarPadrao(empresa.Id, "Consulta", "Acesso de leitura aos cadastros.", PermissionCatalog.ReadOnly);
+            db.AddRange(empresa, adminProfile, consultationProfile, new UsuarioEmpresa(admin.Id, empresa.Id, adminProfile.Id));
         }, cancellationToken);
     }
 }

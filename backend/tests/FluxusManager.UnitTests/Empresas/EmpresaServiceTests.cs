@@ -17,7 +17,7 @@ public sealed class EmpresaServiceTests : IDisposable
     private (EmpresaService service, AppDbContext context) CriarService()
     {
         var context = _database.CreateContext(tenantId: null);
-        var service = new EmpresaService(new EmpresaRepository(context), new UnitOfWork(context, new AuditContext(new TenantContext())));
+        var service = new EmpresaService(new EmpresaRepository(context), new PerfilRepository(context), new UnitOfWork(context, new AuditContext(new TenantContext())));
         return (service, context);
     }
 

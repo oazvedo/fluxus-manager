@@ -1,3 +1,3 @@
 namespace FluxusManager.Application.DTOs.UsuariosEmpresasDtos;
 
-public record AtualizarPerfilUsuarioEmpresaRequest(string Perfil);
+public record AtualizarPerfilUsuarioEmpresaRequest(Guid PerfilId);

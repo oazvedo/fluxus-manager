@@ -10,10 +10,13 @@ public class UsuarioEmpresaConfig : IEntityTypeConfiguration<UsuarioEmpresa>
     {
         builder.ToTable("usuarios_empresas");
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.Perfil).HasMaxLength(50).IsRequired();
+        builder.Property(e => e.PerfilId).IsRequired();
         builder.Property(e => e.Ativo).IsRequired();
         builder.HasIndex(e => new { e.UsuarioId, e.EmpresaId }).IsUnique().HasFilter("excluido = false");
         builder.HasOne<Usuario>().WithMany().HasForeignKey(e => e.UsuarioId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Empresa>().WithMany().HasForeignKey(e => e.EmpresaId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(e => e.Perfil).WithMany(p => p.Vinculos)
+            .HasForeignKey(e => new { e.PerfilId, e.EmpresaId })
+            .HasPrincipalKey(perfil => new { perfil.Id, perfil.TenantId }).OnDelete(DeleteBehavior.Restrict);
     }
 }

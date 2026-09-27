@@ -270,10 +270,19 @@ token com o tenant selecionado. Tokens de acesso antigos expiram normalmente.
 
 O token contém `sub`, `email`, `tenant_id`, `role` e uma claim `permissions` por permissão concedida. A API valida
 assinatura, emissor, audiência e expiração. As rotas declaram permissões por `[HasPermission("empresas.editar")]`;
-políticas e o fallback exigem autenticação. O perfil `Administrador` (também `Admin`) recebe todas as permissões
-iniciais; `Consulta`, `Leitura` e `Read-only` recebem somente leitura. Perfis não mapeados autenticam sem permissões,
-portanto devem ser associados a um perfil conhecido. Esse mapeamento estático será substituído pelo catálogo de perfis
-e permissões da issue #14.
+políticas e o fallback exigem autenticação. Cada empresa tem perfis próprios: novas empresas recebem `Administrador`
+com todas as permissões e `Consulta` com acesso de leitura. O catálogo de códigos é definido pela aplicação e pode ser
+consultado em `GET /perfis/permissoes`. Os vínculos guardam `perfilId`, em vez de um nome livre.
+
+`GET /perfis` e `GET /perfis/{id}` consultam os perfis do tenant selecionado. `POST /perfis` cria, `PUT /perfis/{id}`
+atualiza nome, descrição e permissões, `PATCH /perfis/{id}/ativar|inativar` altera o status e `DELETE /perfis/{id}`
+exclui logicamente. `GET` exige `perfis.visualizar`; alterações exigem `perfis.editar`. Nome não diferencia maiúsculas
+de minúsculas e as permissões precisam pertencer ao catálogo. Perfil com vínculo ativo precisa ser reatribuído antes
+de inativar ou excluir. O token atual preserva as claims emitidas até expirar; o refresh recalcula perfil e permissões.
+
+A migration cria os perfis padrão em empresas existentes, associa os vínculos antigos e conserva nomes legados com
+acesso vazio quando não eram reconhecidos pelo mapeamento anterior. A mesma empresa é exigida no perfil e no vínculo;
+as consultas e chaves estrangeiras compostas isolam permissões entre tenants.
 
 Configure `Jwt:SigningKey` por secret, com pelo menos 32 bytes. Em Docker, gere uma chave aleatória e defina
 `JWT_SIGNING_KEY` em `deploy/.env`; nunca reutilize a chave de desenvolvimento ou a inclua no repositório. O issuer e a

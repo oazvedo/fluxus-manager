@@ -4,10 +4,11 @@ using FluxusManager.Domain.Common;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Exceptions;
 using FluxusManager.Domain.Interfaces;
+using FluxusManager.Application.Security;
 
 namespace FluxusManager.Application.Services;
 
-public class EmpresaService(IEmpresaRepository empresas, IUnitOfWork unitOfWork) : IEmpresaService
+public class EmpresaService(IEmpresaRepository empresas, IPerfilRepository perfis, IUnitOfWork unitOfWork) : IEmpresaService
 {
     public async Task<EmpresaResponse> CriarAsync(CriarEmpresaRequest request, CancellationToken cancellationToken = default)
     {
@@ -19,6 +20,8 @@ public class EmpresaService(IEmpresaRepository empresas, IUnitOfWork unitOfWork)
         var empresa = new Empresa(request.RazaoSocial.Trim(), NomeFantasia(request.NomeFantasia), cnpj);
 
         empresas.Add(empresa);
+        perfis.Add(Perfil.CriarPadrao(empresa.Id, "Administrador", "Acesso completo à empresa.", PermissionCatalog.All));
+        perfis.Add(Perfil.CriarPadrao(empresa.Id, "Consulta", "Acesso de leitura aos cadastros.", PermissionCatalog.ReadOnly));
         await unitOfWork.CommitAsync(cancellationToken);
 
         return EmpresaResponse.DeEntidade(empresa);
