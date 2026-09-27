@@ -11,6 +11,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext
     /// <summary>Nome do filtro global por tenant (para usar em IgnoreQueryFilters([TenantFilter])).</summary>
     public const string TenantFilter = "Tenant";
 
+    /// <summary>Nome do filtro global que esconde registros excluídos logicamente.</summary>
+    public const string SoftDeleteFilter = "SoftDelete";
+
     // Membro do DbContext: o EF reavalia a cada consulta, usando o tenant da requisição atual.
     private Guid? CurrentTenantId => tenantContext.TenantId;
 
@@ -20,6 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         ApplyTenantFilters(modelBuilder);
+        ApplySoftDeleteFilters(modelBuilder);
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -48,17 +52,35 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext
     private void ApplyTenantFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : class, ITenantEntity
         => modelBuilder.Entity<TEntity>().HasQueryFilter(TenantFilter, e => e.TenantId == CurrentTenantId);
 
+    private static void ApplySoftDeleteFilters(ModelBuilder modelBuilder)
+    {
+        var applyFilter = typeof(AppDbContext).GetMethod(nameof(ApplySoftDeleteFilter), BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        var entities = modelBuilder.Model.GetEntityTypes()
+            .Where(t => t.BaseType is null && typeof(BaseEntity).IsAssignableFrom(t.ClrType));
+
+        foreach (var entityType in entities)
+            applyFilter.MakeGenericMethod(entityType.ClrType).Invoke(null, [modelBuilder]);
+    }
+
+    private static void ApplySoftDeleteFilter<TEntity>(ModelBuilder modelBuilder) where TEntity : BaseEntity
+        => modelBuilder.Entity<TEntity>().HasQueryFilter(SoftDeleteFilter, e => !e.Excluido);
+
     private void ApplyConventions()
     {
         var now = DateTime.UtcNow;
 
-        foreach (var entry in ChangeTracker.Entries())
+        // ToList: a exclusão lógica muda o estado das entradas durante o laço.
+        foreach (var entry in ChangeTracker.Entries().ToList())
         {
             if (entry.Entity is ITenantEntity)
                 ApplyTenant(entry);
 
             if (entry.Entity is BaseEntity)
+            {
                 ApplyTimestamps(entry, now);
+                ApplySoftDelete(entry, now);
+            }
         }
     }
 
@@ -92,6 +114,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantContext
                     throw new InvalidOperationException("Não é permitido alterar registros de outro tenant.");
                 break;
         }
+    }
+
+    /// <summary>
+    /// Troca o DELETE por um UPDATE de <c>excluido</c> (o trigger de auditoria registra como UPDATE).
+    /// ExecuteDelete e SQL direto não passam por aqui e apagam de fato.
+    /// </summary>
+    private static void ApplySoftDelete(EntityEntry entry, DateTime now)
+    {
+        if (entry.State != EntityState.Deleted)
+            return;
+
+        entry.State = EntityState.Unchanged;
+        MarkModified(entry, nameof(BaseEntity.Excluido), true);
+        MarkModified(entry, nameof(BaseEntity.AtualizadoEm), now);
+    }
+
+    private static void MarkModified(EntityEntry entry, string property, object value)
+    {
+        entry.Property(property).CurrentValue = value;
+        entry.Property(property).IsModified = true;
     }
 
     private static void ApplyTimestamps(EntityEntry entry, DateTime now)

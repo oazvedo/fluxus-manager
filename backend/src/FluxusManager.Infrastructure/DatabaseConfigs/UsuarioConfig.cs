@@ -15,7 +15,8 @@ public class UsuarioConfig : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.Nome).HasMaxLength(150).IsRequired();
 
         builder.Property(u => u.Email).HasMaxLength(254).IsRequired();
-        builder.HasIndex(u => u.Email).IsUnique();
+        // Único só entre os não excluídos: o e-mail de um usuário excluído pode ser reaproveitado.
+        builder.HasIndex(u => u.Email).IsUnique().HasFilter("excluido = false");
 
         builder.Property(u => u.SenhaHash).HasMaxLength(500).IsRequired();
 

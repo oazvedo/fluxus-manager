@@ -50,6 +50,28 @@ Os bancos `fluxus_test_*` criados nesse modo são apagados ao final da execuçã
 
 O CI roda format, build e todos os testes em todo PR e em todo push na `dev` e na `main`; a `main` só aceita merge com o check verde.
 
+## Auditoria
+
+Toda alteração nas tabelas vira uma linha em `audit.change_log`, gravada por trigger no PostgreSQL:
+operação, valores antigos e novos (JSONB), campos alterados, usuário, tenant e a tela do front (header `X-Frontend-Url`).
+
+**Tabela nova:** na migration que a cria, ligue a auditoria logo depois do `CreateTable`.
+O teste `TodaTabelaDoSistema_TemOTriggerDeAuditoria` falha se faltar.
+
+```csharp
+migrationBuilder.EnableAuditTracking("empresas");
+migrationBuilder.EnableAuditTracking("usuarios", "senha_hash"); // colunas sensíveis: só o nome é gravado
+```
+
+- **Excluir** pelo repositório é exclusão lógica: a coluna `excluido` vira `true`, o registro some das consultas e a auditoria registra um UPDATE.
+- **Partições mensais:** a API cria as dos próximos 3 meses todo dia. `Auditoria:RetencaoMeses` (padrão `0`, guarda tudo) apaga as mais antigas que isso.
+
+```sql
+-- Histórico de um registro
+SELECT created_at, operation, changed_fields, application_user, frontend_url
+FROM audit.change_log WHERE table_name = 'usuarios' AND row_id = '<id>' ORDER BY id;
+```
+
 ## Deploy em servidor (EC2)
 
 Banco, API e frontend sobem juntos com Docker Compose; o nginx do frontend repassa `/api` para a API.

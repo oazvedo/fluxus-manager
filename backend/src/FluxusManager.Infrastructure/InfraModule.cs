@@ -35,6 +35,7 @@ public static class InfraModule
             .UseSnakeCaseNamingConvention());
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddHostedService<AuditPartitionMaintenance>();
     }
 
     private static void AddRepositories(IServiceCollection services)
