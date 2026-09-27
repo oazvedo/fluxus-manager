@@ -1,3 +1,4 @@
+using FluxusManager.API.Logging;
 using FluxusManager.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -21,7 +22,7 @@ public class ExceptionFilter(
             NotFoundException e => (StatusCodes.Status404NotFound, "Recurso não encontrado", e.Message),
             ConflictException e => (StatusCodes.Status409Conflict, "Conflito", e.Message),
             BusinessRuleException e => (StatusCodes.Status422UnprocessableEntity, "Regra de negócio violada", e.Message),
-            _ => (StatusCodes.Status500InternalServerError, "Erro interno", UnexpectedErrorDetail(context.Exception)),
+            _ => (StatusCodes.Status500InternalServerError, "Erro interno", UnexpectedErrorDetail(context)),
         };
 
         if (status == StatusCodes.Status500InternalServerError)
@@ -34,8 +35,9 @@ public class ExceptionFilter(
         context.ExceptionHandled = true;
     }
 
-    private string UnexpectedErrorDetail(Exception exception)
+    private string UnexpectedErrorDetail(ExceptionContext context)
         => environment.IsDevelopment()
-            ? exception.Message
-            : "Ocorreu um erro inesperado. Informe o traceId ao suporte.";
+            ? context.Exception.Message
+            : "Não foi possível concluir a operação. Tente novamente; se o erro continuar, " +
+              $"informe ao suporte o código {CorrelationIdMiddleware.Get(context.HttpContext)}.";
 }

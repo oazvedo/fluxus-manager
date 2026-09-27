@@ -1,10 +1,12 @@
 using FluxusManager.API.Filters;
+using FluxusManager.API.Logging;
 using FluxusManager.Application;
 using FluxusManager.Infrastructure;
 using FluxusManager.Infrastructure.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddStructuredLogging();
 
 builder.Services.AddControllers(options =>
 {
@@ -13,7 +15,9 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ExceptionFilter>();
 })
 .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = InvalidModelStateResponse.Create);
-builder.Services.AddProblemDetails();
+// Todo ProblemDetails leva o correlation id, que o cliente informa ao suporte para achar os logs.
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+    context.ProblemDetails.Extensions["correlationId"] = CorrelationIdMiddleware.Get(context.HttpContext));
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationModule();
@@ -30,6 +34,8 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 var pathBase = app.Configuration["PathBase"];
 if (!string.IsNullOrEmpty(pathBase))
     app.UsePathBase(pathBase);
+
+app.UseRequestLogging();
 
 // Erros fora dos controllers (middlewares, rotas inexistentes) também saem como ProblemDetails.
 app.UseExceptionHandler();
@@ -48,6 +54,7 @@ app.UseSwaggerUI(options =>
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseUserLogContext();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
