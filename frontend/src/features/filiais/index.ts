@@ -1,0 +1,1 @@
+export { filiaisRoutes } from './routes'

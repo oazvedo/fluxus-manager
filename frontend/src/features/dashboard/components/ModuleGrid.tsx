@@ -18,7 +18,7 @@ const modules: Module[] = [
     description: 'Unidades vinculadas a cada empresa.',
     to: '/filiais',
     icon: Store,
-    available: false,
+    available: true,
   },
   {
     title: 'Usuários',
