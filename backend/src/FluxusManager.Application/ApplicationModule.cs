@@ -1,7 +1,9 @@
 using System.Globalization;
 using FluentValidation;
 using FluxusManager.Application.Interfaces;
+using FluxusManager.Application.Options;
 using FluxusManager.Application.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FluxusManager.Application;
@@ -12,12 +14,24 @@ namespace FluxusManager.Application;
 /// </summary>
 public static class ApplicationModule
 {
-    public static IServiceCollection AddApplicationModule(this IServiceCollection services)
+    public static IServiceCollection AddApplicationModule(this IServiceCollection services, IConfiguration configuration)
     {
         AddServices(services);
         AddValidators(services);
+        AddOptions(services, configuration);
 
         return services;
+    }
+
+    private static void AddOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<ConviteOptions>().Bind(configuration.GetSection(ConviteOptions.SectionName))
+            .Validate(o => o.ValidadeHoras is >= 1 and <= 720, "Convites:ValidadeHoras deve estar entre 1 e 720.")
+            .ValidateOnStart();
+        services.AddOptions<FrontendOptions>().Bind(configuration.GetSection(FrontendOptions.SectionName))
+            .Validate(o => Uri.TryCreate(o.Url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https",
+                "Frontend:Url deve ser a URL absoluta HTTP(S) do frontend.")
+            .ValidateOnStart();
     }
 
     private static void AddServices(IServiceCollection services)
@@ -30,6 +44,7 @@ public static class ApplicationModule
         services.AddScoped<IUsuarioEmpresaService, UsuarioEmpresaService>();
         services.AddScoped<IFilialService, FilialService>();
         services.AddScoped<IPerfilService, PerfilService>();
+        services.AddScoped<IConviteService, ConviteService>();
     }
 
     private static void AddValidators(IServiceCollection services)

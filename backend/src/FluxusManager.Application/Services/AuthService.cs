@@ -3,6 +3,7 @@ using FluxusManager.Application.Interfaces;
 using FluxusManager.Application.Security;
 using FluxusManager.Application.Options;
 using Microsoft.Extensions.Options;
+using FluxusManager.Domain.Common;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Exceptions;
 using FluxusManager.Domain.Interfaces;
@@ -23,7 +24,7 @@ public class AuthService(
 {
     public async Task<TokenResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var usuario = await usuarios.ObterPorEmailAsync(request.Email.Trim().ToLowerInvariant(), cancellationToken);
+        var usuario = await usuarios.ObterPorEmailAsync(EnderecoEmail.Normalizar(request.Email), cancellationToken);
         if (usuario is null || !usuario.Ativo || !passwordHasher.Verificar(request.Senha, usuario.SenhaHash))
             return null;
 
@@ -37,11 +38,9 @@ public class AuthService(
             if (empresa is { Ativo: true } && vinculo.Perfil is { Ativo: true } perfil && perfil.TenantId == empresa.Id)
             {
                 var response = CriarToken(usuario, empresa.Id, perfil);
-                var secret = RefreshTokenSecret.Create();
-                // Precisão de segundos mantém a mesma expiração na resposta inicial e após persistir no PostgreSQL.
-                var expiresAt = clock.GetUtcNow().AddDays(refreshOptions.Value.DuracaoDias);
-                var expires = DateTimeOffset.FromUnixTimeSeconds(expiresAt.ToUnixTimeSeconds()).UtcDateTime;
-                refreshTokens.Add(new RefreshToken(usuario.Id, empresa.Id, Guid.CreateVersion7(), RefreshTokenSecret.Hash(secret), expires));
+                var secret = SecretToken.Create();
+                var expires = clock.ExpiracaoEmSegundos(TimeSpan.FromDays(refreshOptions.Value.DuracaoDias));
+                refreshTokens.Add(new RefreshToken(usuario.Id, empresa.Id, Guid.CreateVersion7(), SecretToken.Hash(secret), expires));
                 await unitOfWork.CommitAsync(cancellationToken);
                 return response with { RefreshToken = secret, RefreshTokenExpiresAt = expires };
             }
@@ -65,7 +64,7 @@ public class AuthService(
 
     public async Task<TokenResponse?> RefreshAsync(RefreshRequest request, CancellationToken cancellationToken = default)
     {
-        var original = await refreshTokens.ObterPorHashAsync(RefreshTokenSecret.Hash(request.RefreshToken), cancellationToken);
+        var original = await refreshTokens.ObterPorHashAsync(SecretToken.Hash(request.RefreshToken), cancellationToken);
         if (original is null)
             return null;
 
@@ -96,9 +95,9 @@ public class AuthService(
                 return null;
             }
 
-            var secret = RefreshTokenSecret.Create();
+            var secret = SecretToken.Create();
             var replacement = new RefreshToken(token.UsuarioId, response.TenantId, token.FamiliaId,
-                RefreshTokenSecret.Hash(secret), token.ExpiraEm);
+                SecretToken.Hash(secret), token.ExpiraEm);
             token.Substituir(replacement.Id, now);
             refreshTokens.Add(replacement);
             return response with { RefreshToken = secret, RefreshTokenExpiresAt = token.ExpiraEm };
@@ -107,7 +106,7 @@ public class AuthService(
 
     public async Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default)
     {
-        var original = await refreshTokens.ObterPorHashAsync(RefreshTokenSecret.Hash(request.RefreshToken), cancellationToken);
+        var original = await refreshTokens.ObterPorHashAsync(SecretToken.Hash(request.RefreshToken), cancellationToken);
         if (original is null)
             return;
 

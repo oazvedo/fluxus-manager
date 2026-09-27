@@ -64,6 +64,8 @@ public class PerfilService(IPerfilRepository perfis, ITenantContext tenant, IUni
         var perfil = await BuscarCompletoAsync(id, cancellationToken);
         if (await perfis.TemVinculosAsync(id, cancellationToken))
             throw new BusinessRuleException("Reatribua os vínculos ativos antes de excluir este perfil.");
+        if (await perfis.TemConvitesPendentesAsync(id, cancellationToken))
+            throw new BusinessRuleException("Cancele os convites pendentes deste perfil antes de excluí-lo.");
         perfis.Remove(perfil);
         await unitOfWork.CommitAsync(cancellationToken);
     }

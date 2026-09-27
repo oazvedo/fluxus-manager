@@ -92,8 +92,8 @@ public sealed class RefreshTokenTests(PostgresFixture postgres) : IAsyncLifetime
         var tokens = await db.Set<RefreshToken>().AsNoTracking().ToListAsync();
         Assert.Equal(2, tokens.Count);
         Assert.DoesNotContain(tokens, t => t.TokenHash == login.RefreshToken || t.TokenHash == rotated.RefreshToken);
-        var previous = tokens.Single(t => t.TokenHash == RefreshTokenSecret.Hash(login.RefreshToken));
-        var current = tokens.Single(t => t.TokenHash == RefreshTokenSecret.Hash(rotated.RefreshToken!));
+        var previous = tokens.Single(t => t.TokenHash == SecretToken.Hash(login.RefreshToken));
+        var current = tokens.Single(t => t.TokenHash == SecretToken.Hash(rotated.RefreshToken!));
         Assert.NotNull(previous.RevogadoEm);
         Assert.Equal(current.Id, previous.SubstituidoPorId);
         Assert.Equal(previous.FamiliaId, current.FamiliaId);
@@ -237,7 +237,7 @@ public sealed class RefreshTokenTests(PostgresFixture postgres) : IAsyncLifetime
         await using var scope = _factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var repository = scope.ServiceProvider.GetRequiredService<IRefreshTokenRepository>();
-        var token = await repository.ObterPorHashAsync(RefreshTokenSecret.Hash(login.RefreshToken!));
+        var token = await repository.ObterPorHashAsync(SecretToken.Hash(login.RefreshToken!));
         await using var transaction = await db.Database.BeginTransactionAsync();
         await repository.BloquearFamiliaAsync(token!.FamiliaId);
         _clock.Advance(TimeSpan.FromDays(8));

@@ -21,7 +21,7 @@ public class UsuarioEmpresaService(
             throw new NotFoundException("Usuário", request.UsuarioId);
         if (await empresas.GetByIdAsync(request.EmpresaId, cancellationToken) is null)
             throw new NotFoundException("Empresa", request.EmpresaId);
-        if (await vinculos.ObterVinculoAsync(request.UsuarioId, request.EmpresaId, cancellationToken) is not null)
+        if (await vinculos.ExisteAsync(request.UsuarioId, request.EmpresaId, cancellationToken))
             throw new ConflictException("Este usuário já está vinculado à empresa.");
 
         var perfil = await PerfilAtivoAsync(request.PerfilId, request.EmpresaId, cancellationToken);
@@ -84,8 +84,8 @@ public class UsuarioEmpresaService(
 
     private async Task<Perfil> PerfilAtivoAsync(Guid perfilId, Guid empresaId, CancellationToken cancellationToken)
     {
-        var perfil = await perfis.GetByIdAsync(perfilId, cancellationToken);
-        if (perfil is not { Ativo: true } || perfil.TenantId != empresaId)
+        var perfil = await perfis.ObterAtivoAsync(perfilId, cancellationToken);
+        if (perfil is null || perfil.TenantId != empresaId)
             throw new NotFoundException("Perfil ativo", perfilId);
         return perfil;
     }

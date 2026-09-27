@@ -14,8 +14,14 @@ public class PerfilRepository(AppDbContext context) : RepositoryBase<Perfil>(con
     public Task<Perfil?> ObterComPermissoesAsync(Guid id, CancellationToken cancellationToken = default)
         => Set.Include(perfil => perfil.Permissoes).FirstOrDefaultAsync(perfil => perfil.Id == id, cancellationToken);
 
+    public Task<Perfil?> ObterAtivoAsync(Guid id, CancellationToken cancellationToken = default)
+        => Set.FirstOrDefaultAsync(perfil => perfil.Id == id && perfil.Ativo, cancellationToken);
+
     public Task<Perfil?> ObterPorNomeAsync(string nome, CancellationToken cancellationToken = default)
         => Set.FirstOrDefaultAsync(perfil => perfil.NomeNormalizado == nome.Trim().ToUpperInvariant(), cancellationToken);
+
+    public Task<bool> TemConvitesPendentesAsync(Guid id, CancellationToken cancellationToken = default)
+        => Context.Set<Convite>().AnyAsync(convite => convite.PerfilId == id && convite.Status == ConviteStatus.Pendente, cancellationToken);
 
     public Task<bool> TemVinculosAsync(Guid id, CancellationToken cancellationToken = default)
         => Context.Set<UsuarioEmpresa>().AnyAsync(vinculo => vinculo.PerfilId == id && vinculo.Ativo, cancellationToken);

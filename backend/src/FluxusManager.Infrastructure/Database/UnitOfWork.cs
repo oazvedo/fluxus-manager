@@ -63,6 +63,11 @@ public class UnitOfWork(AppDbContext context, IAuditContext auditContext) : IUni
         {
             throw new DuplicateKeyException(ex);
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Entidade com token de concorrência (ex.: Convite) alterada por outra requisição depois da leitura.
+            throw new ConflictException("Este registro foi alterado por outra operação. Atualize a página e tente novamente.", ex);
+        }
     }
 
     private async Task ApplyAuditContextAsync(CancellationToken cancellationToken)

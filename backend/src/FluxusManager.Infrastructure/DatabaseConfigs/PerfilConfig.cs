@@ -10,7 +10,8 @@ public class PerfilConfig : IEntityTypeConfiguration<Perfil>
     {
         builder.ToTable("perfis");
         builder.HasKey(perfil => perfil.Id);
-        builder.HasAlternateKey(perfil => new { perfil.Id, perfil.TenantId });
+        // Nome fixo: sem ele, a convenção passa a derivar outro nome quando surgem novas FKs para esta chave.
+        builder.HasAlternateKey(perfil => new { perfil.Id, perfil.TenantId }).HasName("ak_perfis_id_tenant_id");
         builder.Property(perfil => perfil.Nome).HasMaxLength(100).IsRequired();
         builder.Property(perfil => perfil.Descricao).HasMaxLength(250);
         builder.Property(perfil => perfil.Ativo).IsRequired();
