@@ -205,6 +205,7 @@ public sealed class RefreshTokenTests(PostgresFixture postgres) : IAsyncLifetime
         var login = await LoginAsync();
         await using (var scope = _factory.Services.CreateAsyncScope())
         {
+            scope.ServiceProvider.GetRequiredService<ITenantContext>().SetTenant(_companyId);
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             (await db.Set<UsuarioEmpresa>().SingleAsync(v => v.UsuarioId == _userId && v.EmpresaId == _companyId))
                 .AtualizarPerfil(await db.Set<Perfil>().SingleAsync(p => p.TenantId == _companyId && p.Nome == "Consulta"));
