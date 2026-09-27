@@ -32,7 +32,7 @@ const modules: Module[] = [
     description: 'O que cada perfil pode ver e fazer no sistema.',
     to: '/perfis',
     icon: ShieldCheck,
-    available: false,
+    available: true,
   },
 ]
 
