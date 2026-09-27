@@ -23,11 +23,10 @@ public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransforme
         {
             [new OpenApiSecuritySchemeReference("Bearer", document)] = []
         });
-        if (document.Paths.TryGetValue("/auth/login", out var loginPath) && loginPath.Operations is { } operations)
+        foreach (var path in new[] { "/auth/login", "/auth/refresh", "/auth/logout" })
         {
-            var loginOperation = operations.FirstOrDefault(operation => operation.Key.ToString() == "Post").Value;
-            if (loginOperation is not null)
-                loginOperation.Security = [];
+            if (document.Paths.TryGetValue(path, out var item) && item.Operations?.TryGetValue(HttpMethod.Post, out var operation) == true)
+                operation.Security = [];
         }
         return Task.CompletedTask;
     }

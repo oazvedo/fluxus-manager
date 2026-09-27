@@ -1,6 +1,8 @@
 using FluxusManager.Application.DTOs.AuthDtos;
 using FluxusManager.Application.Interfaces;
 using FluxusManager.Application.Services;
+using FluxusManager.Application.Options;
+using Microsoft.Extensions.Options;
 using FluxusManager.Domain.Common;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Exceptions;
@@ -89,7 +91,23 @@ public sealed class AuthServiceTests
     }
 
     private static AuthService CreateService(Usuario user, Empresa company, UsuarioEmpresa link, FakeTokenIssuer issuer)
-        => new(new FakeUsuarioRepository(user), new FakeUsuarioEmpresaRepository(user, link), new FakeEmpresaRepository(company), new FakePasswordHasher(), issuer);
+        => new(new FakeUsuarioRepository(user), new FakeUsuarioEmpresaRepository(user, link), new FakeEmpresaRepository(company), new FakePasswordHasher(), issuer, new FakeRefreshRepository(), new FakeUnitOfWork(), TimeProvider.System, Options.Create(new RefreshTokenOptions()));
+
+    private sealed class FakeRefreshRepository : IRefreshTokenRepository
+    {
+        public void Add(RefreshToken token) { }
+        public Task<RefreshToken?> ObterPorHashAsync(string hash, CancellationToken cancellationToken = default) => Task.FromResult<RefreshToken?>(null);
+        public Task BloquearFamiliaAsync(Guid familiaId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task<IReadOnlyList<RefreshToken>> ListarFamiliaAsync(Guid familiaId, CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyList<RefreshToken>>([]);
+        public Task<int> LimparExpiradosAsync(DateTime agora, CancellationToken cancellationToken = default) => Task.FromResult(0);
+    }
+
+    private sealed class FakeUnitOfWork : IUnitOfWork
+    {
+        public Task<int> CommitAsync(CancellationToken cancellationToken = default) => Task.FromResult(0);
+        public Task ExecuteInTransactionAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default) => action(cancellationToken);
+        public Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken = default) => action(cancellationToken);
+    }
 
     private sealed class FakePasswordHasher : IPasswordHasher
     {

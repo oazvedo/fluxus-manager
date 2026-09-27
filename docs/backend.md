@@ -244,7 +244,7 @@ Use as exceções de `Domain/Exceptions` para erro esperado. O `ExceptionFilter`
 As rotas de negócio exigem access token JWT. `POST /auth/login` autentica e emite um token de 15 minutos; envie-o como
 `Authorization: Bearer <token>`. Se a pessoa tiver mais de uma empresa, informe `empresaId` no login para escolher o
 tenant. `POST /auth/switch-tenant` recebe `empresaId`, verifica se o usuário e o vínculo estão ativos e emite um novo
-token com o tenant selecionado. Tokens antigos expiram normalmente; refresh tokens pertencem à issue #7.
+token com o tenant selecionado. Tokens de acesso antigos expiram normalmente.
 
 O token contém `sub`, `email`, `tenant_id`, `role` e uma claim `permissions` por permissão concedida. A API valida
 assinatura, emissor, audiência e expiração. As rotas declaram permissões por `[HasPermission("empresas.editar")]`;
@@ -353,3 +353,32 @@ export FLUXUS_TEST_POSTGRES="Host=localhost;Port=5432;Username=fluxus;Password=f
 8. Controller com os endpoints padrão.
 9. Testes unitários e de integração.
 10. `dotnet format`, `dotnet build` e `dotnet test` verdes.
+
+## Refresh tokens
+
+O login retorna também `refreshToken` e `refreshTokenExpiresAt`. Para renovar, envie
+`POST /auth/refresh` com `{ "refreshToken": "<credencial>" }`. A resposta contém um novo access token e um novo refresh
+token; substitua a credencial anterior e serialize as renovações no cliente. O refresh é uma credencial independente:
+não exige access token válido. A API revalida usuário, empresa e vínculo e recalcula as permissões a cada renovação.
+
+Depois de `switch-tenant`, informe também `empresaId` na próxima renovação para manter a empresa selecionada.
+Esse vínculo é validado novamente. O sucessor guarda a nova empresa, dispensando repeti-la nas renovações seguintes.
+Uma empresa sem vínculo ativo invalida a renovação e revoga a família.
+
+Cada login cria uma família independente. A rotação consome o token anterior e conserva a ligação com seu sucessor.
+Reutilizar um token consumido responde 401 e revoga toda a família, incluindo o token emitido pela outra requisição em
+caso de concorrência. O bloqueio transacional por família no PostgreSQL também serializa logout e rotação entre
+instâncias da API. O commit da revogação ocorre antes da resposta 401.
+
+`POST /auth/logout` recebe `{ "refreshToken": "<credencial>" }` e revoga a família, inclusive se receber um token
+anterior já substituído. Responde 204 também para uma credencial desconhecida ou já revogada. Outros logins permanecem
+ativos. Access tokens JWT emitidos anteriormente continuam válidos até expirar (15 minutos por padrão).
+
+A validade da família é absoluta: sete dias contados do login, sem extensão ao rotacionar. Configure por
+`RefreshTokens:DuracaoDias` (1–90). A limpeza diária remove fisicamente as famílias vencidas; pode ser desligada com
+`RefreshTokens:LimpezaHabilitada=false`. Tokens consumidos são mantidos até esse prazo para permitir a detecção de
+reuso. Esta limpeza de credenciais efêmeras é uma exceção à exclusão lógica dos cadastros.
+
+As credenciais são 256 bits aleatórios e somente seu hash SHA-256 fica em `refresh_tokens`. A migration habilita
+auditoria excluindo `token_hash` dos valores registrados. Respostas de autenticação usam `Cache-Control: no-store`.
+A política de rotação e revogação segue a [seção 4.14 da RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14).
