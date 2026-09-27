@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 import { AppLayout } from '@/app/layout/AppLayout'
 import { dashboardRoutes } from '@/features/dashboard'
+import { empresasRoutes } from '@/features/empresas'
 import { ComingSoon } from '@/shared/components/common/ComingSoon'
 import { NotFound } from '@/shared/components/common/NotFound'
 
@@ -20,7 +21,7 @@ export const router = createBrowserRouter([
     Component: AppLayout,
     children: [
       ...dashboardRoutes,
-      comingSoon('empresas', 'Empresas'),
+      ...empresasRoutes,
       comingSoon('filiais', 'Filiais'),
       comingSoon('usuarios', 'Usuários'),
       comingSoon('perfis', 'Perfis e permissões'),

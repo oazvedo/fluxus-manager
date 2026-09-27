@@ -11,7 +11,7 @@ const modules: Module[] = [
     description: 'Cadastro das empresas e seus dados fiscais.',
     to: '/empresas',
     icon: Building2,
-    available: false,
+    available: true,
   },
   {
     title: 'Filiais',
