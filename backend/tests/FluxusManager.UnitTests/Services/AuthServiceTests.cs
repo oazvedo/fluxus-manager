@@ -90,8 +90,44 @@ public sealed class AuthServiceTests
         Assert.DoesNotContain("empresas.editar", response.Permissions);
     }
 
-    private static AuthService CreateService(Usuario user, Empresa company, UsuarioEmpresa link, FakeTokenIssuer issuer)
-        => new(new FakeUsuarioRepository(user), new FakeUsuarioEmpresaRepository(user, link), new FakeEmpresaRepository(company), new FakePasswordHasher(), issuer, new FakeRefreshRepository(), new FakeUnitOfWork(), TimeProvider.System, Options.Create(new RefreshTokenOptions()));
+    [Fact]
+    public async Task Login_ComSenhaErrada_RegistraAFalhaComOsLimitesConfigurados()
+    {
+        var user = new Usuario("Ana", "ana@fluxus.com", "hash");
+        var company = new Empresa("Fluxus", null, "11222333000181");
+        var usuarios = new FakeUsuarioRepository(user);
+        var service = CreateService(user, company, Vinculo(user, company, "Consulta", []), new FakeTokenIssuer(),
+            usuarios: usuarios, login: new LoginOptions { MaxTentativas = 3, BloqueioMinutos = 10 });
+
+        Assert.Null(await service.LoginAsync(new LoginRequest(user.Email, "errada")));
+
+        var falha = Assert.Single(usuarios.Falhas);
+        Assert.Equal((user.Id, 3, TimeSpan.FromMinutes(10)), falha);
+    }
+
+    [Fact]
+    public async Task Login_ComEmailInexistente_AindaVerificaUmaSenha_ESemRegistrarFalha()
+    {
+        var user = new Usuario("Ana", "ana@fluxus.com", "hash");
+        var company = new Empresa("Fluxus", null, "11222333000181");
+        var hasher = new FakePasswordHasher();
+        var usuarios = new FakeUsuarioRepository(user);
+        var service = CreateService(user, company, Vinculo(user, company, "Consulta", []), new FakeTokenIssuer(),
+            hasher: hasher, usuarios: usuarios);
+
+        Assert.Null(await service.LoginAsync(new LoginRequest("nao@existe.com", "senha")));
+
+        // Mesmo custo de hash do caminho normal: o tempo de resposta não revela se o e-mail existe.
+        Assert.Equal(1, hasher.Verificacoes);
+        Assert.Empty(usuarios.Falhas);
+    }
+
+    private static AuthService CreateService(Usuario user, Empresa company, UsuarioEmpresa link, FakeTokenIssuer issuer,
+        FakePasswordHasher? hasher = null, FakeUsuarioRepository? usuarios = null, LoginOptions? login = null)
+        => new(usuarios ?? new FakeUsuarioRepository(user), new FakeUsuarioEmpresaRepository(user, link), new FakeEmpresaRepository(company),
+            hasher ?? new FakePasswordHasher(), issuer, new FakeRefreshRepository(), new FakeUnitOfWork(), TimeProvider.System,
+            Options.Create(new RefreshTokenOptions()), Options.Create(login ?? new LoginOptions()));
+
 
     private static UsuarioEmpresa Vinculo(Usuario user, Empresa company, string nomePerfil, IReadOnlyCollection<string> codigos)
     {
@@ -119,8 +155,16 @@ public sealed class AuthServiceTests
 
     private sealed class FakePasswordHasher : IPasswordHasher
     {
+        public int Verificacoes { get; private set; }
         public string Hash(string senha) => "hash";
-        public bool Verificar(string senha, string senhaHash) => senha == "senha" && senhaHash == "hash";
+
+        public bool Verificar(string senha, string senhaHash)
+        {
+            Verificacoes++;
+            return senha == "senha" && senhaHash == "hash";
+        }
+
+        public void VerificarSemUsuario(string senha) => Verificacoes++;
     }
 
     private sealed class FakeTokenIssuer : IJwtTokenIssuer
@@ -140,6 +184,14 @@ public sealed class AuthServiceTests
 
     private sealed class FakeUsuarioRepository(Usuario user) : IUsuarioRepository
     {
+        public List<(Guid Id, int MaxTentativas, TimeSpan Bloqueio)> Falhas { get; } = [];
+
+        public Task RegistrarFalhaLoginAsync(Guid id, DateTime agora, int maxTentativas, TimeSpan bloqueio, CancellationToken cancellationToken = default)
+        {
+            Falhas.Add((id, maxTentativas, bloqueio));
+            return Task.CompletedTask;
+        }
+
         public Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default)
             => Task.FromResult<Usuario?>(email == user.Email ? user : null);
         public Task<Usuario?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => Task.FromResult<Usuario?>(id == user.Id ? user : null);

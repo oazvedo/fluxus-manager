@@ -4,6 +4,7 @@ using FluxusManager.Application.DTOs.AuthDtos;
 using FluxusManager.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace FluxusManager.API.Controllers;
 
@@ -21,6 +22,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [AllowAnonymous]
+    [DisableRateLimiting]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(RefreshRequest request, CancellationToken cancellationToken)
     {
@@ -31,6 +33,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [AllowAnonymous]
+    [DisableRateLimiting]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(LogoutRequest request, CancellationToken cancellationToken)
     {

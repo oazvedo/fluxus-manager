@@ -71,6 +71,14 @@ public class UsuarioService(
         await unitOfWork.CommitAsync(cancellationToken);
     }
 
+    public async Task DesbloquearAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var usuario = await BuscarAsync(id, cancellationToken);
+
+        usuario.Desbloquear();
+        await unitOfWork.CommitAsync(cancellationToken);
+    }
+
     private async Task<Usuario> BuscarAsync(Guid id, CancellationToken cancellationToken)
         => await usuarios.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException("Usuário", id);

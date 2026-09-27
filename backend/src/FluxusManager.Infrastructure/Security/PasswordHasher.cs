@@ -16,6 +16,11 @@ public class PasswordHasher : IPasswordHasher
 
     public string Hash(string senha) => _hasher.HashPassword(SemUsuario, senha);
 
+    // Mesmos parâmetros do algoritmo dos hashes reais, calculado uma vez por processo.
+    private static readonly Lazy<string> HashFicticio = new(() => new IdentityHasher().HashPassword(SemUsuario, Guid.NewGuid().ToString()));
+
     public bool Verificar(string senha, string senhaHash)
         => _hasher.VerifyHashedPassword(SemUsuario, senhaHash, senha) != PasswordVerificationResult.Failed;
+
+    public void VerificarSemUsuario(string senha) => Verificar(senha, HashFicticio.Value);
 }

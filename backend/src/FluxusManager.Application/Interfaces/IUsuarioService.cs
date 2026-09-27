@@ -16,4 +16,7 @@ public interface IUsuarioService
     Task AtivarAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task InativarAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>Libera o login bloqueado por senhas erradas e zera a contagem.</summary>
+    Task DesbloquearAsync(Guid id, CancellationToken cancellationToken = default);
 }

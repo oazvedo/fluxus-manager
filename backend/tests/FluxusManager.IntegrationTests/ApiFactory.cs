@@ -36,6 +36,8 @@ public class ApiFactory(string environment, bool useTestAuthentication = true, b
         builder.UseSetting("Email:Host", "localhost");
         builder.UseSetting("Email:RemetenteEmail", "testes@fluxus.local");
         builder.UseSetting("Frontend:Url", "http://localhost:5173");
+        // Os testes fazem muitas requisições seguidas do mesmo "IP"; o limite é exercitado em teste próprio.
+        builder.UseSetting("RateLimiting:RequisicoesPorMinuto", "10000");
         // A migration já cria as partições da auditoria; a rotina diária não é necessária nos testes.
         builder.UseSetting("Auditoria:ManutencaoParticoes", "false");
         builder.ConfigureServices(services =>

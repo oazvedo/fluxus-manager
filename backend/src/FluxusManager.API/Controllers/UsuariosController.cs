@@ -56,4 +56,13 @@ public class UsuariosController(IUsuarioService usuarioService) : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPatch("{id:guid}/desbloquear")]
+    [HasPermission("usuarios.editar")]
+    public async Task<IActionResult> Desbloquear(Guid id, CancellationToken cancellationToken)
+    {
+        await usuarioService.DesbloquearAsync(id, cancellationToken);
+
+        return NoContent();
+    }
 }
