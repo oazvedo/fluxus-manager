@@ -57,7 +57,7 @@ As regras ficam em `.githooks/lib/conventions.sh`, as mesmas que o CI usa.
   correspondente em `docs/` no mesmo PR.
 - **Antes de abrir**, valide localmente:
   - backend: `dotnet format`, `dotnet build` e `dotnet test`;
-  - frontend: `npm run lint` e `npm run build`;
+  - frontend: `npm run lint`, `npm test` e `npm run build`; autenticação também com `npm run test:e2e`;
   - tela: teste no navegador com a API local.
 
 ## CI
@@ -68,7 +68,7 @@ Em todo PR para `dev` ou `main` e em todo push nelas:
 | --- | --- |
 | **Conventions** | Valida o nome da branch, o título do PR, o `Closes #n`, cada commit e a origem de PR para a `main` |
 | **Backend (.NET)** | `dotnet restore`, `dotnet format --verify-no-changes`, build Release e todos os testes |
-| **Frontend (React)** | `npm ci`, `npm run lint` e `npm run build` |
+| **Frontend (React)** | `npm ci`, lint, testes unitários, build e login no Chromium com API/PostgreSQL reais |
 | **Docker (imagens)** | Build das imagens da API e do frontend (as mesmas do deploy) |
 | **Deploy (AWS)** | Só em push na `main`, depois dos outros jobs verdes, se `DEPLOY_EC2_ENABLED=true` |
 
@@ -88,6 +88,10 @@ cd frontend && npm install && npm run dev      # http://localhost:5173, com prox
 
 - .NET SDK 10 e Node 24.
 - As migrations rodam sozinhas quando a API sobe.
+- Para entrar no frontend local, configure a senha do administrador antes de subir a API:
+  `dotnet user-secrets set 'DevelopmentSeed:AdminPassword' '<sua-senha-local-de-12-ou-mais-caracteres>' --project backend/src/FluxusManager.API`.
+  O seed cria `admin@fluxus.local` vinculado à empresa de desenvolvimento com todas as permissões.
+  Veja [Administrador inicial](backend.md#administrador-inicial-de-desenvolvimento).
 - Testes de integração sem Docker disponível: `FLUXUS_TEST_POSTGRES="Host=localhost;Port=5432;Username=fluxus;Password=fluxus"`.
 - **No WSL** (sem a integração do Docker Desktop): rode o `docker compose` pelo Windows. O WSL acessa o Postgres em `localhost:5432`.
 

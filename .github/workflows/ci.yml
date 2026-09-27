@@ -44,6 +44,17 @@ jobs:
   frontend:
     name: Frontend (React)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: fluxus_e2e
+          POSTGRES_USER: fluxus
+          POSTGRES_PASSWORD: fluxus
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U fluxus -d fluxus_e2e"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     defaults:
       run:
         working-directory: frontend
@@ -62,8 +73,23 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Login no navegador com API real
+        run: npm run test:e2e
+        env:
+          FLUXUS_E2E_DATABASE: Host=localhost;Port=5432;Database=fluxus_e2e;Username=fluxus;Password=fluxus
 
   docker:
     name: Docker (imagens)

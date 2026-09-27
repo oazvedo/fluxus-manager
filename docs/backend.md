@@ -3,6 +3,28 @@
 .NET 10, com `Nullable` e `ImplicitUsings` ligados em todos os projetos. As camadas e o fluxo da requisição estão em
 [Arquitetura](arquitetura.md). Aqui fica **como escrever cada peça**, com os modelos de Empresas e Usuários.
 
+## Administrador inicial de desenvolvimento
+
+O startup executa `DevelopmentSeeder` depois das migrations, exclusivamente em `Development` e com
+`DevelopmentSeed:Enabled=true` (padrão de `appsettings.Development.json`). Configure antes do primeiro uso:
+
+```bash
+dotnet user-secrets set 'DevelopmentSeed:AdminPassword' '<senha-local-com-ao-menos-12-caracteres>' --project backend/src/FluxusManager.API
+```
+
+O seed cria `admin@fluxus.local`, a empresa **Fluxus Desenvolvimento Ltda** (CNPJ fictício `47.986.213/0001-06`)
+e o vínculo `Administrador`, que recebe todas as permissões do catálogo. A senha fica em user-secrets, nunca no
+repositório; apenas o hash vai ao banco, excluído dos valores de auditoria. Também aceita a variável
+`DevelopmentSeed__AdminPassword`. Sem senha, avisa no log e não cria os registros.
+
+Uma transação com bloqueio garante a criação conjunta e serializa startups concorrentes. O ID reservado do usuário
+identifica a execução anterior mesmo se o e-mail mudar. Reiniciar não redefine senha, perfil, status ou vínculo,
+nem recria um administrador excluído. Conflitos de e-mail/CNPJ interrompem o bootstrap sem promover usuários existentes.
+Alterar o secret depois da criação não altera a senha já persistida.
+
+Para desabilitar, configure `DevelopmentSeed:Enabled=false`. Em produção o seed é ignorado mesmo com a flag ligada.
+Testes desabilitam o seed por padrão; os testes específicos exercitam o bootstrap com autenticação real.
+
 ## Onde cada coisa fica
 
 | Peça | Pasta | Nome |
