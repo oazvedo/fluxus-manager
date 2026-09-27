@@ -78,7 +78,7 @@ A `main` só aceita merge com Backend, Frontend e Conventions verdes.
 
 ```bash
 cp .env.example .env
-docker compose up -d                           # PostgreSQL 18 em localhost:5432
+docker compose up -d                           # PostgreSQL 18 em localhost:5432 e Mailpit em localhost:8025
 
 cd backend && dotnet tool restore
 dotnet run --project src/FluxusManager.API     # http://localhost:5250 (Swagger em /swagger)
@@ -92,6 +92,8 @@ cd frontend && npm install && npm run dev      # http://localhost:5173, com prox
   `dotnet user-secrets set 'DevelopmentSeed:AdminPassword' '<sua-senha-local-de-12-ou-mais-caracteres>' --project backend/src/FluxusManager.API`.
   O seed cria `admin@fluxus.local` vinculado à empresa de desenvolvimento com todas as permissões.
   Veja [Administrador inicial](backend.md#administrador-inicial-de-desenvolvimento).
+- E-mails enviados pela API local (convites, recuperação de senha) não saem da máquina: abra o Mailpit em
+  http://localhost:8025. Veja [E-mail](backend.md#e-mail).
 - Testes de integração sem Docker disponível: `FLUXUS_TEST_POSTGRES="Host=localhost;Port=5432;Username=fluxus;Password=fluxus"`.
 - **No WSL** (sem a integração do Docker Desktop): rode o `docker compose` pelo Windows. O WSL acessa o Postgres em `localhost:5432`.
 

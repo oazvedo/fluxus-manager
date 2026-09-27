@@ -32,6 +32,9 @@ public class ApiFactory(string environment, bool useTestAuthentication = true, b
         builder.UseSetting("DevelopmentSeed:Enabled", "false");
         builder.UseSetting("RefreshTokens:LimpezaHabilitada", "false");
         builder.UseSetting("Filiais:ValidarRaizCnpjDaEmpresa", "false");
+        // Só para a validação na subida também em Production; nenhum teste daqui envia e-mail.
+        builder.UseSetting("Email:Host", "localhost");
+        builder.UseSetting("Email:RemetenteEmail", "testes@fluxus.local");
         // A migration já cria as partições da auditoria; a rotina diária não é necessária nos testes.
         builder.UseSetting("Auditoria:ManutencaoParticoes", "false");
         builder.ConfigureServices(services =>

@@ -16,7 +16,7 @@ As regras e os padrões do projeto (arquitetura, backend, frontend, estilo e flu
 ## Rodando localmente
 
 ```bash
-# Banco
+# Banco e Mailpit (e-mails enviados localmente em http://localhost:8025)
 cp .env.example .env
 docker compose up -d
 
