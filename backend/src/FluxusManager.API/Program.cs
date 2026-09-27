@@ -25,9 +25,11 @@ builder.Services.AddControllers(options =>
 // Todo ProblemDetails leva o correlation id, que o cliente informa ao suporte para achar os logs.
 builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
     context.ProblemDetails.Extensions["correlationId"] = CorrelationIdMiddleware.Get(context.HttpContext));
-builder.Services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
+builder.Services.AddOpenApi(options => options
+    .AddDocumentTransformer<BearerSecuritySchemeTransformer>()
+    .AddOperationTransformer<BearerSecuritySchemeTransformer>());
 
-builder.Services.AddApplicationModule();
+builder.Services.AddApplicationModule(builder.Configuration);
 builder.Services.Configure<FilialOptions>(builder.Configuration.GetSection(FilialOptions.SectionName));
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();

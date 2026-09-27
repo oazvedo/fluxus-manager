@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
-using System.Collections.Generic;
 
 namespace FluxusManager.API.Security;
 
-public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
+/// <summary>Exige o Bearer em todo o documento, exceto nas actions marcadas com <c>[AllowAnonymous]</c>.</summary>
+public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer, IOpenApiOperationTransformer
 {
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
@@ -23,11 +24,14 @@ public sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransforme
         {
             [new OpenApiSecuritySchemeReference("Bearer", document)] = []
         });
-        foreach (var path in new[] { "/auth/login", "/auth/refresh", "/auth/logout" })
-        {
-            if (document.Paths.TryGetValue(path, out var item) && item.Operations?.TryGetValue(HttpMethod.Post, out var operation) == true)
-                operation.Security = [];
-        }
+        return Task.CompletedTask;
+    }
+
+    public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
+    {
+        // Lista vazia sobrepõe o requisito global do documento.
+        if (context.Description.ActionDescriptor.EndpointMetadata.OfType<IAllowAnonymous>().Any())
+            operation.Security = [];
         return Task.CompletedTask;
     }
 }

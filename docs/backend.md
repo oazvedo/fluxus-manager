@@ -414,6 +414,40 @@ As credenciais são 256 bits aleatórios e somente seu hash SHA-256 fica em `ref
 auditoria excluindo `token_hash` dos valores registrados. Respostas de autenticação usam `Cache-Control: no-store`.
 A política de rotação e revogação segue a [seção 4.14 da RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14).
 
+## Convites
+
+Um administrador convida alguém por e-mail para a empresa selecionada, com um perfil ativo dela. As rotas usam as
+permissões de vínculo: `usuarios-empresas.visualizar` para consultar e `usuarios-empresas.editar` para alterar.
+
+| Ação | Verbo e rota | Resposta |
+| --- | --- | --- |
+| Listar / obter | `GET /convites?page=1&pageSize=20`, `GET /convites/{id}` | 200 |
+| Convidar | `POST /convites` com `{ email, perfilId }` | **201**; envia o e-mail |
+| Reenviar | `POST /convites/{id}/reenviar` | 200; novo link e novo prazo, o anterior deixa de valer |
+| Cancelar | `PATCH /convites/{id}/cancelar` | **204**; aceito não pode ser cancelado (422) |
+| Consultar (público) | `POST /convites/consultar` com `{ token }` | 200 com e-mail, empresa, perfil e `usuarioExistente` |
+| Aceitar (público) | `POST /convites/aceitar` com `{ token, nome?, senha? }` | **204** |
+
+- O link enviado é `{Frontend:Url}/convites/aceitar?token=<token>`. O token (256 bits, `SecretToken`) só existe no
+  e-mail; o banco guarda o SHA-256, excluído da auditoria. As rotas públicas recebem o token no corpo e respondem
+  com `Cache-Control: no-store`.
+- O status gravado é `Pendente`, `Aceito` ou `Cancelado`; a API devolve `Expirado` para pendente vencido.
+  O prazo é `Convites:ValidadeHoras` (padrão 72, entre 1 e 720), contado do envio ou do último reenvio.
+- Um convite pendente por e-mail em cada empresa (índice único). Convidar de novo um e-mail com convite vencido
+  cancela o anterior; com convite no prazo responde 409 (use reenviar). E-mail que já tem vínculo com a empresa: 409.
+- Convidar ou reenviar para usuário inativo (422), com vínculo ativo (409) ou inativo (409, reative o vínculo) é
+  recusado, assim como convidar numa empresa inativa: o link enviado sempre pode ser aceito.
+- O e-mail é montado antes e enviado dentro da transação: se o envio falhar, o convite não é gravado.
+- Aceite, cancelamento e reenvio concorrentes: o convite usa o `xmin` do PostgreSQL como token de concorrência, e o
+  `UnitOfWork` converte a gravação perdida em 409. Um perfil com convite pendente não pode ser excluído (422).
+- **Aceite:** se já existe usuário com o e-mail, só cria o vínculo (nome e senha são ignorados; usuário inativo
+  recebe 422). Senão, `nome` e `senha` são obrigatórios e o usuário é criado junto com o vínculo. O aceite confere
+  empresa ativa e perfil ainda ativo. Quem tem o link comprova o acesso ao e-mail, por isso o aceite não pede login.
+- As rotas públicas ignoram um `tenant_id` de token enviado junto: o `TenantFilter` não atua em `[AllowAnonymous]`,
+  e o service passa a operar na empresa do convite. A auditoria registra o usuário que aceitou.
+- `Frontend:Url` é obrigatório (URL absoluta HTTP(S) do frontend). Em Development é `http://localhost:5173`; no
+  deploy vem de `PUBLIC_URL` em `deploy/.env`. Nunca é montado a partir do `Host` da requisição.
+
 ## E-mail
 
 Services enviam e-mail por `IEmailSender.EnviarAsync(MensagemEmail)` (`Application/Interfaces`). A implementação

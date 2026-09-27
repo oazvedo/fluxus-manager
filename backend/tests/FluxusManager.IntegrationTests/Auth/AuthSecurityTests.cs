@@ -65,7 +65,7 @@ public sealed class AuthSecurityTests
         Assert.Equal(HttpStatusCode.OK, openApi.StatusCode);
         var document = JsonNode.Parse(await openApi.Content.ReadAsStringAsync())!;
         Assert.NotNull(document["components"]?["securitySchemes"]?["Bearer"]);
-        foreach (var path in new[] { "/auth/login", "/auth/refresh", "/auth/logout" })
+        foreach (var path in new[] { "/auth/login", "/auth/refresh", "/auth/logout", "/convites/consultar", "/convites/aceitar" })
         {
             var security = document["paths"]?[path]?["post"]?["security"];
             Assert.NotNull(security);

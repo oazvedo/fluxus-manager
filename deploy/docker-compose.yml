@@ -37,6 +37,7 @@ services:
       Database__MigrateOnStartup: "true"
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=fluxus_manager;Username=fluxus;Password=${POSTGRES_PASSWORD};Gss Encryption Mode=Disable"
       Jwt__SigningKey: ${JWT_SIGNING_KEY:?configure JWT_SIGNING_KEY em deploy/.env}
+      Frontend__Url: ${PUBLIC_URL:?configure PUBLIC_URL em deploy/.env}
       Email__Host: ${EMAIL_HOST:?configure EMAIL_HOST em deploy/.env}
       Email__Port: ${EMAIL_PORT:-587}
       Email__Seguranca: ${EMAIL_SEGURANCA:-StartTls}

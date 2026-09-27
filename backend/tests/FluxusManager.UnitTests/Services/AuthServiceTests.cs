@@ -153,6 +153,9 @@ public sealed class AuthServiceTests
 
     private sealed class FakeUsuarioEmpresaRepository(Usuario user, UsuarioEmpresa link) : IUsuarioEmpresaRepository
     {
+        public Task<bool> ExisteAsync(Guid usuarioId, Guid empresaId, CancellationToken cancellationToken = default)
+            => Task.FromResult(usuarioId == user.Id && empresaId == link.EmpresaId);
+
         public Task<UsuarioEmpresa?> ObterVinculoAsync(Guid usuarioId, Guid empresaId, CancellationToken cancellationToken = default)
             => Task.FromResult<UsuarioEmpresa?>(usuarioId == user.Id && empresaId == link.EmpresaId ? link : null);
         public Task<IReadOnlyList<UsuarioEmpresa>> ListarPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken = default)

@@ -29,6 +29,8 @@ public class TenantTestDbContext(DbContextOptions<AppDbContext> options, ITenant
     {
         modelBuilder.Entity<Registro>();
         base.OnModelCreating(modelBuilder);
+        // O SQLite não tem o xmin do PostgreSQL: a coluna vira um valor fixo (sem detecção de concorrência aqui).
+        modelBuilder.Entity<Convite>().Property<uint>("Versao").HasDefaultValue(0u);
     }
 }
 
@@ -50,6 +52,12 @@ public sealed class TenantTestDatabase : IDisposable
         if (tenantId.HasValue)
             tenantContext.SetTenant(tenantId.Value);
 
+        return CreateContext(tenantContext);
+    }
+
+    /// <summary>Contexto que compartilha o <paramref name="tenantContext"/> com o service testado (que pode definir o tenant).</summary>
+    public TenantTestDbContext CreateContext(ITenantContext tenantContext)
+    {
         var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(_connection).Options;
         return new TenantTestDbContext(options, tenantContext);
     }

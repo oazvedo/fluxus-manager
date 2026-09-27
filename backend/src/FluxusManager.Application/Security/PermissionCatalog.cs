@@ -38,7 +38,7 @@ public static class PermissaoCatalogo
         new(PermissionCatalog.UsuariosVisualizar, "Visualizar usuários", "Consultar os dados dos usuários."),
         new(PermissionCatalog.UsuariosEditar, "Editar usuários", "Cadastrar, editar e alterar o status de usuários."),
         new(PermissionCatalog.UsuariosEmpresasVisualizar, "Visualizar vínculos", "Consultar os vínculos de usuários e empresas."),
-        new(PermissionCatalog.UsuariosEmpresasEditar, "Editar vínculos", "Criar, editar e remover vínculos de usuários."),
+        new(PermissionCatalog.UsuariosEmpresasEditar, "Editar vínculos", "Criar, editar e remover vínculos de usuários e convidar pessoas."),
         new(PermissionCatalog.PerfisVisualizar, "Visualizar perfis", "Consultar perfis e suas permissões."),
         new(PermissionCatalog.PerfisEditar, "Editar perfis", "Criar, editar e remover perfis da empresa.")
     ]);

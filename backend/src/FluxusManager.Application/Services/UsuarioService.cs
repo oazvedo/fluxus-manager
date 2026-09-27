@@ -14,7 +14,7 @@ public class UsuarioService(
 {
     public async Task<UsuarioResponse> CriarAsync(CriarUsuarioRequest request, CancellationToken cancellationToken = default)
     {
-        var email = NormalizarEmail(request.Email);
+        var email = EnderecoEmail.Normalizar(request.Email);
 
         if (await usuarios.EmailEmUsoAsync(email, cancellationToken: cancellationToken))
             throw new ConflictException($"O e-mail '{email}' já está em uso.");
@@ -44,7 +44,7 @@ public class UsuarioService(
     public async Task<UsuarioResponse> AtualizarAsync(Guid id, AtualizarUsuarioRequest request, CancellationToken cancellationToken = default)
     {
         var usuario = await BuscarAsync(id, cancellationToken);
-        var email = NormalizarEmail(request.Email);
+        var email = EnderecoEmail.Normalizar(request.Email);
 
         if (await usuarios.EmailEmUsoAsync(email, ignorarId: id, cancellationToken))
             throw new ConflictException($"O e-mail '{email}' já está em uso.");
@@ -74,6 +74,4 @@ public class UsuarioService(
     private async Task<Usuario> BuscarAsync(Guid id, CancellationToken cancellationToken)
         => await usuarios.GetByIdAsync(id, cancellationToken)
             ?? throw new NotFoundException("Usuário", id);
-
-    private static string NormalizarEmail(string email) => email.Trim().ToLowerInvariant();
 }

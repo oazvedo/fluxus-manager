@@ -7,6 +7,9 @@ namespace FluxusManager.Infrastructure.Repositories;
 
 public class UsuarioEmpresaRepository(AppDbContext context) : RepositoryBase<UsuarioEmpresa>(context), IUsuarioEmpresaRepository
 {
+    public Task<bool> ExisteAsync(Guid usuarioId, Guid empresaId, CancellationToken cancellationToken = default)
+        => Set.AnyAsync(e => e.UsuarioId == usuarioId && e.EmpresaId == empresaId, cancellationToken);
+
     public Task<UsuarioEmpresa?> ObterVinculoAsync(Guid usuarioId, Guid empresaId, CancellationToken cancellationToken = default)
         // Login, refresh e switch-tenant autenticam antes de haver um claim tenant confiável.
         // O chamador valida a empresa do perfil; a FK composta também impede vínculos cruzados.
