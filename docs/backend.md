@@ -414,6 +414,31 @@ As credenciais são 256 bits aleatórios e somente seu hash SHA-256 fica em `ref
 auditoria excluindo `token_hash` dos valores registrados. Respostas de autenticação usam `Cache-Control: no-store`.
 A política de rotação e revogação segue a [seção 4.14 da RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14).
 
+## Proteção contra força bruta
+
+- **Rate limiting** (`RateLimitingExtensions`): toda action de controller com `[AllowAnonymous]` (hoje login e os
+  convites públicos) é limitada automaticamente, numa janela fixa de 1 minuto por IP e action
+  (`RateLimiting:RequisicoesPorMinuto`, padrão 20). Rota pública nova já nasce protegida; health check e OpenAPI
+  ficam de fora. Acima do limite: **429** em ProblemDetails, com `Retry-After` e uma mensagem dizendo quanto aguardar.
+  IPv4 mapeado em IPv6 conta como IPv4, e IPv6 é agrupado por /64.
+- **Refresh e logout** têm `[DisableRateLimiting]`: a credencial (256 bits) não é adivinhável, e um 429 ali
+  derrubaria a sessão de quem divide o IP (NAT de escritório) ou deixaria de revogar o token no logout. O cliente
+  também não descarta a sessão se receber 429 no refresh.
+- **IP real atrás do nginx:** `Proxy:Confiavel=true` (ligado no `deploy/docker-compose.yml`) faz a API usar o último
+  salto do `X-Forwarded-For`, que é o endereço visto pelo nginx. Só ligue com a API atrás do proxy: sem ele, o cliente
+  poderia forjar o cabeçalho.
+- **Bloqueio do usuário:** `Login:MaxTentativas` (padrão 5) senhas erradas dentro de `Login:BloqueioMinutos`
+  (padrão 15) bloqueiam o login por esse mesmo prazo, mesmo com a senha certa. Falhas mais antigas que a janela não
+  somam. A contagem é um único UPDATE atômico no PostgreSQL (`IUsuarioRepository.RegistrarFalhaLoginAsync`), então
+  tentativas simultâneas não se perdem. Login concluído zera tudo; o administrador desbloqueia em
+  `PATCH /usuarios/{id}/desbloquear` (`usuarios.editar`), e `GET /usuarios` mostra `bloqueadoAte`. Os campos ficam em
+  `usuarios`, e cada falha gera uma linha de auditoria (trilha de tentativas).
+- **Resposta genérica:** e-mail inexistente, senha errada, usuário inativo ou bloqueado e falta de vínculo respondem o
+  mesmo 401. Os caminhos sem usuário válido também pagam o custo do hash (`IPasswordHasher.VerificarSemUsuario`),
+  que domina o tempo de resposta; resta só a pequena diferença do UPDATE na senha errada de um usuário real.
+- Quem conhece um e-mail consegue mantê-lo bloqueado errando a senha de tempos em tempos: é o custo do bloqueio por
+  conta. O rate limiting por IP limita o ritmo, e o administrador pode desbloquear.
+
 ## Convites
 
 Um administrador convida alguém por e-mail para a empresa selecionada, com um perfil ativo dela. As rotas usam as

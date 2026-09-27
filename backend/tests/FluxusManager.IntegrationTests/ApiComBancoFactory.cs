@@ -6,7 +6,8 @@ namespace FluxusManager.IntegrationTests;
 /// API em memória ligada a um banco PostgreSQL próprio (ver <see cref="Database.PostgresFixture"/>).
 /// As migrations rodam na subida, como em produção.
 /// </summary>
-public class ApiComBancoFactory(string connectionString) : ApiFactory
+public class ApiComBancoFactory(string connectionString, bool useTestAuthentication = true, bool useRealAuthService = false)
+    : ApiFactory("Development", useTestAuthentication, useRealAuthService)
 {
     public string ConnectionString { get; } = connectionString;
 

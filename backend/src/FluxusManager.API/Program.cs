@@ -61,6 +61,8 @@ builder.Services.AddAuthorization(options =>
         options.AddPolicy(permission, policy => policy.RequireAuthenticatedUser().RequireClaim("permissions", permission));
 });
 builder.Services.AddInfraModule(builder.Configuration);
+builder.Services.AddRateLimitingPublico(builder.Configuration);
+builder.Services.AddProxyConfiavel(builder.Configuration);
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("postgres");
 
@@ -70,6 +72,9 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await app.Services.MigrateDatabaseAsync();
 
 await app.Services.SeedDevelopmentAsync();
+
+// Atrás do nginx, o IP do cliente vem do X-Forwarded-For (usado pelo rate limiting e pelos logs).
+app.UseForwardedHeaders();
 
 // No servidor a API fica atrás do nginx em /api (PathBase=/api); localmente não há prefixo.
 var pathBase = app.Configuration["PathBase"];
@@ -83,6 +88,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 app.UseRouting();
+app.UseRateLimiter();
 
 app.MapOpenApi().AllowAnonymous();
 app.UseSwaggerUI(options =>

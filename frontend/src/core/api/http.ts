@@ -43,7 +43,9 @@ async function refreshSession() {
       if (getSession()?.id === original.id) setSession({ ...original, ...data })
     } catch (error) {
       // Uma resposta perdida pode ter consumido o refresh token: nunca tentar reutilizá-lo.
-      if (getSession()?.id === original.id) setSession(null)
+      // A exceção é o 429: a API recusou antes de processar, e o token continua válido.
+      const limitado = axios.isAxiosError(error) && error.response?.status === 429
+      if (!limitado && getSession()?.id === original.id) setSession(null)
       throw error
     } finally {
       if (refreshing?.sessionId === original.id) refreshing = null

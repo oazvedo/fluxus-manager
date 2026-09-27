@@ -13,6 +13,7 @@ using FluxusManager.Infrastructure.Security;
 using FluxusManager.UnitTests.MultiTenant;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using FluxusManager.UnitTests.TestSupport;
 
 namespace FluxusManager.UnitTests.Convites;
 
@@ -311,10 +312,4 @@ public sealed partial class ConviteServiceTests : IDisposable
         }
     }
 
-    private sealed class Relogio : TimeProvider
-    {
-        private DateTimeOffset _agora = DateTimeOffset.UtcNow;
-        public override DateTimeOffset GetUtcNow() => _agora;
-        public void Avancar(TimeSpan tempo) => _agora += tempo;
-    }
 }

@@ -20,13 +20,31 @@ public class AuthService(
     IRefreshTokenRepository refreshTokens,
     IUnitOfWork unitOfWork,
     TimeProvider clock,
-    IOptions<RefreshTokenOptions> refreshOptions) : IAuthService
+    IOptions<RefreshTokenOptions> refreshOptions,
+    IOptions<LoginOptions> loginOptions) : IAuthService
 {
     public async Task<TokenResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var usuario = await usuarios.ObterPorEmailAsync(EnderecoEmail.Normalizar(request.Email), cancellationToken);
-        if (usuario is null || !usuario.Ativo || !passwordHasher.Verificar(request.Senha, usuario.SenhaHash))
+        var agora = clock.GetUtcNow().UtcDateTime;
+        if (usuario is null || !usuario.Ativo || usuario.Bloqueado(agora))
+        {
+            // Também paga o custo do hash (o que domina o tempo de resposta), para não revelar se o e-mail existe.
+            // Resta a diferença de um UPDATE na senha errada de um usuário real, bem menor que a do hash.
+            passwordHasher.VerificarSemUsuario(request.Senha);
             return null;
+        }
+
+        if (!passwordHasher.Verificar(request.Senha, usuario.SenhaHash))
+        {
+            var opcoes = loginOptions.Value;
+            await usuarios.RegistrarFalhaLoginAsync(usuario.Id, agora, opcoes.MaxTentativas,
+                TimeSpan.FromMinutes(opcoes.BloqueioMinutos), cancellationToken);
+            return null;
+        }
+
+        // Gravado junto com o refresh token, se o login for concluído.
+        usuario.Desbloquear();
 
         var vinculosAtivos = (await vinculos.ListarPorUsuarioAsync(usuario.Id, cancellationToken)).Where(v => v.Ativo);
         if (request.EmpresaId is Guid empresaId)
