@@ -9,6 +9,10 @@ Sistema de gestão empresarial multi-tenant.
 - **Frontend:** React + TypeScript (Vite), Tailwind e shadcn/ui, organizado por feature
 - **Deploy:** Docker Compose em um servidor (EC2) — ver [Deploy em servidor](#deploy-em-servidor-ec2)
 
+## Documentação
+
+As regras e os padrões do projeto (arquitetura, backend, frontend, estilo e fluxo de trabalho) estão em [`docs/`](docs/README.md).
+
 ## Rodando localmente
 
 ```bash
@@ -25,6 +29,51 @@ dotnet run --project src/FluxusManager.API
 cd frontend
 npm install
 npm run dev
+```
+
+## Testes
+
+```bash
+cd backend
+dotnet test
+```
+
+- `FluxusManager.UnitTests`: Domain, Application e regras do `AppDbContext` (SQLite em memória).
+- `FluxusManager.IntegrationTests`: API em memória (`WebApplicationFactory`) com **PostgreSQL de verdade**.
+  Cada teste ganha um banco próprio, com as migrations aplicadas.
+
+Os testes de integração sobem um container do PostgreSQL com Testcontainers, então precisam do Docker.
+Sem acesso ao Docker (ex.: WSL sem a integração do Docker Desktop), aponte para o banco do `docker compose`:
+
+```bash
+export FLUXUS_TEST_POSTGRES="Host=localhost;Port=5432;Username=fluxus;Password=fluxus"
+dotnet test
+```
+
+Os bancos `fluxus_test_*` criados nesse modo são apagados ao final da execução.
+
+O CI roda format, build e todos os testes em todo PR e em todo push na `dev` e na `main`; a `main` só aceita merge com o check verde.
+
+## Auditoria
+
+Toda alteração nas tabelas vira uma linha em `audit.change_log`, gravada por trigger no PostgreSQL:
+operação, valores antigos e novos (JSONB), campos alterados, usuário, tenant e a tela do front (header `X-Frontend-Url`).
+
+**Tabela nova:** na migration que a cria, ligue a auditoria logo depois do `CreateTable`.
+O teste `TodaTabelaDoSistema_TemOTriggerDeAuditoria` falha se faltar.
+
+```csharp
+migrationBuilder.EnableAuditTracking("empresas");
+migrationBuilder.EnableAuditTracking("usuarios", "senha_hash"); // colunas sensíveis: só o nome é gravado
+```
+
+- **Excluir** pelo repositório é exclusão lógica: a coluna `excluido` vira `true`, o registro some das consultas e a auditoria registra um UPDATE.
+- **Partições mensais:** a API cria as dos próximos 3 meses todo dia. `Auditoria:RetencaoMeses` (padrão `0`, guarda tudo) apaga as mais antigas que isso.
+
+```sql
+-- Histórico de um registro
+SELECT created_at, operation, changed_fields, application_user, frontend_url
+FROM audit.change_log WHERE table_name = 'usuarios' AND row_id = '<id>' ORDER BY id;
 ```
 
 ## Deploy em servidor (EC2)

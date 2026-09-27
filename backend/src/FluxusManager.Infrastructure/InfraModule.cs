@@ -1,6 +1,8 @@
+using FluxusManager.Application.Interfaces;
 using FluxusManager.Domain.Interfaces;
 using FluxusManager.Infrastructure.Database;
 using FluxusManager.Infrastructure.Repositories;
+using FluxusManager.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,7 @@ public static class InfraModule
     {
         AddDatabase(services, configuration);
         AddRepositories(services);
+        AddSecurity(services);
 
         return services;
     }
@@ -32,6 +35,7 @@ public static class InfraModule
             .UseSnakeCaseNamingConvention());
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddHostedService<AuditPartitionMaintenance>();
     }
 
     private static void AddRepositories(IServiceCollection services)
@@ -39,6 +43,16 @@ public static class InfraModule
         // Repositório genérico para entidades sem consultas próprias; os específicos são registrados abaixo.
         services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
-        // services.AddScoped<IEmpresaRepository, EmpresaRepository>();
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IEmpresaRepository, EmpresaRepository>();
+        services.AddScoped<IUsuarioEmpresaRepository, UsuarioEmpresaRepository>();
+        services.AddScoped<IFilialRepository, FilialRepository>();
+    }
+
+    private static void AddSecurity(IServiceCollection services)
+    {
+        // Sem estado: uma única instância serve a aplicação inteira.
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IJwtTokenIssuer, JwtTokenIssuer>();
     }
 }
