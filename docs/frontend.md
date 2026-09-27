@@ -74,7 +74,7 @@ export async function alterarStatusEmpresa(id: string, ativo: boolean) {
 ```
 
 - **Sempre pelo `http` de `@/core/api/http`.** Nunca `axios` ou `fetch` direto: é nele que ficam a base `/api`, o
-  timeout, o header `X-Frontend-Url` (auditoria) e, no futuro, o token.
+  timeout, o header `X-Frontend-Url` (auditoria) e o token Bearer.
 - Uma função `async` por endpoint, nomeada pelo caso de uso, devolvendo `data` já tipado.
 - Os tipos em `types/` espelham os DTOs da API em camelCase (`EmpresaResponse` → `Empresa`, `CriarEmpresaRequest` →
   `CriarEmpresa`). Datas chegam como `string` ISO.
@@ -96,8 +96,35 @@ export const empresasKeys = {
   o painel abrir já preenchido.
 - **Mutations:** ao criar ou mudar status, `invalidateQueries({ queryKey: <feature>Keys.all })`. Ao atualizar,
   `setQueryData` no detalhe e invalida as listas.
-- Padrões globais (`AppProviders`): `staleTime` de 30 s, `retry: 1` e sem refetch ao focar a janela.
+- Padrões globais (`AppProviders`): `staleTime` de 30 s, uma repetição em falhas (exceto 401/403) e sem refetch ao focar a janela.
 - Estado de tela (página, painel aberto) fica na **URL**, não em store global (ver [Telas de cadastro](#telas-de-cadastro)).
+
+## Login e sessão
+
+- `/login` é pública; as demais rotas passam por `RequireSession` antes de montar o layout ou consultar cadastros.
+  Depois do login, o usuário retorna ao caminho interno solicitado, incluindo os parâmetros da URL.
+- `core/auth` mantém os tokens e os dados de sessão **somente na memória da aba**. Recarregar ou fechar a página
+  exige novo login; não há credenciais em localStorage, sessionStorage ou cookies. Cada aba autentica separadamente.
+- `http` acrescenta o Bearer e, em um 401, renova a sessão uma vez e repete a chamada. Chamadas simultâneas
+  compartilham a mesma renovação; um 401 atrasado usa o token já renovado. Login, refresh e logout não entram nesse ciclo.
+- Uma falha de renovação encerra a sessão, inclusive em resposta perdida: o refresh pode já ter sido consumido.
+  403 não renova e não repete automaticamente. Respostas de sessões anteriores não restauram um login encerrado.
+- `Sair da conta` limpa a sessão e o cache imediatamente e revoga a família no servidor. Falha de conexão avisa
+  que a revogação não foi confirmada. JWTs já emitidos mantêm a validade original.
+- `SessionBoundary` limpa o React Query ao mudar a identidade da sessão. A renovação normal preserva o cache.
+
+### Testes de autenticação
+
+`npm test` verifica os interceptors, concorrência, falhas e respostas tardias. `npm run test:e2e` sobe a API e o Vite
+nas portas 5259 e 5174 e testa o fluxo com Chromium e PostgreSQL reais. Configure `FLUXUS_E2E_DATABASE` com um
+banco exclusivo para testes, vazio no primeiro uso. O seed usa uma senha exclusiva de teste definida no config do Playwright.
+
+```bash
+npx playwright install --with-deps chromium
+FLUXUS_E2E_DATABASE='Host=localhost;Port=5432;Database=fluxus_e2e;Username=fluxus;Password=fluxus' npm run test:e2e
+```
+
+Os testes e2e também rodam no CI, com banco isolado. Não use o banco de desenvolvimento ou produção nessa variável.
 
 ## Formulários
 

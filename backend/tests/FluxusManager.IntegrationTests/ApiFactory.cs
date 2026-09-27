@@ -29,6 +29,7 @@ public class ApiFactory(string environment, bool useTestAuthentication = true, b
         builder.UseSetting("Jwt:SigningKey", "integration-tests-only-signing-key-32-bytes-minimum");
         // Sem banco por padrão; testes que precisam dele usam o ApiComBancoFactory.
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("DevelopmentSeed:Enabled", "false");
         builder.UseSetting("RefreshTokens:LimpezaHabilitada", "false");
         builder.UseSetting("Filiais:ValidarRaizCnpjDaEmpresa", "false");
         // A migration já cria as partições da auditoria; a rotina diária não é necessária nos testes.

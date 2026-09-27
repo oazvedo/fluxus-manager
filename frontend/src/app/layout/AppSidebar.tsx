@@ -12,6 +12,7 @@ import {
   SidebarRail,
 } from '@/shared/components/ui/sidebar'
 import { navigation } from './navigation'
+import { SessionMenu } from './SessionMenu'
 
 export function AppSidebar() {
   const { pathname } = useLocation()
@@ -59,6 +60,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
+      <SessionMenu />
       <SidebarRail />
     </Sidebar>
   )

@@ -67,6 +67,8 @@ var app = builder.Build();
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await app.Services.MigrateDatabaseAsync();
 
+await app.Services.SeedDevelopmentAsync();
+
 // No servidor a API fica atrás do nginx em /api (PathBase=/api); localmente não há prefixo.
 var pathBase = app.Configuration["PathBase"];
 if (!string.IsNullOrEmpty(pathBase))

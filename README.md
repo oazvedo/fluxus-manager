@@ -23,6 +23,7 @@ docker compose up -d
 # Backend (http://localhost:<porta>/swagger)
 cd backend
 dotnet tool restore
+dotnet user-secrets set 'DevelopmentSeed:AdminPassword' '<sua-senha-local-de-12-ou-mais-caracteres>' --project src/FluxusManager.API
 dotnet run --project src/FluxusManager.API
 
 # Frontend
@@ -30,6 +31,10 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Entre com `admin@fluxus.local` e a senha configurada acima. Em Development, a API cria uma empresa e o vínculo
+de administrador com todas as permissões. O seed não redefine dados existentes e não executa em produção.
+Detalhes em [Administrador inicial de desenvolvimento](docs/backend.md#administrador-inicial-de-desenvolvimento).
 
 ## Testes
 
