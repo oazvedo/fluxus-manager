@@ -161,6 +161,15 @@ public record EmpresaResponse(Guid Id, string RazaoSocial, string? NomeFantasia,
 
 ## Validators
 
+### Regra de raiz do CNPJ de filial
+
+A compatibilidade entre os oito primeiros caracteres do CNPJ da filial e da empresa é controlada pela configuração
+`Filiais:ValidarRaizCnpjDaEmpresa`. O padrão (`appsettings.json`) é `true`; `appsettings.Development.json` e os testes
+desativam a regra para permitir cadastros com CNPJs de teste. Em produção, mantenha `true`. A validação de formato e
+dígitos verificadores do CNPJ continua ativa em todos os ambientes.
+
+Para alternar por variável de ambiente, use `Filiais__ValidarRaizCnpjDaEmpresa=true` ou `false`.
+
 ```csharp
 public class CriarUsuarioRequestValidator : AbstractValidator<CriarUsuarioRequest>
 {

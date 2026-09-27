@@ -20,6 +20,7 @@ public class ApiFactory(string environment) : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:DefaultConnection", "Host=localhost;Database=fluxus_tests");
         // Sem banco por padrão; testes que precisam dele usam o ApiComBancoFactory.
         builder.UseSetting("Database:MigrateOnStartup", "false");
+        builder.UseSetting("Filiais:ValidarRaizCnpjDaEmpresa", "false");
         // A migration já cria as partições da auditoria; a rotina diária não é necessária nos testes.
         builder.UseSetting("Auditoria:ManutencaoParticoes", "false");
         builder.ConfigureServices(services =>
