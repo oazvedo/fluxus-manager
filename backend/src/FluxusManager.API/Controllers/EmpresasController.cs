@@ -3,6 +3,7 @@ using FluxusManager.Application.DTOs.EmpresasDtos;
 using FluxusManager.Application.Interfaces;
 using FluxusManager.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
+using FluxusManager.API.Security;
 
 namespace FluxusManager.API.Controllers;
 
@@ -11,6 +12,7 @@ namespace FluxusManager.API.Controllers;
 public class EmpresasController(IEmpresaService empresaService) : ControllerBase
 {
     [HttpGet]
+    [HasPermission("empresas.visualizar")]
     public Task<PagedResult<EmpresaResponse>> Listar(
         [Range(1, int.MaxValue, ErrorMessage = "A página deve ser maior ou igual a 1.")] int page = 1,
         [Range(1, 100, ErrorMessage = "O tamanho da página deve estar entre 1 e 100.")] int pageSize = 20,
@@ -18,10 +20,12 @@ public class EmpresasController(IEmpresaService empresaService) : ControllerBase
         => empresaService.ListarAsync(page, pageSize, cancellationToken);
 
     [HttpGet("{id:guid}")]
+    [HasPermission("empresas.visualizar")]
     public Task<EmpresaResponse> Obter(Guid id, CancellationToken cancellationToken)
         => empresaService.ObterAsync(id, cancellationToken);
 
     [HttpPost]
+    [HasPermission("empresas.editar")]
     [ProducesResponseType<EmpresaResponse>(StatusCodes.Status201Created)]
     public async Task<IActionResult> Criar(CriarEmpresaRequest request, CancellationToken cancellationToken)
     {
@@ -31,10 +35,12 @@ public class EmpresasController(IEmpresaService empresaService) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [HasPermission("empresas.editar")]
     public Task<EmpresaResponse> Atualizar(Guid id, AtualizarEmpresaRequest request, CancellationToken cancellationToken)
         => empresaService.AtualizarAsync(id, request, cancellationToken);
 
     [HttpPatch("{id:guid}/ativar")]
+    [HasPermission("empresas.editar")]
     public async Task<IActionResult> Ativar(Guid id, CancellationToken cancellationToken)
     {
         await empresaService.AtivarAsync(id, cancellationToken);
@@ -43,6 +49,7 @@ public class EmpresasController(IEmpresaService empresaService) : ControllerBase
     }
 
     [HttpPatch("{id:guid}/inativar")]
+    [HasPermission("empresas.editar")]
     public async Task<IActionResult> Inativar(Guid id, CancellationToken cancellationToken)
     {
         await empresaService.InativarAsync(id, cancellationToken);

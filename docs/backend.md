@@ -239,6 +239,24 @@ Use as exceções de `Domain/Exceptions` para erro esperado. O `ExceptionFilter`
 - `ConflictException("Já existe uma empresa com o CNPJ 11.222.333/0001-81.")` → 409
 - `BusinessRuleException("...")` → 422
 
+## Autenticação e permissões
+
+As rotas de negócio exigem access token JWT. `POST /auth/login` autentica e emite um token de 15 minutos; envie-o como
+`Authorization: Bearer <token>`. Se a pessoa tiver mais de uma empresa, informe `empresaId` no login para escolher o
+tenant. `POST /auth/switch-tenant` recebe `empresaId`, verifica se o usuário e o vínculo estão ativos e emite um novo
+token com o tenant selecionado. Tokens antigos expiram normalmente; refresh tokens pertencem à issue #7.
+
+O token contém `sub`, `email`, `tenant_id`, `role` e uma claim `permissions` por permissão concedida. A API valida
+assinatura, emissor, audiência e expiração. As rotas declaram permissões por `[HasPermission("empresas.editar")]`;
+políticas e o fallback exigem autenticação. O perfil `Administrador` (também `Admin`) recebe todas as permissões
+iniciais; `Consulta`, `Leitura` e `Read-only` recebem somente leitura. Perfis não mapeados autenticam sem permissões,
+portanto devem ser associados a um perfil conhecido. Esse mapeamento estático será substituído pelo catálogo de perfis
+e permissões da issue #14.
+
+Configure `Jwt:SigningKey` por secret, com pelo menos 32 bytes. Em Docker, gere uma chave aleatória e defina
+`JWT_SIGNING_KEY` em `deploy/.env`; nunca reutilize a chave de desenvolvimento ou a inclua no repositório. O issuer e a
+audience padrão são `FluxusManager`, e a duração pode ser alterada por `Jwt__AccessTokenMinutes` (1–60 minutos).
+
 A mensagem vai para a tela: frase completa, em português, sem dado sensível e sem detalhe técnico.
 Erro de programação (argumento inválido, estado impossível) usa as exceções padrão do .NET e vira 500.
 
