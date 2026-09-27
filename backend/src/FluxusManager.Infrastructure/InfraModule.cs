@@ -55,6 +55,7 @@ public static class InfraModule
         services.AddScoped<IEmpresaRepository, EmpresaRepository>();
         services.AddScoped<IUsuarioEmpresaRepository, UsuarioEmpresaRepository>();
         services.AddScoped<IFilialRepository, FilialRepository>();
+        services.AddScoped<IPerfilRepository, PerfilRepository>();
     }
 
     private static void AddSecurity(IServiceCollection services)

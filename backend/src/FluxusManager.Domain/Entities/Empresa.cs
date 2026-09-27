@@ -10,6 +10,7 @@ public class Empresa : BaseEntity
     public string? NomeFantasia { get; private set; }
     public string Cnpj { get; private set; }
     public bool Ativo { get; private set; } = true;
+    public ICollection<Perfil> Perfis { get; private set; } = new List<Perfil>();
 
     public Empresa(string razaoSocial, string? nomeFantasia, string cnpj)
     {

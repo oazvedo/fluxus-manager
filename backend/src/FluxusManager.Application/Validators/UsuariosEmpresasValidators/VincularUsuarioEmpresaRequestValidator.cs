@@ -9,6 +9,6 @@ public class VincularUsuarioEmpresaRequestValidator : AbstractValidator<Vincular
     {
         RuleFor(x => x.UsuarioId).NotEmpty();
         RuleFor(x => x.EmpresaId).NotEmpty();
-        RuleFor(x => x.Perfil).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.PerfilId).NotEmpty();
     }
 }

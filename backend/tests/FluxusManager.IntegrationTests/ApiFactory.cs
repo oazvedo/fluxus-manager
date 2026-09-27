@@ -71,7 +71,8 @@ internal sealed class IntegrationTestAuthHandler(
         claims.AddRange(new[]
         {
             "empresas.visualizar", "empresas.editar", "filiais.visualizar", "filiais.editar",
-            "usuarios.visualizar", "usuarios.editar", "usuarios-empresas.visualizar", "usuarios-empresas.editar"
+            "usuarios.visualizar", "usuarios.editar", "usuarios-empresas.visualizar", "usuarios-empresas.editar",
+            "perfis.visualizar", "perfis.editar"
         }.Select(permission => new Claim("permissions", permission)));
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name));
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name)));

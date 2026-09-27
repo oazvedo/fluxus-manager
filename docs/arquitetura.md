@@ -59,6 +59,8 @@ nginx (/api) ─► CorrelationIdMiddleware ─► log da requisição ─► ro
   tenant da requisição. Sem tenant definido, não trazem nada.
 - Ao incluir, o `TenantId` é **preenchido automaticamente**. Incluir em outro tenant, alterar o tenant de um
   registro ou mexer em registro de outro tenant lança erro.
+- A única inclusão inicial em outro tenant ocorre na mesma transação que cria a própria `Empresa`, para gravar
+  os perfis padrão. O `AppDbContext` só permite isso quando a empresa pai está como nova no mesmo contexto.
 - Registro de outro tenant se comporta como inexistente: **404**, nunca 403, para não revelar que ele existe.
 - `Empresa` e `Usuario` são globais (não são `ITenantEntity`): a empresa é o próprio tenant, e o usuário se liga a
   empresas por vínculo.

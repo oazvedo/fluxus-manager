@@ -17,7 +17,7 @@ public sealed class AuthServiceTests
     {
         var user = new Usuario("Ana", "ana@fluxus.com", "hash");
         var company = new Empresa("Fluxus", null, "11222333000181");
-        var link = new UsuarioEmpresa(user.Id, company.Id, "Administrador");
+        var link = Vinculo(user, company, "Administrador", ["empresas.visualizar", "empresas.editar"]);
         var tokenIssuer = new FakeTokenIssuer();
         var service = CreateService(user, company, link, tokenIssuer);
 
@@ -36,7 +36,7 @@ public sealed class AuthServiceTests
     {
         var user = new Usuario("Ana", "ana@fluxus.com", "hash");
         var company = new Empresa("Fluxus", null, "11222333000181");
-        var link = new UsuarioEmpresa(user.Id, company.Id, "Perfil livre ainda sem mapeamento");
+        var link = Vinculo(user, company, "Perfil livre ainda sem mapeamento", []);
         var tokenIssuer = new FakeTokenIssuer();
         var service = CreateService(user, company, link, tokenIssuer);
 
@@ -52,7 +52,7 @@ public sealed class AuthServiceTests
     {
         var user = new Usuario("Ana", "ana@fluxus.com", "hash");
         var company = new Empresa("Fluxus", null, "11222333000181");
-        var link = new UsuarioEmpresa(user.Id, company.Id, "Administrador");
+        var link = Vinculo(user, company, "Administrador", ["empresas.editar"]);
         var service = CreateService(user, company, link, new FakeTokenIssuer());
 
         var response = await service.LoginAsync(new LoginRequest(user.Email, "incorreta"));
@@ -65,7 +65,7 @@ public sealed class AuthServiceTests
     {
         var user = new Usuario("Ana", "ana@fluxus.com", "hash");
         var company = new Empresa("Fluxus", null, "11222333000181");
-        var link = new UsuarioEmpresa(user.Id, company.Id, "Administrador");
+        var link = Vinculo(user, company, "Administrador", ["empresas.editar"]);
         link.Inativar();
         var service = CreateService(user, company, link, new FakeTokenIssuer());
 
@@ -77,7 +77,7 @@ public sealed class AuthServiceTests
     {
         var user = new Usuario("Ana", "ana@fluxus.com", "hash");
         var company = new Empresa("Fluxus", null, "11222333000181");
-        var link = new UsuarioEmpresa(user.Id, company.Id, "Consulta");
+        var link = Vinculo(user, company, "Consulta", ["empresas.visualizar"]);
         var tokenIssuer = new FakeTokenIssuer();
         var service = CreateService(user, company, link, tokenIssuer);
 
@@ -92,6 +92,14 @@ public sealed class AuthServiceTests
 
     private static AuthService CreateService(Usuario user, Empresa company, UsuarioEmpresa link, FakeTokenIssuer issuer)
         => new(new FakeUsuarioRepository(user), new FakeUsuarioEmpresaRepository(user, link), new FakeEmpresaRepository(company), new FakePasswordHasher(), issuer, new FakeRefreshRepository(), new FakeUnitOfWork(), TimeProvider.System, Options.Create(new RefreshTokenOptions()));
+
+    private static UsuarioEmpresa Vinculo(Usuario user, Empresa company, string nomePerfil, IReadOnlyCollection<string> codigos)
+    {
+        var perfil = Perfil.CriarPadrao(company.Id, nomePerfil, "", codigos);
+        var vinculo = new UsuarioEmpresa(user.Id, company.Id, perfil.Id);
+        vinculo.AssociarPerfil(perfil);
+        return vinculo;
+    }
 
     private sealed class FakeRefreshRepository : IRefreshTokenRepository
     {
