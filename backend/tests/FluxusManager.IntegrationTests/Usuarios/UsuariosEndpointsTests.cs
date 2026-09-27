@@ -55,6 +55,17 @@ public sealed class UsuariosEndpointsTests(PostgresFixture postgres) : IAsyncLif
     }
 
     [Fact]
+    public async Task PostsSimultaneos_ComOMesmoEmail_UmCria_OsOutrosRecebem409()
+    {
+        var respostas = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
+            _client.PostAsJsonAsync("/usuarios", new CriarUsuarioRequest("Ana", "ana@fluxus.com", "segredo123"))));
+
+        Assert.Single(respostas, r => r.StatusCode == HttpStatusCode.Created);
+        Assert.All(respostas.Where(r => r.StatusCode != HttpStatusCode.Created),
+            r => Assert.Equal(HttpStatusCode.Conflict, r.StatusCode));
+    }
+
+    [Fact]
     public async Task Post_ComDadosInvalidos_Retorna400ComErrosPorCampo()
     {
         var response = await _client.PostAsJsonAsync("/usuarios", new CriarUsuarioRequest("", "x", "curta"));

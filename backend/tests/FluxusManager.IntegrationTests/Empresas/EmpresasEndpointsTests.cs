@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using FluxusManager.Application.DTOs.EmpresasDtos;
 using FluxusManager.Domain.Common;
+using FluxusManager.Domain.Entities;
+using FluxusManager.Domain.Exceptions;
 using FluxusManager.Domain.Interfaces;
 using FluxusManager.IntegrationTests.Database;
 using Microsoft.AspNetCore.Mvc;
@@ -115,6 +117,30 @@ public sealed class EmpresasEndpointsTests(PostgresFixture postgres) : IAsyncLif
 
         Assert.Equal(3, pagina!.TotalCount);
         Assert.Single(pagina.Items);
+    }
+
+    [Fact]
+    public async Task PostsSimultaneos_ComOMesmoCnpj_UmCria_OsOutrosRecebem409()
+    {
+        var respostas = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
+            _client.PostAsJsonAsync("/empresas", new CriarEmpresaRequest("Fluxus Ltda", null, "11222333000181"))));
+
+        Assert.Single(respostas, r => r.StatusCode == HttpStatusCode.Created);
+        Assert.All(respostas.Where(r => r.StatusCode != HttpStatusCode.Created),
+            r => Assert.Equal(HttpStatusCode.Conflict, r.StatusCode));
+    }
+
+    [Fact]
+    public async Task CommitQueViolaIndiceUnico_ViraDuplicateKeyException()
+    {
+        await CriarAsync("11222333000181");
+
+        await using var scope = _factory.Services.CreateAsyncScope();
+        scope.ServiceProvider.GetRequiredService<IEmpresaRepository>().Add(new Empresa("Outra", null, "11222333000181"));
+
+        var erro = await Assert.ThrowsAsync<DuplicateKeyException>(() =>
+            scope.ServiceProvider.GetRequiredService<IUnitOfWork>().CommitAsync());
+        Assert.Equal("ix_empresas_cnpj", erro.Constraint);
     }
 
     [Fact]
