@@ -9,6 +9,10 @@ Sistema de gestão empresarial multi-tenant.
 - **Frontend:** React + TypeScript (Vite), Tailwind e shadcn/ui, organizado por feature
 - **Deploy:** Docker Compose em um servidor (EC2) — ver [Deploy em servidor](#deploy-em-servidor-ec2)
 
+## Documentação
+
+As regras e os padrões do projeto (arquitetura, backend, frontend, estilo e fluxo de trabalho) estão em [`docs/`](docs/README.md).
+
 ## Rodando localmente
 
 ```bash
