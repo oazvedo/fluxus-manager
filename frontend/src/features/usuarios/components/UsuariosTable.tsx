@@ -40,7 +40,7 @@ export function UsuariosTable({ usuarios, loading, message, editHref }: Usuarios
             const href = editHref(usuario.id)
 
             return (
-              <RecordRow key={usuario.id} href={href}>
+              <RecordRow key={usuario.id} href={href} recordId={usuario.id}>
                 <TableCell>
                   <RecordLink href={href} title={usuario.nome}>
                     {usuario.nome}

@@ -11,7 +11,7 @@ export function HomePage() {
   const now = new Date()
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-10">
+    <div className="mx-auto w-full max-w-6xl space-y-10">
       <PageHeader
         title="Início"
         meta={

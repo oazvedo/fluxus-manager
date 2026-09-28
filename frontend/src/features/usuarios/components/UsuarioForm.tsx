@@ -3,6 +3,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { notify } from '@/shared/lib/notify'
+import { destacarRegistro } from '@/shared/lib/record-highlight'
 import { applyProblemToForm } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
@@ -45,10 +46,12 @@ export function UsuarioForm({ usuario, onSaved }: UsuarioFormProps) {
   async function onSubmit(values: UsuarioFormValues) {
     try {
       if (editing) {
-        await atualizar.mutateAsync({ nome: values.nome, email: values.email })
+        const { id } = await atualizar.mutateAsync({ nome: values.nome, email: values.email })
+        destacarRegistro(id)
         notify.success('Alterações salvas')
       } else {
-        await criar.mutateAsync(values)
+        const { id } = await criar.mutateAsync(values)
+        destacarRegistro(id)
         notify.success('Usuário cadastrado')
       }
       onSaved()

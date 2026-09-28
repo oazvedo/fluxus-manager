@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { notify } from '@/shared/lib/notify'
+import { destacarRegistro } from '@/shared/lib/record-highlight'
 import { applyProblemToForm } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
@@ -40,10 +41,12 @@ export function FilialForm({ filial, onSaved }: FilialFormProps) {
   async function onSubmit(values: FilialFormValues) {
     try {
       if (editing) {
-        await atualizar.mutateAsync({ nome: values.nome, endereco: values.endereco })
+        const { id } = await atualizar.mutateAsync({ nome: values.nome, endereco: values.endereco })
+        destacarRegistro(id)
         notify.success('Alterações salvas')
       } else {
-        await criar.mutateAsync(values)
+        const { id } = await criar.mutateAsync(values)
+        destacarRegistro(id)
         notify.success('Filial cadastrada')
       }
       onSaved()

@@ -42,7 +42,7 @@ export function EmpresasTable({ empresas, loading, message, editHref }: Empresas
             const atualizadaEm = empresa.atualizadoEm ?? empresa.criadoEm
 
             return (
-              <RecordRow key={empresa.id} href={href}>
+              <RecordRow key={empresa.id} href={href} recordId={empresa.id}>
                 <TableCell>
                   <RecordLink href={href} title={empresa.razaoSocial}>
                     {empresa.razaoSocial}

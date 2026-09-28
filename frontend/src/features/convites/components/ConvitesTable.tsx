@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { TableSkeletonRows } from '@/shared/components/common/TableStates'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table'
 import { formatDate, formatDateTime } from '@/shared/lib/format'
+import { useDestaqueRegistro } from '@/shared/lib/record-highlight'
 import type { Convite } from '../types/convite'
 import { ConviteActions } from './ConviteActions'
 import { ConviteStatusBadge } from './ConviteStatusBadge'
@@ -26,15 +27,7 @@ export function ConvitesTable({ convites, loading, message }: {
       <TableBody>
         {loading ? <TableSkeletonRows columns={CONVITES_COLUMNS} /> : null}
         {!loading && message}
-        {!loading && convites?.map((convite) => (
-          <TableRow key={convite.id} className="h-12">
-            <TableCell><span className="block truncate font-medium" title={convite.email}>{convite.email}</span></TableCell>
-            <TableCell><span className="block truncate text-muted-foreground" title={convite.perfil}>{convite.perfil}</span></TableCell>
-            <TableCell><ConviteStatusBadge status={convite.status} /></TableCell>
-            <TableCell className="text-muted-foreground tabular-nums"><Validade convite={convite} /></TableCell>
-            <TableCell className="text-right"><ConviteActions convite={convite} /></TableCell>
-          </TableRow>
-        ))}
+        {!loading && convites?.map((convite) => <ConviteRow key={convite.id} convite={convite} />)}
       </TableBody>
     </Table>
   )
@@ -49,4 +42,17 @@ function Validade({ convite }: { convite: Convite }) {
     <span className="sr-only">{rotulo} </span>
     <time dateTime={data} title={`${rotulo} ${formatDateTime(data)}`}>{formatDate(data)}</time>
   </span>
+}
+
+function ConviteRow({ convite }: { convite: Convite }) {
+  const ref = useDestaqueRegistro<HTMLTableRowElement>(convite.id)
+  return (
+    <TableRow ref={ref} className="h-12">
+      <TableCell><span className="block truncate font-medium" title={convite.email}>{convite.email}</span></TableCell>
+      <TableCell><span className="block truncate text-muted-foreground" title={convite.perfil}>{convite.perfil}</span></TableCell>
+      <TableCell><ConviteStatusBadge status={convite.status} /></TableCell>
+      <TableCell className="text-muted-foreground tabular-nums"><Validade convite={convite} /></TableCell>
+      <TableCell className="text-right"><ConviteActions convite={convite} /></TableCell>
+    </TableRow>
+  )
 }

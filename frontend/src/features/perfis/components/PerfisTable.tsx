@@ -40,7 +40,7 @@ export function PerfisTable({ perfis, loading, message, editHref }: PerfisTableP
             const href = editHref(perfil.id)
 
             return (
-              <RecordRow key={perfil.id} href={href}>
+              <RecordRow key={perfil.id} href={href} recordId={perfil.id}>
                 <TableCell>
                   <RecordLink href={href} title={perfil.nome}>
                     {perfil.nome}
