@@ -9,7 +9,6 @@ import {
 } from '@/shared/components/ui/breadcrumb'
 import { Separator } from '@/shared/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/shared/components/ui/sidebar'
-import { pressable } from '@/shared/lib/motion'
 import { AppSidebar } from './AppSidebar'
 import { findNavGroup } from './navigation'
 
@@ -43,7 +42,7 @@ export function AppLayout() {
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className={`-ml-1 text-muted-foreground hover:text-foreground ${pressable}`} />
+          <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
           <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-center" />
           <Breadcrumb>
             <BreadcrumbList>

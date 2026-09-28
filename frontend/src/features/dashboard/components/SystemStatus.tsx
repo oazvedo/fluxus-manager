@@ -5,6 +5,10 @@ import { useApiHealth } from '../hooks/useApiHealth'
 
 const time = new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' })
 
+// Em produção não há o que avisar; nos outros ambientes o nome evita confundir dado de teste com real.
+const nomesAmbiente: Record<string, string> = { development: 'Ambiente de desenvolvimento', test: 'Ambiente de testes' }
+const ambiente = env.mode === 'production' ? null : (nomesAmbiente[env.mode] ?? `Ambiente: ${env.mode}`)
+
 /** Linha discreta de status no rodapé: informação de apoio, não o foco da tela. */
 export function SystemStatus() {
   const { data, isPending } = useApiHealth()
@@ -32,7 +36,7 @@ export function SystemStatus() {
           ) : null}
         </>
       )}
-      <span className="capitalize">{env.mode}</span>
+      {ambiente ? <span>{ambiente}</span> : null}
     </footer>
   )
 }

@@ -42,7 +42,7 @@ export function FilialActions({ filial, editHref }: { filial: Filial; editHref: 
         <DropdownMenuItem onClick={() => navigate(editHref)}>Editar filial</DropdownMenuItem>
         <DropdownMenuSeparator />
         {filial.ativo ? (
-          <DropdownMenuItem variant="destructive" onClick={() => alterar(false)}>
+          <DropdownMenuItem onClick={() => alterar(false)}>
             Inativar filial
           </DropdownMenuItem>
         ) : (
