@@ -1,22 +1,26 @@
-import { GettingStartedCard } from '../components/GettingStartedCard'
-import { ModuleGrid } from '../components/ModuleGrid'
-import { SystemStatusCard } from '../components/SystemStatusCard'
-import { WelcomeHeader } from '../components/WelcomeHeader'
+import { PageHeader } from '@/shared/components/common/PageHeader'
+import { ModuleList } from '../components/ModuleList'
+import { QuickActions } from '../components/QuickActions'
+import { SystemStatus } from '../components/SystemStatus'
+
+const dateFormat = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
 
 export function HomePage() {
-  return (
-    <div className="mx-auto w-full max-w-6xl space-y-8">
-      <WelcomeHeader />
+  const now = new Date()
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <ModuleGrid />
-        </div>
-        <div className="space-y-6 lg:pt-8">
-          <SystemStatusCard />
-          <GettingStartedCard />
-        </div>
-      </div>
+  return (
+    <div className="mx-auto w-full max-w-4xl space-y-8">
+      <PageHeader
+        title="Início"
+        meta={
+          <time dateTime={now.toLocaleDateString('sv-SE')} className="inline-block first-letter:uppercase">
+            {dateFormat.format(now)}
+          </time>
+        }
+      />
+      <QuickActions />
+      <ModuleList />
+      <SystemStatus />
     </div>
   )
 }
