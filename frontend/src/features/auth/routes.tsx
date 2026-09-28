@@ -14,3 +14,10 @@ export const authRoutes: RouteObject[] = [{
   HydrateFallback: PageLoading,
   lazy: async () => ({ Component: (await import('./pages/ResetPasswordPage')).ResetPasswordPage }),
 }]
+
+/** Ações da conta acessíveis somente com uma sessão autenticada. */
+export const accountRoutes: RouteObject[] = [{
+  path: 'conta/trocar-senha',
+  lazy: async () => ({ Component: (await import('./pages/ChangePasswordPage')).ChangePasswordPage }),
+  handle: { title: 'Trocar senha' },
+}]

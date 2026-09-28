@@ -14,6 +14,7 @@ export type Tokens = {
 export type Session = Tokens & { id: string; email: string }
 
 const storageKey = 'fluxus.session.v1'
+let avisoSessaoExpiradaPendente = false
 
 function restoreSession(): Session | null {
   try {
@@ -21,10 +22,11 @@ function restoreSession(): Session | null {
     if (stored && typeof stored === 'object') {
       const value = stored as Record<string, unknown>
       const strings = ['id', 'email', 'accessToken', 'tokenType', 'tenantId', 'role', 'refreshToken', 'refreshTokenExpiresAt']
-      if (strings.every((key) => typeof value[key] === 'string' && value[key].length > 0)
+      const estruturaValida = strings.every((key) => typeof value[key] === 'string' && value[key].length > 0)
         && typeof value.expiresIn === 'number' && Number.isFinite(value.expiresIn) && value.expiresIn > 0
         && Array.isArray(value.permissions) && value.permissions.every((permission) => typeof permission === 'string')
-        && Date.parse(value.refreshTokenExpiresAt as string) > Date.now()) return stored as Session
+      if (estruturaValida && Date.parse(value.refreshTokenExpiresAt as string) > Date.now()) return stored as Session
+      if (estruturaValida) avisoSessaoExpiradaPendente = true
     }
   } catch {
     // JSON inválido ou armazenamento bloqueado não deve impedir o acesso à tela de login.
@@ -50,8 +52,15 @@ export const getSession = () => session
 
 export function setSession(value: Session | null) {
   session = value
+  if (value) avisoSessaoExpiradaPendente = false
   persistSession(value)
   listeners.forEach((listener) => listener())
+}
+
+/** Encerra uma sessão cuja renovação falhou e deixa um aviso de uso único para a tela de login. */
+export function expirarSessao() {
+  avisoSessaoExpiradaPendente = true
+  setSession(null)
 }
 
 export function subscribeSession(listener: () => void) {
@@ -61,4 +70,8 @@ export function subscribeSession(listener: () => void) {
 
 export function useSession() {
   return useSyncExternalStore(subscribeSession, getSession, () => null)
+}
+
+export function useAvisoSessaoExpirada() {
+  return useSyncExternalStore(subscribeSession, () => avisoSessaoExpiradaPendente, () => false)
 }

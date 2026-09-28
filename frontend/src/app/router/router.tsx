@@ -7,7 +7,7 @@ import { usuariosRoutes } from '@/features/usuarios'
 import { perfisRoutes } from '@/features/perfis'
 import { aceiteConviteRoutes, convitesRoutes } from '@/features/convites'
 import { NotFound } from '@/shared/components/common/NotFound'
-import { authRoutes } from '@/features/auth'
+import { accountRoutes, authRoutes } from '@/features/auth'
 import { RequireSession } from './RequireSession'
 import { PageLoading } from '@/shared/components/common/PageLoading'
 
@@ -31,6 +31,7 @@ export const router = createBrowserRouter([
           ...filiaisRoutes,
           ...perfisRoutes,
           ...convitesRoutes,
+          ...accountRoutes,
           { path: '*', Component: NotFound, handle: { title: 'Página não encontrada' } satisfies RouteHandle },
         ],
       },

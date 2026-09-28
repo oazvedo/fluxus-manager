@@ -121,6 +121,10 @@ export const empresasKeys = {
   da API e permite criar uma nova senha. Link inválido, expirado ou usado oferece solicitar outro. Após sucesso, a
   sessão local é limpa, o token sai da URL e o login confirma a redefinição. Senha e token não entram em logs nem no
   armazenamento do navegador.
+- `Trocar senha`, no menu da conta, abre `/conta/trocar-senha`, uma rota autenticada. O formulário envia senha atual e
+  nova senha com confirmação para `POST /auth/change-password`; senha atual incorreta fica associada ao campo e a
+  validação da nova senha segue a regra da API. Após sucesso, a tela informa que o acesso atual permanece válido até
+  expirar, mas os refresh tokens foram revogados; senhas nunca são persistidas no navegador.
 
 ### Convites
 

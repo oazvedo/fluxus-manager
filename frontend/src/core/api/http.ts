@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { env } from '@/core/config/env'
-import { getSession, setSession, type Tokens } from '@/core/auth/session'
+import { expirarSessao, getSession, setSession, type Tokens } from '@/core/auth/session'
 
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
@@ -45,7 +45,7 @@ async function refreshSession() {
       // Uma resposta perdida pode ter consumido o refresh token: nunca tentar reutilizá-lo.
       // A exceção é o 429: a API recusou antes de processar, e o token continua válido.
       const limitado = axios.isAxiosError(error) && error.response?.status === 429
-      if (!limitado && getSession()?.id === original.id) setSession(null)
+      if (!limitado && getSession()?.id === original.id) expirarSessao()
       throw error
     } finally {
       if (refreshing?.sessionId === original.id) refreshing = null
@@ -63,7 +63,7 @@ http.interceptors.response.use(undefined, async (error: unknown) => {
     || !session || config.sessionId !== session.id) throw error
 
   if (config.authRetried) {
-    if (config.headers.get('Authorization') === `Bearer ${session.accessToken}`) setSession(null)
+    if (config.headers.get('Authorization') === `Bearer ${session.accessToken}`) expirarSessao()
     throw error
   }
 
