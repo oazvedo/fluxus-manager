@@ -1,7 +1,6 @@
 import { Ellipsis } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { toast } from 'sonner'
-import { problemMessage } from '@/core/api/problem'
+import { notify } from '@/shared/lib/notify'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -24,10 +23,10 @@ export function EmpresaActions({ empresa, editHref }: { empresa: Empresa; editHr
       { id: empresa.id, ativo },
       {
         onSuccess: () =>
-          toast.success(ativo ? `${nome} ativada` : `${nome} inativada`, {
-            action: desfazer ? { label: 'Desfazer', onClick: () => alterar(!ativo, false) } : undefined,
+          notify.success(ativo ? `${nome} ativada` : `${nome} inativada`, {
+            undo: desfazer ? () => alterar(!ativo, false) : undefined,
           }),
-        onError: (error) => toast.error(problemMessage(error)),
+        onError: (error) => notify.error(error),
       },
     )
   }

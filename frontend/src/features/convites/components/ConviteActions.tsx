@@ -1,7 +1,6 @@
 import { Ellipsis } from 'lucide-react'
 import { useState } from 'react'
-import { toast } from 'sonner'
-import { problemMessage } from '@/core/api/problem'
+import { notify } from '@/shared/lib/notify'
 import { ConfirmDialog } from '@/shared/components/common/ConfirmDialog'
 import { Button } from '@/shared/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
@@ -17,8 +16,8 @@ export function ConviteActions({ convite }: { convite: Convite }) {
 
   function reenviarConvite() {
     reenviar.mutate(convite.id, {
-      onSuccess: () => toast.success(`Convite reenviado para ${convite.email}`, { description: 'O link anterior deixou de valer.' }),
-      onError: (error) => toast.error(problemMessage(error)),
+      onSuccess: () => notify.success(`Convite reenviado para ${convite.email}`, { description: 'O link anterior deixou de valer.' }),
+      onError: (error) => notify.error(error),
     })
   }
 
@@ -26,9 +25,9 @@ export function ConviteActions({ convite }: { convite: Convite }) {
     cancelar.mutate(convite.id, {
       onSuccess: () => {
         setConfirmando(false)
-        toast.success('Convite cancelado')
+        notify.success('Convite cancelado')
       },
-      onError: (error) => toast.error(problemMessage(error)),
+      onError: (error) => notify.error(error),
     })
   }
 
