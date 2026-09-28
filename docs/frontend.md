@@ -114,6 +114,10 @@ export const empresasKeys = {
 - `Sair da conta` limpa a memória, o sessionStorage e o cache imediatamente e revoga a família no servidor. Falha de conexão avisa
   que a revogação não foi confirmada. JWTs já emitidos mantêm a validade original.
 - `SessionBoundary` limpa o React Query ao mudar a identidade da sessão. A renovação normal preserva o cache.
+- `/esqueci-senha` mostra uma resposta neutra após pedir o link; `/redefinir-senha?token=...` envia o token no corpo
+  da API e permite criar uma nova senha. Link inválido, expirado ou usado oferece solicitar outro. Após sucesso, a
+  sessão local é limpa, o token sai da URL e o login confirma a redefinição. Senha e token não entram em logs nem no
+  armazenamento do navegador.
 
 ### Convites
 
@@ -130,8 +134,9 @@ export const empresasKeys = {
 
 ### Testes de autenticação
 
-`npm test` verifica os interceptors, concorrência, falhas e respostas tardias. `npm run test:e2e` sobe a API e o Vite
-nas portas 5259 e 5174 e testa o fluxo com Chromium e PostgreSQL reais. Configure `FLUXUS_E2E_DATABASE` com um
+`npm test` verifica interceptors, formulários de senha, concorrência, falhas e respostas tardias. `npm run test:e2e`
+sobe a API e o Vite nas portas 5259 e 5174 e testa os fluxos de autenticação com Chromium e PostgreSQL reais.
+Configure `FLUXUS_E2E_DATABASE` com um
 banco exclusivo para testes, vazio no primeiro uso. O seed usa uma senha exclusiva de teste definida no config do Playwright.
 
 ```bash
