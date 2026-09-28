@@ -42,7 +42,7 @@ export function FiliaisTable({ filiais, loading, message, editHref }: FiliaisTab
             const atualizadaEm = filial.atualizadoEm ?? filial.criadoEm
 
             return (
-              <RecordRow key={filial.id} href={href}>
+              <RecordRow key={filial.id} href={href} recordId={filial.id}>
                 <TableCell>
                   <RecordLink href={href} title={filial.nome}>
                     {filial.nome}

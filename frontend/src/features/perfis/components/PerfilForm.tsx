@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
 import { notify } from '@/shared/lib/notify'
+import { destacarRegistro } from '@/shared/lib/record-highlight'
 import { applyProblemToForm, problemMessage } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
@@ -30,7 +31,8 @@ export function PerfilForm({ perfil, onSaved }: { perfil?: Perfil; onSaved: () =
 
   async function onSubmit(values: PerfilFormValues) {
     try {
-      await mutation.mutateAsync({ ...values, permissoes: [...new Set(values.permissoes)] })
+      const { id } = await mutation.mutateAsync({ ...values, permissoes: [...new Set(values.permissoes)] })
+      destacarRegistro(id)
       notify.success(editing ? 'Alterações salvas' : 'Perfil cadastrado')
       onSaved()
     } catch (error) {

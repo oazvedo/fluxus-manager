@@ -44,7 +44,7 @@ async function recentes<T extends Registro>(path: string, tipo: TipoCadastro, no
  */
 export async function listarCadastrosRecentes(limite = 8): Promise<CadastroRecente[]> {
   const resultados = await Promise.allSettled([
-    recentes<Empresa>('/empresas', 'empresa', (e) => e.nomeFantasia || e.razaoSocial),
+    recentes<Empresa>('/empresas', 'empresa', (e) => e.razaoSocial),
     recentes<ComNome>('/filiais', 'filial', (f) => f.nome),
     recentes<ComNome>('/usuarios', 'usuario', (u) => u.nome),
   ])

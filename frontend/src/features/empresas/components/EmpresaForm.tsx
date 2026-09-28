@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { notify } from '@/shared/lib/notify'
+import { destacarRegistro } from '@/shared/lib/record-highlight'
 import { applyProblemToForm } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
@@ -46,10 +47,12 @@ export function EmpresaForm({ empresa, onSaved }: EmpresaFormProps) {
 
     try {
       if (editing) {
-        await atualizar.mutateAsync({ razaoSocial: values.razaoSocial, nomeFantasia })
+        const { id } = await atualizar.mutateAsync({ razaoSocial: values.razaoSocial, nomeFantasia })
+        destacarRegistro(id)
         notify.success('Alterações salvas')
       } else {
-        await criar.mutateAsync({ razaoSocial: values.razaoSocial, nomeFantasia, cnpj: values.cnpj })
+        const { id } = await criar.mutateAsync({ razaoSocial: values.razaoSocial, nomeFantasia, cnpj: values.cnpj })
+        destacarRegistro(id)
         notify.success('Empresa cadastrada')
       }
       onSaved()

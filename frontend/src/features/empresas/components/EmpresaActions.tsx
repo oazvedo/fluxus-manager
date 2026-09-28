@@ -16,7 +16,8 @@ import type { Empresa } from '../types/empresa'
 export function EmpresaActions({ empresa, editHref }: { empresa: Empresa; editHref: string }) {
   const navigate = useNavigate()
   const alterarStatus = useAlterarStatusEmpresa()
-  const nome = empresa.nomeFantasia ?? empresa.razaoSocial
+  // Mesmo nome da primeira coluna da tabela, para o aviso apontar para a linha que a pessoa vê.
+  const nome = empresa.razaoSocial
 
   function alterar(ativo: boolean, desfazer = true) {
     alterarStatus.mutate(

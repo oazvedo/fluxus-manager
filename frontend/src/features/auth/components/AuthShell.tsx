@@ -49,7 +49,7 @@ function BrandPanel() {
       aria-label="FluxusManager"
       className="relative hidden flex-col justify-between overflow-hidden bg-brand-surface p-10 text-brand-surface-foreground lg:flex"
     >
-      <FlowField className="absolute inset-0 size-full [mask-image:linear-gradient(to_bottom,black_35%,transparent_85%)]" />
+      <FlowField className="absolute inset-0 size-full [mask-image:linear-gradient(to_bottom,transparent_72px,black_136px),linear-gradient(to_bottom,black_35%,transparent_85%)] [mask-composite:intersect]" />
       <BrandLogo accent="var(--brand-accent)" className="relative" />
       <div className="relative max-w-sm space-y-3">
         <p className="text-[1.75rem] leading-[1.15] font-medium tracking-[-0.02em] text-balance">
