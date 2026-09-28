@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { RecordLink, RecordRow } from '@/shared/components/common/RecordRow'
 import { StatusBadge } from '@/shared/components/common/StatusBadge'
 import { TableSkeletonRows } from '@/shared/components/common/TableStates'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table'
@@ -18,11 +18,9 @@ type UsuariosTableProps = {
 }
 
 export function UsuariosTable({ usuarios, loading, message, editHref }: UsuariosTableProps) {
-  const navigate = useNavigate()
-
   return (
     // Larguras fixas: a tabela não "pula" quando um status ou data muda. Em telas estreitas rola na horizontal.
-    <Table className="min-w-2xl table-fixed">
+    <Table aria-label="Usuários" aria-busy={loading || undefined} className="min-w-2xl table-fixed">
       <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead className="text-muted-foreground">Nome</TableHead>
@@ -42,22 +40,11 @@ export function UsuariosTable({ usuarios, loading, message, editHref }: Usuarios
             const href = editHref(usuario.id)
 
             return (
-              <TableRow
-                key={usuario.id}
-                className="h-12 cursor-pointer"
-                // Atalho de mouse: a linha inteira abre a edição. Pelo teclado, o link do nome faz o mesmo.
-                onClick={(event) => {
-                  if ((event.target as HTMLElement).closest('a, button, [role="menuitem"]')) return
-                  navigate(href)
-                }}
-              >
+              <RecordRow key={usuario.id} href={href}>
                 <TableCell>
-                  <Link
-                    to={href}
-                    className="block truncate font-medium underline-offset-4 outline-none hover:underline focus-visible:underline"
-                  >
+                  <RecordLink href={href} title={usuario.nome}>
                     {usuario.nome}
-                  </Link>
+                  </RecordLink>
                 </TableCell>
                 <TableCell className="truncate text-muted-foreground" title={usuario.email}>
                   {usuario.email}
@@ -73,7 +60,7 @@ export function UsuariosTable({ usuarios, loading, message, editHref }: Usuarios
                 <TableCell className="text-right">
                   <UsuarioActions usuario={usuario} editHref={href} />
                 </TableCell>
-              </TableRow>
+              </RecordRow>
             )
           })}
       </TableBody>

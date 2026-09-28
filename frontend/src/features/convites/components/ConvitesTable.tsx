@@ -15,7 +15,7 @@ export function ConvitesTable({ convites, loading, message }: {
   message?: ReactNode
 }) {
   return (
-    <Table className="min-w-2xl table-fixed">
+    <Table aria-label="Convites" aria-busy={loading || undefined} className="min-w-2xl table-fixed">
       <TableHeader><TableRow className="hover:bg-transparent">
         <TableHead className="text-muted-foreground">E-mail</TableHead>
         <TableHead className="w-44 text-muted-foreground">Perfil</TableHead>

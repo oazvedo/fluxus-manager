@@ -120,7 +120,7 @@ export function UsuarioForm({ usuario, onSaved }: UsuarioFormProps) {
             {errors.senha ? (
               <FieldError id="usuario-senha-erro" errors={[errors.senha]} />
             ) : (
-              <FieldDescription id="usuario-senha-ajuda">Pelo menos 8 caracteres, com letras e números.</FieldDescription>
+              <FieldDescription id="usuario-senha-ajuda">Use pelo menos 8 caracteres, com letras e números.</FieldDescription>
             )}
           </Field>
         )}

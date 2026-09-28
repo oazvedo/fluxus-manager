@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
 import { applyProblemToForm, problemMessage } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
@@ -40,23 +41,25 @@ export function ConviteForm({ onSaved }: { onSaved: () => void }) {
     <FieldGroup className="flex-1 overflow-y-auto overscroll-contain px-4 py-2">
       <Field data-invalid={!!errors.email}>
         <FieldLabel htmlFor="convite-email">E-mail</FieldLabel>
-        <Input id="convite-email" type="email" autoComplete="off" autoCapitalize="none" placeholder="nome@empresa.com.br"
-          aria-invalid={!!errors.email} aria-describedby={errorId('email')} {...register('email')} />
+        <Input id="convite-email" type="email" inputMode="email" autoComplete="off" autoCapitalize="none" spellCheck={false}
+          placeholder="nome@empresa.com.br" aria-invalid={!!errors.email} aria-describedby={errorId('email')} {...register('email')} />
         <FieldError id={errorId('email')} errors={[errors.email]} />
       </Field>
       <Field data-invalid={!!errors.perfilId}>
         <FieldLabel htmlFor="convite-perfilId">Perfil de acesso</FieldLabel>
         <select id="convite-perfilId" className={selectClassName} disabled={!perfis.isSuccess || semPerfis}
-          aria-invalid={!!errors.perfilId} aria-describedby={errors.perfilId ? 'convite-perfilId-erro' : 'convite-perfilId-ajuda'}
+          aria-invalid={!!errors.perfilId} aria-describedby={errors.perfilId ? 'convite-perfilId-erro' : perfis.isError ? 'convite-perfis-falha' : 'convite-perfilId-ajuda'}
           aria-busy={perfis.isPending || undefined} {...register('perfilId')}>
           <option value="">{perfis.isPending ? 'Carregando perfis…' : 'Escolha um perfil'}</option>
           {perfis.data?.map((perfil) => <option key={perfil.id} value={perfil.id}>{perfil.nome}</option>)}
         </select>
         {perfis.isError ? <div className="space-y-2">
-          <p className="text-sm text-destructive">{problemMessage(perfis.error)}</p>
+          <p id="convite-perfis-falha" role="alert" className="text-sm text-destructive">{problemMessage(perfis.error)}</p>
           <Button type="button" variant="outline" onClick={() => perfis.refetch()}>Tentar de novo</Button>
         </div> : <FieldDescription id="convite-perfilId-ajuda">
-          {semPerfis ? 'Não há perfil ativo nesta empresa. Ative ou cadastre um perfil antes de convidar.' : 'O que a pessoa vai poder consultar e alterar ao aceitar.'}
+          {semPerfis
+            ? <>Esta empresa não tem perfil ativo. <Link to="/perfis?novo" className="font-medium text-foreground underline underline-offset-4">Cadastre um perfil</Link> antes de convidar.</>
+            : 'Define o que a pessoa pode consultar e alterar depois de aceitar.'}
         </FieldDescription>}
         <FieldError id={errorId('perfilId')} errors={[errors.perfilId]} />
       </Field>

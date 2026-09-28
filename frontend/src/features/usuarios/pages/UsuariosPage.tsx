@@ -1,6 +1,6 @@
-import { Plus } from 'lucide-react'
 import { useEffect } from 'react'
 import { problemMessage } from '@/core/api/problem'
+import { NewRecordButton } from '@/shared/components/common/NewRecordButton'
 import { PageHeader } from '@/shared/components/common/PageHeader'
 import { TableMessage } from '@/shared/components/common/TableStates'
 import { TablePagination } from '@/shared/components/common/TablePagination'
@@ -32,15 +32,7 @@ export function UsuariosPage() {
       <PageHeader
         title="Usuários"
         meta={data && !empty ? `${count.format(data.totalCount)} ${data.totalCount === 1 ? 'usuário' : 'usuários'}` : null}
-        action={
-          <Button onClick={openCreate} aria-keyshortcuts="n">
-            <Plus aria-hidden="true" />
-            Novo usuário
-            <kbd aria-hidden="true" className="ml-1 hidden rounded border border-primary-foreground/25 px-1 font-sans text-[0.7rem] leading-4 text-primary-foreground/70 md:inline">
-              N
-            </kbd>
-          </Button>
-        }
+        action={<NewRecordButton onClick={openCreate}>Novo usuário</NewRecordButton>}
       />
 
       <div className="border-y">
@@ -51,6 +43,7 @@ export function UsuariosPage() {
           message={
             isError && !data ? (
               <TableMessage
+                tone="error"
                 columns={USUARIOS_COLUMNS}
                 title="Não foi possível carregar os usuários"
                 description={problemMessage(error)}
@@ -64,7 +57,7 @@ export function UsuariosPage() {
               <TableMessage
                 columns={USUARIOS_COLUMNS}
                 title="Nenhum usuário cadastrado"
-                description="Cada usuário é uma pessoa que entra no sistema com seu próprio e-mail e senha."
+                description="Cadastre quem vai entrar no sistema. Cada pessoa usa o próprio e-mail e senha."
                 action={<Button onClick={openCreate}>Cadastrar usuário</Button>}
               />
             ) : null
