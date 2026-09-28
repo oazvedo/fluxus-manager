@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Navigate, useLocation } from 'react-router'
+import { Link, Navigate, useLocation } from 'react-router'
 import { useSession } from '@/core/auth/session'
 import { applyProblemToForm, getProblem, problemMessage } from '@/core/api/problem'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
@@ -19,6 +19,7 @@ export function LoginPage() {
     resolver: zodResolver(loginSchema), defaultValues: { email: typeof email === 'string' ? email : '', senha: '' },
   })
   const from: unknown = location.state?.from
+  const senhaRedefinida = location.state?.passwordReset === true
   const destination = typeof from === 'string' && from.startsWith('/') && !from.startsWith('//')
     && !from.startsWith('/login') ? from : '/'
 
@@ -47,6 +48,7 @@ export function LoginPage() {
           <h1 className="text-xl font-semibold tracking-tight">Entrar na sua conta</h1>
           <p className="text-sm text-pretty text-muted-foreground">Acesse as empresas e os cadastros da sua equipe.</p>
         </div>
+        {senhaRedefinida && <p role="status" className="text-sm text-foreground">Senha redefinida. Entre com sua nova senha.</p>}
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-busy={login.isPending}>
           <Field data-invalid={!!errors.email}>
             <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
@@ -62,6 +64,11 @@ export function LoginPage() {
               {...register('senha')} />
             <FieldError id="login-senha-erro" errors={[errors.senha]} />
           </Field>
+          <div className="-mt-2 text-right">
+            <Link to="/esqueci-senha" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+              Esqueci minha senha
+            </Link>
+          </div>
           {errors.root && <p role="alert" className="text-sm text-destructive">{errors.root.message}</p>}
           <SubmitButton pending={login.isPending} className="w-full">Entrar</SubmitButton>
         </form>

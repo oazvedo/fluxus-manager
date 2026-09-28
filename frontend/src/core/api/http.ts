@@ -26,7 +26,7 @@ http.interceptors.request.use((config) => {
   return config
 })
 
-const isCredentialEndpoint = (url?: string) => /^\/auth\/(login|refresh|logout)$/.test(url ?? '')
+const isCredentialEndpoint = (url?: string) => /^\/auth\/(login|refresh|logout|forgot-password|reset-password)$/.test(url ?? '')
 let refreshing: { sessionId: string; promise: Promise<void> } | null = null
 
 async function refreshSession() {

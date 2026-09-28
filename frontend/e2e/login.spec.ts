@@ -1,5 +1,59 @@
 import { expect, test } from '@playwright/test'
 
+const resetToken = 'A1'.repeat(32)
+
+test('pede recuperação sem revelar se o e-mail está cadastrado', async ({ page }) => {
+  let corpo: { email?: string } = {}
+  await page.route('**/api/auth/forgot-password', async (route) => {
+    corpo = route.request().postDataJSON() as { email?: string }
+    await route.fulfill({ status: 200, json: { mensagem: 'Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.' } })
+  })
+
+  await page.goto('/login')
+  await page.getByRole('link', { name: 'Esqueci minha senha' }).click()
+  await expect(page).toHaveURL('/esqueci-senha')
+  await page.getByLabel('E-mail', { exact: true }).fill('alguem@exemplo.com')
+  await page.getByRole('button', { name: 'Enviar link' }).click()
+
+  await expect(page.getByRole('status')).toContainText('Se o e-mail estiver cadastrado')
+  expect(corpo.email).toBe('alguem@exemplo.com')
+  await expect(page.getByRole('link', { name: 'Voltar para o login' })).toBeVisible()
+})
+
+test('redefine a senha com token no corpo e remove o token da URL ao concluir', async ({ page }) => {
+  let corpo: { token?: string; novaSenha?: string } = {}
+  let authorization: string | undefined
+  await page.route('**/api/auth/reset-password', async (route) => {
+    corpo = route.request().postDataJSON() as { token?: string; novaSenha?: string }
+    authorization = route.request().headers().authorization
+    await route.fulfill({ status: 204 })
+  })
+
+  await page.goto(`/redefinir-senha?token=${resetToken}`)
+  await page.getByLabel('Nova senha', { exact: true }).fill('segredo123')
+  await page.getByLabel('Repita a nova senha', { exact: true }).fill('segredo123')
+  await page.getByRole('button', { name: 'Redefinir senha' }).click()
+
+  await expect(page).toHaveURL('/login')
+  await expect(page.getByRole('status')).toContainText('Senha redefinida')
+  expect(corpo).toEqual({ token: resetToken, novaSenha: 'segredo123' })
+  expect(authorization).toBeUndefined()
+  expect(page.url()).not.toContain(resetToken)
+})
+
+test('mostra orientação para token já usado ou expirado', async ({ page }) => {
+  await page.route('**/api/auth/reset-password', (route) => route.fulfill({
+    status: 422, json: { status: 422, detail: 'O link de redefinição é inválido ou expirou. Solicite outro.' },
+  }))
+  await page.goto(`/redefinir-senha?token=${resetToken}`)
+  await page.getByLabel('Nova senha', { exact: true }).fill('segredo123')
+  await page.getByLabel('Repita a nova senha', { exact: true }).fill('segredo123')
+  await page.getByRole('button', { name: 'Redefinir senha' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Link inválido ou expirado' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Solicitar outro link' })).toBeVisible()
+})
+
 test('login, cadastros autenticados, renovação e logout com API real', async ({ page }, testInfo) => {
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
