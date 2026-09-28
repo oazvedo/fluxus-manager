@@ -2,7 +2,9 @@ using FluxusManager.Application.DTOs.AuthDtos;
 using FluxusManager.Application.Interfaces;
 using FluxusManager.Application.Security;
 using FluxusManager.Application.Options;
+using FluxusManager.Application.Email;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using FluxusManager.Domain.Common;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Exceptions;
@@ -21,8 +23,15 @@ public class AuthService(
     IUnitOfWork unitOfWork,
     TimeProvider clock,
     IOptions<RefreshTokenOptions> refreshOptions,
-    IOptions<LoginOptions> loginOptions) : IAuthService
+    IOptions<LoginOptions> loginOptions,
+    IPasswordResetTokenRepository passwordResetTokens,
+    IEmailSender emailSender,
+    IOptions<FrontendOptions> frontendOptions,
+    IOptions<PasswordResetOptions> passwordResetOptions,
+    ILogger<AuthService> logger) : IAuthService
 {
+    private DateTime Agora => clock.GetUtcNow().UtcDateTime;
+
     public async Task<TokenResponse?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var usuario = await usuarios.ObterPorEmailAsync(EnderecoEmail.Normalizar(request.Email), cancellationToken);
@@ -133,6 +142,62 @@ public class AuthService(
             await refreshTokens.BloquearFamiliaAsync(original.FamiliaId, ct);
             var family = await refreshTokens.ListarFamiliaAsync(original.FamiliaId, ct);
             foreach (var token in family) token.Revogar(clock.GetUtcNow().UtcDateTime);
+        }, cancellationToken);
+    }
+
+    public async Task EsquecerSenhaAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        var usuario = await usuarios.ObterPorEmailAsync(EnderecoEmail.Normalizar(request.Email), cancellationToken);
+        if (usuario is not { Ativo: true })
+            return;
+
+        var token = SecretToken.Create();
+        var validade = TimeSpan.FromMinutes(passwordResetOptions.Value.ValidadeMinutos);
+        var expiraEm = clock.ExpiracaoEmSegundos(validade);
+        var mensagem = EmailTemplates.RecuperacaoSenha(usuario.Email, usuario.Nome,
+            frontendOptions.Value.Link($"redefinir-senha?token={token}"), validade);
+
+        passwordResetTokens.Add(new PasswordResetToken(usuario.Id, SecretToken.Hash(token), expiraEm));
+        await unitOfWork.CommitAsync(cancellationToken);
+        try
+        {
+            await emailSender.EnviarAsync(mensagem, cancellationToken);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // A resposta do endpoint público não revela se o e-mail existe nem se houve falha SMTP.
+            logger.LogError("Falha ao enviar e-mail de recuperação de senha.");
+        }
+    }
+
+    public async Task RedefinirSenhaAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            var agora = Agora;
+            var token = await passwordResetTokens.ObterParaUsoAsync(SecretToken.Hash(request.Token), agora, ct)
+                ?? throw new BusinessRuleException("O link de redefinição é inválido ou expirou. Solicite outro.");
+            var usuario = await usuarios.GetByIdAsync(token.UsuarioId, ct);
+            if (usuario is not { Ativo: true })
+                throw new BusinessRuleException("O link de redefinição é inválido ou expirou. Solicite outro.");
+
+            token.Usar(agora);
+            usuario.AlterarSenha(passwordHasher.Hash(request.NovaSenha));
+            await usuarios.RevogarRefreshTokensAsync(usuario.Id, agora, ct);
+        }, cancellationToken);
+    }
+
+    public async Task TrocarSenhaAsync(Guid usuarioId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        var usuario = await usuarios.GetByIdAsync(usuarioId, cancellationToken);
+        if (usuario is not { Ativo: true } || !passwordHasher.Verificar(request.SenhaAtual, usuario.SenhaHash))
+            throw new BusinessRuleException("A senha atual está incorreta.");
+
+        await unitOfWork.ExecuteInTransactionAsync(async ct =>
+        {
+            var agora = Agora;
+            usuario.AlterarSenha(passwordHasher.Hash(request.NovaSenha));
+            await usuarios.RevogarRefreshTokensAsync(usuario.Id, agora, ct);
         }, cancellationToken);
     }
 

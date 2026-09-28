@@ -1,8 +1,10 @@
 using FluxusManager.Application.DTOs.AuthDtos;
+using FluxusManager.Application.Email;
 using FluxusManager.Application.Interfaces;
 using FluxusManager.Application.Services;
 using FluxusManager.Application.Options;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 using FluxusManager.Domain.Common;
 using FluxusManager.Domain.Entities;
 using FluxusManager.Domain.Exceptions;
@@ -126,7 +128,21 @@ public sealed class AuthServiceTests
         FakePasswordHasher? hasher = null, FakeUsuarioRepository? usuarios = null, LoginOptions? login = null)
         => new(usuarios ?? new FakeUsuarioRepository(user), new FakeUsuarioEmpresaRepository(user, link), new FakeEmpresaRepository(company),
             hasher ?? new FakePasswordHasher(), issuer, new FakeRefreshRepository(), new FakeUnitOfWork(), TimeProvider.System,
-            Options.Create(new RefreshTokenOptions()), Options.Create(login ?? new LoginOptions()));
+            Options.Create(new RefreshTokenOptions()), Options.Create(login ?? new LoginOptions()),
+            new FakePasswordResetTokenRepository(), new FakeEmailSender(), Options.Create(new FrontendOptions { Url = "http://localhost:5173" }),
+            Options.Create(new PasswordResetOptions()), NullLogger<AuthService>.Instance);
+
+    private sealed class FakePasswordResetTokenRepository : IPasswordResetTokenRepository
+    {
+        public Task<PasswordResetToken?> ObterParaUsoAsync(string hash, DateTime agora, CancellationToken cancellationToken = default)
+            => Task.FromResult<PasswordResetToken?>(null);
+        public void Add(PasswordResetToken token) { }
+    }
+
+    private sealed class FakeEmailSender : IEmailSender
+    {
+        public Task EnviarAsync(MensagemEmail mensagem, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    }
 
 
     private static UsuarioEmpresa Vinculo(Usuario user, Empresa company, string nomePerfil, IReadOnlyCollection<string> codigos)
@@ -194,6 +210,7 @@ public sealed class AuthServiceTests
 
         public Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default)
             => Task.FromResult<Usuario?>(email == user.Email ? user : null);
+        public Task RevogarRefreshTokensAsync(Guid usuarioId, DateTime agora, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task<Usuario?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => Task.FromResult<Usuario?>(id == user.Id ? user : null);
         public Task<PagedResult<Usuario>> ListAsync(int page, int pageSize, CancellationToken cancellationToken = default) => Task.FromResult(new PagedResult<Usuario>([], page, pageSize, 0));
         public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default) => Task.FromResult(id == user.Id);

@@ -37,4 +37,10 @@ public class UsuarioRepository(AppDbContext context) : RepositoryBase<Usuario>(c
 
     public Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default)
         => Set.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+    public Task RevogarRefreshTokensAsync(Guid usuarioId, DateTime agora, CancellationToken cancellationToken = default)
+        => Context.Database.ExecuteSqlAsync($"""
+            UPDATE refresh_tokens SET revogado_em = {agora}, atualizado_em = {agora}
+            WHERE usuario_id = {usuarioId} AND revogado_em IS NULL
+            """, cancellationToken);
 }

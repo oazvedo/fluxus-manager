@@ -93,6 +93,12 @@ internal sealed class IntegrationTestAuthService : IAuthService
 
     public Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
+    public Task EsquecerSenhaAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task RedefinirSenhaAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task TrocarSenhaAsync(Guid usuarioId, ChangePasswordRequest request, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
     public Task<TokenResponse> SwitchTenantAsync(Guid userId, Guid empresaId, CancellationToken cancellationToken = default)
         => throw new NotImplementedException();
 }

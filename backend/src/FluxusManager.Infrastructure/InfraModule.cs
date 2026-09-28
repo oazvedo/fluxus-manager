@@ -53,6 +53,7 @@ public static class InfraModule
         services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IEmpresaRepository, EmpresaRepository>();
         services.AddScoped<IUsuarioEmpresaRepository, UsuarioEmpresaRepository>();

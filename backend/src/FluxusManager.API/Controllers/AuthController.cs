@@ -22,6 +22,34 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await authService.EsquecerSenhaAsync(request, cancellationToken);
+        return Ok(new { mensagem = "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha." });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await authService.RedefinirSenhaAsync(request, cancellationToken);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
+    {
+        var subject = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(subject, out var userId))
+            return Unauthorized();
+
+        await authService.TrocarSenhaAsync(userId, request, cancellationToken);
+        return NoContent();
+    }
+
+    [AllowAnonymous]
     [DisableRateLimiting]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(RefreshRequest request, CancellationToken cancellationToken)
