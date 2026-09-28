@@ -24,15 +24,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" tooltip="Início" className={menuPress} render={<NavLink to="/" />}>
-              {/* Caixa de 32px: com a barra recolhida, sobra só o símbolo, centralizado no botão. */}
+            <SidebarMenuButton size="lg" tooltip="Início" aria-label="FluxusManager, ir para o Início"
+              className={`hover:bg-transparent! ${menuPress}`} render={<NavLink to="/" />}>
+              {/* Caixa de 32px: com a barra recolhida, sobra só o símbolo, centralizado no botão.
+                  O `!` vence o `[&_svg]:size-4` do botão, que encolhia a marca para 16px. */}
               <span className="flex aspect-square size-8 items-center justify-center">
-                <BrandSymbol className="size-5" />
+                <BrandSymbol className="size-7!" />
               </span>
-              <span className="grid flex-1 gap-1 text-left">
-                <BrandWordmark className="truncate" />
-                <span className="truncate text-xs leading-none text-muted-foreground">Área administrativa</span>
-              </span>
+              <BrandWordmark className="truncate text-[1.0625rem]!" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
