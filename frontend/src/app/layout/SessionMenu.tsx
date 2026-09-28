@@ -1,12 +1,14 @@
 import { useMutation } from '@tanstack/react-query'
-import { LogOut } from 'lucide-react'
+import { LogOut, Moon, Sun } from 'lucide-react'
 import { toast } from 'sonner'
 import { sair } from '@/core/auth/actions'
 import { useSession } from '@/core/auth/session'
+import { useTheme } from '@/core/theme/useTheme'
 import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/shared/components/ui/sidebar'
 
 export function SessionMenu() {
   const session = useSession()
+  const { theme, toggleTheme } = useTheme()
   const logout = useMutation({
     mutationFn: sair,
     retry: false,
@@ -19,6 +21,14 @@ export function SessionMenu() {
         <p className="truncate">{session?.role}</p>
       </div>
       <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton tooltip={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            aria-pressed={theme === 'dark'} onClick={toggleTheme}>
+            {theme === 'dark' ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+            <span>{theme === 'dark' ? 'Tema claro' : 'Tema escuro'}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton tooltip="Sair da conta" onClick={() => logout.mutate()} disabled={logout.isPending}>
             <LogOut aria-hidden="true" /><span>Sair da conta</span>

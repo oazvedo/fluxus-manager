@@ -263,10 +263,10 @@ Use as exceções de `Domain/Exceptions` para erro esperado. O `ExceptionFilter`
 
 ## Autenticação e permissões
 
-As rotas de negócio exigem access token JWT. `POST /auth/login` autentica e emite um token de 15 minutos; envie-o como
-`Authorization: Bearer <token>`. Se a pessoa tiver mais de uma empresa, informe `empresaId` no login para escolher o
-tenant. `POST /auth/switch-tenant` recebe `empresaId`, verifica se o usuário e o vínculo estão ativos e emite um novo
-token com o tenant selecionado. Tokens de acesso antigos expiram normalmente.
+As rotas de negócio exigem access token JWT. `POST /auth/login` recebe apenas `{ email, senha }` e emite um token de
+15 minutos para o primeiro vínculo ativo com empresa ativa; envie-o como `Authorization: Bearer <token>`. A escolha
+de empresa não faz parte do payload de login. `POST /auth/switch-tenant` recebe `empresaId`, verifica se o usuário e
+o vínculo estão ativos e emite um novo token com o tenant selecionado. Tokens de acesso antigos expiram normalmente.
 
 O token contém `sub`, `email`, `tenant_id`, `role` e uma claim `permissions` por permissão concedida. A API valida
 assinatura, emissor, audiência e expiração. As rotas declaram permissões por `[HasPermission("empresas.editar")]`;

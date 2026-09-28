@@ -1,11 +1,12 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { useTheme } from '@/core/theme/useTheme'
 
-// O app ainda não alterna tema: os avisos seguem o tema claro em vez do sistema operacional.
-const Toaster = ({ theme = "light", ...props }: ToasterProps) => {
+const Toaster = ({ theme, ...props }: ToasterProps) => {
+  const appTheme = useTheme().theme
   return (
     <Sonner
-      theme={theme}
+      theme={theme ?? appTheme}
       className="toaster group"
       icons={{
         success: (

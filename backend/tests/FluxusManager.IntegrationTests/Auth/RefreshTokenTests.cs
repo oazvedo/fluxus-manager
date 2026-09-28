@@ -56,7 +56,7 @@ public sealed class RefreshTokenTests(PostgresFixture postgres) : IAsyncLifetime
 
     private async Task<TokenResponse> LoginAsync()
     {
-        using var response = await _client.PostAsJsonAsync("/auth/login", new LoginRequest("ana@fluxus.com", "segredo123", _companyId));
+        using var response = await _client.PostAsJsonAsync("/auth/login", new LoginRequest("ana@fluxus.com", "segredo123"));
         response.EnsureSuccessStatusCode();
         Assert.True(response.Headers.CacheControl?.NoStore);
         return (await response.Content.ReadFromJsonAsync<TokenResponse>())!;

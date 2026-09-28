@@ -70,7 +70,7 @@ public sealed partial class ConvitesEndpointsTests(PostgresFixture postgres) : I
         using var aceite = await anonimo.PostAsJsonAsync("/convites/aceitar", new AceitarConviteRequest(token, "Ana", "segredo123"));
         Assert.Equal(HttpStatusCode.NoContent, aceite.StatusCode);
 
-        using var login = await anonimo.PostAsJsonAsync("/auth/login", new LoginRequest("ana@acme.com", "segredo123", _empresaId));
+        using var login = await anonimo.PostAsJsonAsync("/auth/login", new LoginRequest("ana@acme.com", "segredo123"));
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
         Assert.Equal(_empresaId, (await login.Content.ReadFromJsonAsync<TokenResponse>())!.TenantId);
 
