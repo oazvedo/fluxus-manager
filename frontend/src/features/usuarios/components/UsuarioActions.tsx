@@ -1,7 +1,6 @@
 import { Ellipsis } from 'lucide-react'
 import { useNavigate } from 'react-router'
-import { toast } from 'sonner'
-import { problemMessage } from '@/core/api/problem'
+import { notify } from '@/shared/lib/notify'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -23,11 +22,11 @@ export function UsuarioActions({ usuario, editHref }: { usuario: Usuario; editHr
       { id: usuario.id, ativo },
       {
         onSuccess: () =>
-          toast.success(ativo ? `${usuario.nome} ativado` : `${usuario.nome} inativado`, {
+          notify.success(ativo ? `${usuario.nome} ativado` : `${usuario.nome} inativado`, {
             description: ativo ? undefined : 'Esta pessoa não consegue mais entrar no sistema.',
-            action: desfazer ? { label: 'Desfazer', onClick: () => alterar(!ativo, false) } : undefined,
+            undo: desfazer ? () => alterar(!ativo, false) : undefined,
           }),
-        onError: (error) => toast.error(problemMessage(error)),
+        onError: (error) => notify.error(error),
       },
     )
   }

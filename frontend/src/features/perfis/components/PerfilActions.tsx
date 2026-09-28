@@ -1,8 +1,7 @@
 import { Ellipsis } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { toast } from 'sonner'
-import { problemMessage } from '@/core/api/problem'
+import { notify } from '@/shared/lib/notify'
 import { ConfirmDialog } from '@/shared/components/common/ConfirmDialog'
 import { Button } from '@/shared/components/ui/button'
 import {
@@ -30,10 +29,10 @@ export function PerfilActions({ perfil, editHref }: { perfil: Perfil; editHref: 
       { id: perfil.id, ativo },
       {
         onSuccess: () =>
-          toast.success(ativo ? `${perfil.nome} ativado` : `${perfil.nome} inativado`, {
-            action: desfazer ? { label: 'Desfazer', onClick: () => alterar(!ativo, false) } : undefined,
+          notify.success(ativo ? `${perfil.nome} ativado` : `${perfil.nome} inativado`, {
+            undo: desfazer ? () => alterar(!ativo, false) : undefined,
           }),
-        onError: (error) => toast.error(problemMessage(error)),
+        onError: (error) => notify.error(error),
       },
     )
   }
@@ -42,9 +41,9 @@ export function PerfilActions({ perfil, editHref }: { perfil: Perfil; editHref: 
     excluir.mutate(perfil.id, {
       onSuccess: () => {
         setConfirmando(false)
-        toast.success(`${perfil.nome} excluído`)
+        notify.success(`${perfil.nome} excluído`)
       },
-      onError: (error) => toast.error(problemMessage(error)),
+      onError: (error) => notify.error(error),
     })
   }
 
