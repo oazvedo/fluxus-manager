@@ -56,9 +56,6 @@ public class AuthService(
         usuario.Desbloquear();
 
         var vinculosAtivos = (await vinculos.ListarPorUsuarioAsync(usuario.Id, cancellationToken)).Where(v => v.Ativo);
-        if (request.EmpresaId is Guid empresaId)
-            vinculosAtivos = vinculosAtivos.Where(v => v.EmpresaId == empresaId);
-
         foreach (var vinculo in vinculosAtivos)
         {
             var empresa = await empresas.GetByIdAsync(vinculo.EmpresaId, cancellationToken);

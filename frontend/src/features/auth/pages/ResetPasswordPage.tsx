@@ -7,6 +7,7 @@ import { setSession } from '@/core/auth/session'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
+import { AuthBrand } from '../components/AuthBrand'
 import { redefinirSenha } from '../api/password-reset'
 import { tokenDeRedefinicao } from '../lib/reset-token'
 import { redefinirSenhaSchema, type RedefinirSenhaValues } from '../schemas/password-reset'
@@ -43,7 +44,7 @@ export function ResetPasswordPage() {
 
   if (!token || linkInvalido) return <main className="flex min-h-svh items-center justify-center px-6 py-12">
     <div className="w-full max-w-sm space-y-8">
-      <Marca />
+      <AuthBrand />
       <div className="space-y-2">
         <h1 className="text-xl font-semibold tracking-tight">Link inválido ou expirado</h1>
         <p className="text-sm text-pretty text-muted-foreground">
@@ -59,7 +60,7 @@ export function ResetPasswordPage() {
 
   return <main className="flex min-h-svh items-center justify-center px-6 py-12">
     <div className="w-full max-w-sm space-y-8">
-      <Marca />
+      <AuthBrand />
       <div className="space-y-2">
         <h1 className="text-xl font-semibold tracking-tight">Criar uma nova senha</h1>
         <p className="text-sm text-pretty text-muted-foreground">Escolha uma senha com pelo menos 8 caracteres, incluindo letras e números.</p>
@@ -88,11 +89,4 @@ export function ResetPasswordPage() {
       </Link>
     </div>
   </main>
-}
-
-function Marca() {
-  return <div className="flex items-center gap-3 font-semibold tracking-tight">
-    <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">F</span>
-    FluxusManager
-  </div>
 }

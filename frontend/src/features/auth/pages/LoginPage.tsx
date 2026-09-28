@@ -6,6 +6,7 @@ import { applyProblemToForm, getProblem, problemMessage } from '@/core/api/probl
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
+import { AuthBrand } from '../components/AuthBrand'
 import { useLogin } from '../hooks/use-login'
 import { loginSchema, type LoginValues } from '../schemas/login'
 
@@ -40,10 +41,7 @@ export function LoginPage() {
   return (
     <main className="flex min-h-svh items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm space-y-8">
-        <div className="flex items-center gap-3 font-semibold tracking-tight">
-          <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">F</span>
-          FluxusManager
-        </div>
+        <AuthBrand />
         <div className="space-y-2">
           <h1 className="text-xl font-semibold tracking-tight">Entrar na sua conta</h1>
           <p className="text-sm text-pretty text-muted-foreground">Acesse as empresas e os cadastros da sua equipe.</p>

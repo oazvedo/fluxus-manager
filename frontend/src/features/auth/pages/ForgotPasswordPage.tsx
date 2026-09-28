@@ -6,6 +6,7 @@ import { problemMessage } from '@/core/api/problem'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
+import { AuthBrand } from '../components/AuthBrand'
 import { solicitarRedefinicaoSenha } from '../api/password-reset'
 import { esqueciSenhaSchema, type EsqueciSenhaValues } from '../schemas/password-reset'
 
@@ -51,10 +52,7 @@ export function ForgotPasswordPage() {
 function AuthPage({ children }: { children: React.ReactNode }) {
   return <main className="flex min-h-svh items-center justify-center px-6 py-12">
     <div className="w-full max-w-sm space-y-8">
-      <div className="flex items-center gap-3 font-semibold tracking-tight">
-        <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">F</span>
-        FluxusManager
-      </div>
+      <AuthBrand />
       {children}
     </div>
   </main>

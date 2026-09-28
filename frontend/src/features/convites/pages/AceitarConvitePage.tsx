@@ -10,6 +10,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Skeleton } from '@/shared/components/ui/skeleton'
 import { formatDateTime } from '@/shared/lib/format'
 import { cn } from '@/shared/lib/utils'
+import { ThemeToggle } from '@/shared/components/common/ThemeToggle'
 import { useAceitarConvite, useConviteDetalhes } from '../hooks/use-convites'
 import { tokenDoLink } from '../lib/token'
 import { aceiteNovoUsuarioSchema, type AceiteNovoUsuarioValues } from '../schemas/convite'
@@ -34,9 +35,12 @@ export function AceitarConvitePage() {
 
   return <main className="flex min-h-svh items-center justify-center px-6 py-12">
     <div className="w-full max-w-sm space-y-8">
-      <div className="flex items-center gap-3 font-semibold tracking-tight">
-        <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">F</span>
-        FluxusManager
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 font-semibold tracking-tight">
+          <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">F</span>
+          FluxusManager
+        </div>
+        <ThemeToggle />
       </div>
       {conteudo}
     </div>

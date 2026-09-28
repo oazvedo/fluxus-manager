@@ -114,6 +114,9 @@ export const empresasKeys = {
 - `Sair da conta` limpa a memória, o sessionStorage e o cache imediatamente e revoga a família no servidor. Falha de conexão avisa
   que a revogação não foi confirmada. JWTs já emitidos mantêm a validade original.
 - `SessionBoundary` limpa o React Query ao mudar a identidade da sessão. A renovação normal preserva o cache.
+- A aparência começa seguindo o tema do sistema; a pessoa pode alternar entre claro e escuro pelo controle na tela
+  de login ou na barra lateral. A escolha fica em `localStorage`. O tema escuro usa superfícies grafite, bordas sutis
+  e destaque violeta, e também se aplica aos avisos e às rotas públicas.
 - `/esqueci-senha` mostra uma resposta neutra após pedir o link; `/redefinir-senha?token=...` envia o token no corpo
   da API e permite criar uma nova senha. Link inválido, expirado ou usado oferece solicitar outro. Após sucesso, a
   sessão local é limpa, o token sai da URL e o login confirma a redefinição. Senha e token não entram em logs nem no
