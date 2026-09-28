@@ -22,6 +22,7 @@
     --color-sidebar-primary: var(--sidebar-primary);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
+    --color-canvas: var(--canvas);
     --color-chart-5: var(--chart-5);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);
@@ -99,12 +100,15 @@
     --chart-4: oklch(0.6 0.13 75);
     --chart-5: oklch(0.55 0.18 25);
     --radius: 0.5rem;
-    --sidebar: oklch(0.975 0.004 80);
+    /* Janela: canvas < barra lateral < conteúdo, dois painéis irmãos sobre a mesma mesa. */
+    --canvas: oklch(0.948 0.005 80);
+    --sidebar: oklch(0.978 0.003 80);
     --sidebar-foreground: oklch(0.2 0.01 60);
     --sidebar-primary: oklch(0.47 0.085 225);
     --sidebar-primary-foreground: oklch(0.99 0.003 85);
-    --sidebar-accent: oklch(0.935 0.012 215);
-    --sidebar-accent-foreground: oklch(0.2 0.01 60);
+    /* Seleção: pílula tingida de acento. Texto 8.4:1 e ícone 5.3:1 sobre a pílula (escuro: 10.4:1 e 6.2:1). */
+    --sidebar-accent: oklch(0.925 0.03 222);
+    --sidebar-accent-foreground: oklch(0.36 0.075 225);
     --sidebar-border: oklch(0.905 0.006 75);
     --sidebar-ring: oklch(0.47 0.085 225);
     /* Painel de marca (login): tinta escura nos dois temas. Texto 15.7:1, secundário 7.3:1, acento 8.1:1. */
@@ -121,6 +125,9 @@
     --elevation-modal: 0 2.8px 2.2px oklch(0.2 0.01 60 / 0.034), 0 6.7px 5.3px oklch(0.2 0.01 60 / 0.048),
         0 12.5px 10px oklch(0.2 0.01 60 / 0.06), 0 22.3px 17.9px oklch(0.2 0.01 60 / 0.072),
         0 41.8px 33.4px oklch(0.2 0.01 60 / 0.086), 0 100px 80px oklch(0.2 0.01 60 / 0.12);
+    /* Painéis da janela (barra lateral e conteúdo): contorno de 6% e sombra curta em camadas. */
+    --elevation-panel: 0 0 0 1px oklch(0.2 0.01 60 / 0.06), 0 1px 2px -1px oklch(0.2 0.01 60 / 0.08),
+        0 3px 8px -4px oklch(0.2 0.01 60 / 0.06);
 }
 
 /*
@@ -160,12 +167,13 @@
     --chart-3: oklch(0.76 0.15 150);
     --chart-4: oklch(0.78 0.16 75);
     --chart-5: oklch(0.72 0.18 25);
+    --canvas: oklch(0.135 0.005 65);
     --sidebar: oklch(0.185 0.007 65);
     --sidebar-foreground: oklch(0.91 0.005 80);
     --sidebar-primary: oklch(0.74 0.1 218);
     --sidebar-primary-foreground: oklch(0.17 0.006 65);
-    --sidebar-accent: oklch(0.26 0.02 220);
-    --sidebar-accent-foreground: oklch(0.94 0.005 80);
+    --sidebar-accent: oklch(0.29 0.04 222);
+    --sidebar-accent-foreground: oklch(0.9 0.045 215);
     --sidebar-border: oklch(1 0.005 80 / 8%);
     --sidebar-ring: oklch(0.74 0.1 218);
     --brand-surface: oklch(0.205 0.008 65);
@@ -177,12 +185,21 @@
     --elevation-overlay: 0 0 0 1px oklch(1 0 0 / 8%), 0 2px 6px oklch(0.08 0.006 65 / 40%),
         0 12px 28px -8px oklch(0.08 0.006 65 / 60%);
     --elevation-modal: 0 0 0 1px oklch(1 0 0 / 8%), 0 24px 64px -12px oklch(0.06 0.006 65 / 70%);
+    /* Luz na borda de cima (material), contorno de 6% e sombra que afunda no canvas. */
+    --elevation-panel: inset 0 1px 0 oklch(1 0 0 / 4%), 0 0 0 1px oklch(1 0.005 80 / 6%),
+        0 1px 2px oklch(0.06 0.006 65 / 40%), 0 4px 12px -6px oklch(0.06 0.006 65 / 50%);
     /* Vidro (só no escuro): derivado da superfície grafite, com a borda puxando para o acento. */
     --glass-alpha: 88%;
     --glass-highlight: oklch(1 0 0 / 6%);
     --glass-edge: oklch(1 0.005 80 / 14%);
     --glass-edge-accent: oklch(0.74 0.1 218 / 18%);
     --glass-blur: 16px;
+}
+
+/* Painel da janela (barra lateral e conteúdo): mesmo raio e mesma elevação, para lerem como irmãos. */
+@utility panel-surface {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--elevation-panel);
 }
 
 /*
