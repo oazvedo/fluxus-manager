@@ -2,8 +2,9 @@ import { cn } from '@/shared/lib/utils'
 import type { ConviteStatus } from '../types/convite'
 
 const pontos: Record<ConviteStatus, string> = {
-  Pendente: 'bg-emerald-600 dark:bg-emerald-400',
-  Aceito: 'bg-primary',
+  // Pendente espera a pessoa agir; aceito é o desfecho bom. O acento fica reservado para o que é clicável.
+  Pendente: 'bg-warning',
+  Aceito: 'bg-success',
   Expirado: 'bg-muted-foreground/60',
   Cancelado: 'bg-muted-foreground/60',
 }

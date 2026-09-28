@@ -2,8 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { applyProblemToForm, problemMessage } from '@/core/api/problem'
+import { notify } from '@/shared/lib/notify'
+import { applyProblemToForm } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/shared/components/ui/field'
@@ -46,14 +46,14 @@ export function UsuarioForm({ usuario, onSaved }: UsuarioFormProps) {
     try {
       if (editing) {
         await atualizar.mutateAsync({ nome: values.nome, email: values.email })
-        toast.success('Alterações salvas')
+        notify.success('Alterações salvas')
       } else {
         await criar.mutateAsync(values)
-        toast.success('Usuário cadastrado')
+        notify.success('Usuário cadastrado')
       }
       onSaved()
     } catch (error) {
-      if (!applyProblemToForm(error, setError, fields, 'email')) toast.error(problemMessage(error))
+      if (!applyProblemToForm(error, setError, fields, 'email')) notify.error(error)
     }
   }
 

@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { applyProblemToForm, problemMessage } from '@/core/api/problem'
+import { notify } from '@/shared/lib/notify'
+import { applyProblemToForm } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/shared/components/ui/field'
@@ -47,14 +47,14 @@ export function EmpresaForm({ empresa, onSaved }: EmpresaFormProps) {
     try {
       if (editing) {
         await atualizar.mutateAsync({ razaoSocial: values.razaoSocial, nomeFantasia })
-        toast.success('Alterações salvas')
+        notify.success('Alterações salvas')
       } else {
         await criar.mutateAsync({ razaoSocial: values.razaoSocial, nomeFantasia, cnpj: values.cnpj })
-        toast.success('Empresa cadastrada')
+        notify.success('Empresa cadastrada')
       }
       onSaved()
     } catch (error) {
-      if (!applyProblemToForm(error, setError, fields, 'cnpj')) toast.error(problemMessage(error))
+      if (!applyProblemToForm(error, setError, fields, 'cnpj')) notify.error(error)
     }
   }
 

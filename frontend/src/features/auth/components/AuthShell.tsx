@@ -3,7 +3,9 @@ import { CircleAlert, CircleCheck } from 'lucide-react'
 import { Link, type LinkProps } from 'react-router'
 import { enterFromBelow } from '@/shared/lib/motion'
 import { cn } from '@/shared/lib/utils'
+import { BrandLogo } from '@/shared/components/brand/BrandMark'
 import { AuthBrand } from './AuthBrand'
+import { FlowField } from './FlowField'
 
 type AuthShellProps = {
   title: string
@@ -13,24 +15,51 @@ type AuthShellProps = {
   children: ReactNode
 }
 
-/** Moldura das telas públicas: marca no topo, título e conteúdo numa coluna estreita e centralizada. */
+/**
+ * Moldura das telas públicas. Em telas largas, painel de marca à esquerda (o que o sistema é) e o formulário
+ * à direita; em telas estreitas, só o formulário com a marca no topo.
+ */
 export function AuthShell({ title, description, headingRef, children }: AuthShellProps) {
   return (
-    <main className="flex min-h-svh flex-col px-6 py-6 sm:py-8">
-      <div className="mx-auto w-full max-w-sm">
-        <AuthBrand />
-      </div>
-      {/* Remonta a cada tela (login, recuperação, redefinição): a entrada curta marca a troca sem distrair. */}
-      <div className={cn('mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-8 py-12', enterFromBelow)}>
-        <div className="space-y-1.5">
-          <h1 ref={headingRef} tabIndex={-1} className="text-xl font-semibold tracking-tight text-balance outline-none">
-            {title}
-          </h1>
-          {description && <p className="text-sm text-pretty text-muted-foreground">{description}</p>}
+    <div className="grid min-h-svh lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <BrandPanel />
+      <main className="flex min-h-svh flex-col px-6 py-6 sm:py-8">
+        <div className="mx-auto w-full max-w-sm">
+          <AuthBrand />
         </div>
-        {children}
+        {/* Remonta a cada tela (login, recuperação, redefinição): a entrada curta marca a troca sem distrair. */}
+        <div className={cn('mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-8 py-12', enterFromBelow)}>
+          <div className="space-y-1.5">
+            <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-semibold text-balance outline-none">
+              {title}
+            </h1>
+            {description && <p className="text-sm text-pretty text-muted-foreground">{description}</p>}
+          </div>
+          {children}
+        </div>
+      </main>
+    </div>
+  )
+}
+
+/** Painel de marca: tinta escura nos dois temas, campo de faixas e uma frase sobre o que o sistema garante. */
+function BrandPanel() {
+  return (
+    <aside
+      aria-label="FluxusManager"
+      className="relative hidden flex-col justify-between overflow-hidden bg-brand-surface p-10 text-brand-surface-foreground lg:flex"
+    >
+      <FlowField className="absolute inset-0 size-full [mask-image:linear-gradient(to_bottom,black_35%,transparent_85%)]" />
+      <BrandLogo accent="var(--brand-accent)" className="relative" />
+      <div className="relative max-w-sm space-y-3">
+        <p className="text-[1.75rem] leading-[1.15] font-medium tracking-[-0.02em] text-balance">
+          Empresas e acessos conferidos na entrada.
+        </p>
+        <p className="text-sm text-pretty text-brand-muted">
+          CNPJ validado, e-mail único por pessoa e cada alteração registrada.
+        </p>
       </div>
-    </main>
+    </aside>
   )
 }
 

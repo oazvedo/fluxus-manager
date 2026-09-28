@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'
-import { toast } from 'sonner'
+import { notify } from '@/shared/lib/notify'
 import { applyProblemToForm, problemMessage } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
@@ -27,10 +27,10 @@ export function ConviteForm({ onSaved }: { onSaved: () => void }) {
   async function onSubmit(values: ConviteFormValues) {
     try {
       const convite = await criar.mutateAsync(values)
-      toast.success(`Convite enviado para ${convite.email}`)
+      notify.success(`Convite enviado para ${convite.email}`)
       onSaved()
     } catch (error) {
-      if (!applyProblemToForm(error, setError, fields, 'email')) toast.error(problemMessage(error))
+      if (!applyProblemToForm(error, setError, fields, 'email')) notify.error(error)
     }
   }
 

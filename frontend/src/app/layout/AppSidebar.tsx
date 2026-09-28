@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/shared/components/ui/sidebar'
+import { BrandSymbol, BrandWordmark } from '@/shared/components/brand/BrandMark'
 import { menuPress } from '@/shared/lib/motion'
 import { matchesNav, navigation } from './navigation'
 import { SessionMenu } from './SessionMenu'
@@ -24,13 +25,14 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" tooltip="Início" className={menuPress} render={<NavLink to="/" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-foreground text-sm font-semibold text-background">
-                F
-              </div>
-              <div className="grid flex-1 text-left leading-tight">
-                <span className="truncate font-semibold tracking-tight">FluxusManager</span>
-                <span className="truncate text-xs text-muted-foreground">Gestão empresarial</span>
-              </div>
+              {/* Caixa de 32px: com a barra recolhida, sobra só o símbolo, centralizado no botão. */}
+              <span className="flex aspect-square size-8 items-center justify-center">
+                <BrandSymbol className="size-5" />
+              </span>
+              <span className="grid flex-1 gap-1 text-left">
+                <BrandWordmark className="truncate" />
+                <span className="truncate text-xs leading-none text-muted-foreground">Área administrativa</span>
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

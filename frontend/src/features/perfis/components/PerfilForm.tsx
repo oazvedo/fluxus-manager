@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, useWatch } from 'react-hook-form'
-import { toast } from 'sonner'
+import { notify } from '@/shared/lib/notify'
 import { applyProblemToForm, problemMessage } from '@/core/api/problem'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
 import { Button } from '@/shared/components/ui/button'
@@ -31,10 +31,10 @@ export function PerfilForm({ perfil, onSaved }: { perfil?: Perfil; onSaved: () =
   async function onSubmit(values: PerfilFormValues) {
     try {
       await mutation.mutateAsync({ ...values, permissoes: [...new Set(values.permissoes)] })
-      toast.success(editing ? 'Alterações salvas' : 'Perfil cadastrado')
+      notify.success(editing ? 'Alterações salvas' : 'Perfil cadastrado')
       onSaved()
     } catch (error) {
-      if (!applyProblemToForm(error, setError, fields, 'nome')) toast.error(problemMessage(error))
+      if (!applyProblemToForm(error, setError, fields, 'nome')) notify.error(error)
     }
   }
 
