@@ -24,3 +24,10 @@ export const iconHidden = 'scale-25 opacity-0 blur-[4px]'
 /** `pressable` para itens de menu da barra lateral: mantém as transições de tamanho do recolhimento. */
 export const menuPress =
   'transition-[width,height,padding,scale,color] duration-150 ease-out active:scale-[0.98] motion-reduce:active:scale-100'
+
+/**
+ * Para superfícies animadas com tw-animate-css (menus, tooltips), que não tem regra de movimento reduzido:
+ * zera escala e deslocamento de entrada e saída, sobrando só o fade.
+ */
+export const fadeOnlyWhenReduced =
+  'motion-reduce:[--tw-enter-scale:1]! motion-reduce:[--tw-exit-scale:1]! motion-reduce:[--tw-enter-translate-x:0]! motion-reduce:[--tw-enter-translate-y:0]! motion-reduce:[--tw-exit-translate-x:0]! motion-reduce:[--tw-exit-translate-y:0]!'

@@ -13,7 +13,7 @@ const actions = [
 export function QuickActions() {
   return (
     <section aria-labelledby="acoes-rapidas" className="space-y-3">
-      <h2 id="acoes-rapidas" className="text-sm font-medium text-muted-foreground">
+      <h2 id="acoes-rapidas" className="text-sm font-medium">
         Ações rápidas
       </h2>
       <div className="flex flex-wrap gap-2">

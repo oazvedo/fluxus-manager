@@ -43,7 +43,7 @@ export function UsuarioActions({ usuario, editHref }: { usuario: Usuario; editHr
         <DropdownMenuItem onClick={() => navigate(editHref)}>Editar usuário</DropdownMenuItem>
         <DropdownMenuSeparator />
         {usuario.ativo ? (
-          <DropdownMenuItem variant="destructive" onClick={() => alterar(false)}>
+          <DropdownMenuItem onClick={() => alterar(false)}>
             Inativar usuário
           </DropdownMenuItem>
         ) : (

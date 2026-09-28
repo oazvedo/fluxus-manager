@@ -43,7 +43,7 @@ export function EmpresaActions({ empresa, editHref }: { empresa: Empresa; editHr
         <DropdownMenuItem onClick={() => navigate(editHref)}>Editar empresa</DropdownMenuItem>
         <DropdownMenuSeparator />
         {empresa.ativo ? (
-          <DropdownMenuItem variant="destructive" onClick={() => alterar(false)}>
+          <DropdownMenuItem onClick={() => alterar(false)}>
             Inativar empresa
           </DropdownMenuItem>
         ) : (
