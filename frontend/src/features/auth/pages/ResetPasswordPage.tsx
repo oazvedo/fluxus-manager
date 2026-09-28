@@ -5,9 +5,12 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import { getProblem, problemMessage } from '@/core/api/problem'
 import { setSession } from '@/core/auth/session'
 import { SubmitButton } from '@/shared/components/common/SubmitButton'
-import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
-import { Input } from '@/shared/components/ui/input'
-import { AuthBrand } from '../components/AuthBrand'
+import { buttonVariants } from '@/shared/components/ui/button'
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/shared/components/ui/field'
+import { cn } from '@/shared/lib/utils'
+import { pressable } from '@/shared/lib/motion'
+import { AuthLink, AuthShell, FormNotice } from '../components/AuthShell'
+import { PasswordInput } from '../components/PasswordInput'
 import { redefinirSenha } from '../api/password-reset'
 import { tokenDeRedefinicao } from '../lib/reset-token'
 import { redefinirSenhaSchema, type RedefinirSenhaValues } from '../schemas/password-reset'
@@ -42,51 +45,41 @@ export function ResetPasswordPage() {
     }
   }
 
-  if (!token || linkInvalido) return <main className="flex min-h-svh items-center justify-center px-6 py-12">
-    <div className="w-full max-w-sm space-y-8">
-      <AuthBrand />
-      <div className="space-y-2">
-        <h1 className="text-xl font-semibold tracking-tight">Link inválido ou expirado</h1>
-        <p className="text-sm text-pretty text-muted-foreground">
-          Este link pode ter expirado ou já ter sido usado. Solicite um novo para redefinir sua senha.
-        </p>
+  if (!token || linkInvalido) return (
+    <AuthShell title="Link inválido ou expirado"
+      description="Este link pode ter expirado ou já ter sido usado. Solicite um novo para redefinir sua senha.">
+      <div className="flex flex-col items-center gap-3">
+        <Link to="/esqueci-senha" className={cn(buttonVariants({ size: 'lg' }), 'w-full', pressable)}>
+          Solicitar outro link
+        </Link>
+        <AuthLink to="/login">Voltar para o login</AuthLink>
       </div>
-      <Link to="/esqueci-senha" className="block text-center text-sm underline-offset-4 hover:underline">Solicitar outro link</Link>
-      <Link to="/login" className="block text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-        Voltar para o login
-      </Link>
-    </div>
-  </main>
+    </AuthShell>
+  )
 
-  return <main className="flex min-h-svh items-center justify-center px-6 py-12">
-    <div className="w-full max-w-sm space-y-8">
-      <AuthBrand />
-      <div className="space-y-2">
-        <h1 className="text-xl font-semibold tracking-tight">Criar uma nova senha</h1>
-        <p className="text-sm text-pretty text-muted-foreground">Escolha uma senha com pelo menos 8 caracteres, incluindo letras e números.</p>
-      </div>
+  return (
+    <AuthShell title="Criar uma nova senha" description="Depois de salvar, você entra com a nova senha.">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-busy={isSubmitting}>
         <Field data-invalid={!!errors.novaSenha}>
           <FieldLabel htmlFor="redefinir-nova-senha">Nova senha</FieldLabel>
-          <Input id="redefinir-nova-senha" type="password" autoComplete="new-password"
-            aria-invalid={!!errors.novaSenha} aria-describedby={errors.novaSenha ? 'redefinir-nova-senha-erro' : 'redefinir-ajuda'}
+          <PasswordInput id="redefinir-nova-senha" autoComplete="new-password" autoFocus
+            aria-invalid={!!errors.novaSenha}
+            aria-describedby={errors.novaSenha ? 'redefinir-nova-senha-erro redefinir-ajuda' : 'redefinir-ajuda'}
             {...register('novaSenha')} />
-          <p id="redefinir-ajuda" className="text-xs text-muted-foreground">Ao menos 8 caracteres, com letras e números.</p>
           <FieldError id="redefinir-nova-senha-erro" errors={[errors.novaSenha]} />
+          <FieldDescription id="redefinir-ajuda">Ao menos 8 caracteres, com letras e números.</FieldDescription>
         </Field>
         <Field data-invalid={!!errors.confirmacao}>
           <FieldLabel htmlFor="redefinir-confirmacao">Repita a nova senha</FieldLabel>
-          <Input id="redefinir-confirmacao" type="password" autoComplete="new-password"
+          <PasswordInput id="redefinir-confirmacao" autoComplete="new-password"
             aria-invalid={!!errors.confirmacao} aria-describedby={errors.confirmacao ? 'redefinir-confirmacao-erro' : undefined}
             {...register('confirmacao')} />
           <FieldError id="redefinir-confirmacao-erro" errors={[errors.confirmacao]} />
         </Field>
-        {errors.root && <p role="alert" className="text-sm text-destructive">{errors.root.message}</p>}
-        <SubmitButton pending={isSubmitting} className="w-full">Redefinir senha</SubmitButton>
+        {errors.root && <FormNotice tone="error">{errors.root.message}</FormNotice>}
+        <SubmitButton pending={isSubmitting} size="lg" className={`w-full ${pressable}`}>Redefinir senha</SubmitButton>
       </form>
-      <Link to="/login" className="block text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-        Voltar para o login
-      </Link>
-    </div>
-  </main>
+      <AuthLink to="/login" className="self-center">Voltar para o login</AuthLink>
+    </AuthShell>
+  )
 }
