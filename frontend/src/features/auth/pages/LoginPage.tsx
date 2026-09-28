@@ -46,7 +46,7 @@ export function LoginPage() {
   }
 
   return (
-    <AuthShell title="Entrar na sua conta" description="Acesse as empresas e os cadastros da sua equipe.">
+    <AuthShell title="Entrar" description="Use o e-mail com que sua equipe cadastrou você.">
       {senhaRedefinida && <FormNotice tone="success">Senha redefinida. Entre com sua nova senha.</FormNotice>}
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-busy={login.isPending}>
         <Field data-invalid={!!errors.email}>

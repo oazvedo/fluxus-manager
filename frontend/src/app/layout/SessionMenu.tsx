@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { Loader2, LogOut, Moon, Sun } from 'lucide-react'
-import { toast } from 'sonner'
+import { notify } from '@/shared/lib/notify'
 import { sair } from '@/core/auth/actions'
 import { useSession } from '@/core/auth/session'
 import { useTheme } from '@/core/theme/useTheme'
@@ -16,7 +16,7 @@ export function SessionMenu() {
   const logout = useMutation({
     mutationFn: sair,
     retry: false,
-    onError: () => toast.error('Você saiu desta aba, mas não foi possível encerrar a sessão no servidor. Verifique sua conexão.'),
+    onError: () => notify.error('Você saiu desta aba, mas não foi possível encerrar a sessão no servidor. Verifique sua conexão.'),
   })
   const inicial = session?.email.charAt(0).toUpperCase() ?? '?'
 

@@ -6,7 +6,7 @@ export function StatusBadge({ active, labels }: { active: boolean; labels: { act
     <span className={cn('inline-flex items-center gap-2 text-sm', !active && 'text-muted-foreground')}>
       <span
         aria-hidden="true"
-        className={cn('size-1.5 rounded-full', active ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-muted-foreground/60')}
+        className={cn('size-1.5 rounded-full', active ? 'bg-success' : 'bg-muted-foreground/60')}
       />
       {active ? labels.active : labels.inactive}
     </span>

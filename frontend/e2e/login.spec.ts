@@ -94,14 +94,14 @@ test('login, cadastros autenticados, renovação e logout com API real', async (
   await logout
   await expect(page).toHaveURL(/\/login$/)
   await page.goBack()
-  await expect(page.getByRole('heading', { name: 'Entrar na sua conta' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar', exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })
 
 test('login responsivo preserva sessão após recarregar e logout remove persistência', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 375, height: 740 })
   await page.goto('/login')
-  await expect(page.getByRole('heading', { name: 'Entrar na sua conta' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar', exact: true })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.screenshot({ path: testInfo.outputPath('login-mobile.png') })
   await page.getByLabel('E-mail', { exact: true }).fill('admin@fluxus.local')
@@ -130,6 +130,6 @@ test('login responsivo preserva sessão após recarregar e logout remove persist
   await page.getByRole('button', { name: 'Sair da conta', exact: true }).click()
   await logout
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Entrar na sua conta' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar', exact: true })).toBeVisible()
   expect(await page.evaluate(() => Object.keys(localStorage).length + Object.keys(sessionStorage).length)).toBe(0)
 })
