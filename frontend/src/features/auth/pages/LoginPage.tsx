@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Navigate, useLocation } from 'react-router'
-import { useSession } from '@/core/auth/session'
+import { useAvisoSessaoExpirada, useSession } from '@/core/auth/session'
 import { applyProblemToForm, getProblem, problemMessage } from '@/core/api/problem'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
@@ -17,6 +17,7 @@ export function LoginPage() {
   const session = useSession()
   const location = useLocation()
   const login = useLogin()
+  const sessaoExpirada = useAvisoSessaoExpirada()
   // Vindo do aceite de convite, o e-mail já chega preenchido.
   const email: unknown = location.state?.email
   const emailPreenchido = typeof email === 'string' && email.length > 0
@@ -48,6 +49,7 @@ export function LoginPage() {
   return (
     <AuthShell title="Entrar" description="Use o e-mail com que sua equipe cadastrou você.">
       {senhaRedefinida && <FormNotice tone="success">Senha redefinida. Entre com sua nova senha.</FormNotice>}
+      {sessaoExpirada && <FormNotice tone="error">Sua sessão expirou. Entre novamente para continuar.</FormNotice>}
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-5" aria-busy={login.isPending}>
         <Field data-invalid={!!errors.email}>
           <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
