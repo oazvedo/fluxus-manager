@@ -33,6 +33,12 @@ public class Usuario : BaseEntity
 
     public void Ativar() => Ativo = true;
 
+    public void AlterarSenha(string senhaHash)
+    {
+        SenhaHash = senhaHash;
+        Desbloquear();
+    }
+
     public void Inativar() => Ativo = false;
 
     public bool Bloqueado(DateTime agora) => BloqueadoAte > agora;

@@ -439,6 +439,23 @@ A política de rotação e revogação segue a [seção 4.14 da RFC 9700](https:
 - Quem conhece um e-mail consegue mantê-lo bloqueado errando a senha de tempos em tempos: é o custo do bloqueio por
   conta. O rate limiting por IP limita o ritmo, e o administrador pode desbloquear.
 
+## Recuperação e troca de senha
+
+| Ação | Verbo e rota | Acesso / resposta |
+| --- | --- | --- |
+| Solicitar recuperação | `POST /auth/forgot-password` com `{ email }` | Público; sempre 200 com a mesma mensagem |
+| Redefinir pelo link | `POST /auth/reset-password` com `{ token, novaSenha }` | Público; 204; link inválido ou expirado: 422 |
+| Trocar senha | `POST /auth/change-password` com `{ senhaAtual, novaSenha }` | Autenticado; 204; senha atual incorreta: 422 |
+
+- O link vai para `{Frontend:Url}/redefinir-senha?token=<token>` e vence após `RecuperacaoSenha:ValidadeMinutos`
+  (padrão 60, entre 5 e 1440). O token aleatório só é enviado por e-mail; a tabela `password_reset_tokens` guarda
+  apenas o SHA-256. Tokens vencidos ou já usados não podem redefinir a senha.
+- Pedido para e-mail inexistente ou usuário inativo tem a mesma resposta pública; falha SMTP também não altera a
+  resposta. A entrega pode ser conferida no Mailpit local.
+- Redefinir ou trocar a senha limpa o bloqueio de login e revoga os refresh tokens ativos do usuário. A troca exige
+  a senha atual. A redefinição confirma e consome o token dentro da mesma transação.
+- Ambas usam a política de senha existente: ao menos uma letra e um número.
+
 ## Convites
 
 Um administrador convida alguém por e-mail para a empresa selecionada, com um perfil ativo dela. As rotas usam as

@@ -32,6 +32,9 @@ public static class ApplicationModule
             .Validate(o => o.MaxTentativas is >= 3 and <= 20, "Login:MaxTentativas deve estar entre 3 e 20.")
             .Validate(o => o.BloqueioMinutos is >= 1 and <= 1440, "Login:BloqueioMinutos deve estar entre 1 e 1440.")
             .ValidateOnStart();
+        services.AddOptions<PasswordResetOptions>().Bind(configuration.GetSection(PasswordResetOptions.SectionName))
+            .Validate(o => o.ValidadeMinutos is >= 5 and <= 1440, "RecuperacaoSenha:ValidadeMinutos deve estar entre 5 e 1440.")
+            .ValidateOnStart();
         services.AddOptions<FrontendOptions>().Bind(configuration.GetSection(FrontendOptions.SectionName))
             .Validate(o => Uri.TryCreate(o.Url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https",
                 "Frontend:Url deve ser a URL absoluta HTTP(S) do frontend.")

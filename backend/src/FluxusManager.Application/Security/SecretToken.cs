@@ -4,7 +4,7 @@ using System.Text;
 namespace FluxusManager.Application.Security;
 
 /// <summary>
-/// Credencial opaca (refresh token, link de convite): 256 bits aleatórios em hexadecimal.
+/// Credencial opaca (refresh token, convite, redefinição de senha): 256 bits aleatórios em hexadecimal.
 /// Apenas o SHA-256 é persistido, nunca a credencial original.
 /// </summary>
 public static class SecretToken

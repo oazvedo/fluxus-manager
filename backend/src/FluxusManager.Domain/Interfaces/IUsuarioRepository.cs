@@ -18,4 +18,6 @@ public interface IUsuarioRepository : IRepository<Usuario>
     Task RegistrarFalhaLoginAsync(Guid id, DateTime agora, int maxTentativas, TimeSpan bloqueio, CancellationToken cancellationToken = default);
 
     Task<Usuario?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default);
+
+    Task RevogarRefreshTokensAsync(Guid usuarioId, DateTime agora, CancellationToken cancellationToken = default);
 }

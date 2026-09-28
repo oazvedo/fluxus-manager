@@ -10,5 +10,11 @@ public interface IAuthService
 
     Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken = default);
 
+    Task EsquecerSenhaAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default);
+
+    Task RedefinirSenhaAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default);
+
+    Task TrocarSenhaAsync(Guid usuarioId, ChangePasswordRequest request, CancellationToken cancellationToken = default);
+
     Task<TokenResponse> SwitchTenantAsync(Guid userId, Guid empresaId, CancellationToken cancellationToken = default);
 }
