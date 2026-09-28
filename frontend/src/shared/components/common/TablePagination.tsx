@@ -19,7 +19,8 @@ export function TablePagination({
 
   return (
     <nav aria-label="Paginação" className="flex items-center justify-end gap-4">
-      <p className="text-sm text-muted-foreground tabular-nums">
+      {/* Anunciado ao trocar de página: o foco fica no botão e o leitor de tela ouve o novo intervalo. */}
+      <p aria-live="polite" className="text-sm text-muted-foreground tabular-nums">
         {number.format(first)}–{number.format(last)} de {number.format(result.totalCount)}
       </p>
       <div className="flex gap-2">

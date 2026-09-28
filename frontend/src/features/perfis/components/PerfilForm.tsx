@@ -54,25 +54,36 @@ export function PerfilForm({ perfil, onSaved }: { perfil?: Perfil; onSaved: () =
         <FieldError id={errorId('nome')} errors={[errors.nome]} />
       </Field>
       <Field data-invalid={!!errors.descricao}>
-        <FieldLabel htmlFor="perfil-descricao">Descrição (opcional)</FieldLabel>
+        <FieldLabel htmlFor="perfil-descricao">
+          Descrição <span className="font-normal text-muted-foreground">(opcional)</span>
+        </FieldLabel>
         <Input id="perfil-descricao" autoComplete="off" aria-invalid={!!errors.descricao} aria-describedby={errorId('descricao')} {...register('descricao')} />
         <FieldError id={errorId('descricao')} errors={[errors.descricao]} />
       </Field>
       <fieldset aria-describedby={errors.permissoes ? 'perfil-permissoes-erro' : 'perfil-permissoes-ajuda'} className="space-y-3">
         <legend className="text-sm font-medium">Permissões</legend>
         <FieldDescription id="perfil-permissoes-ajuda">Escolha o que as pessoas com este perfil podem consultar e alterar.</FieldDescription>
-        {catalogo.isPending ? <p aria-busy="true" className="text-sm text-muted-foreground">Carregando permissões…</p> : null}
-        {catalogo.isError ? <div className="space-y-2"><p className="text-sm text-destructive">{problemMessage(catalogo.error)}</p><Button type="button" variant="outline" onClick={() => catalogo.refetch()}>Tentar de novo</Button></div> : null}
-        {Object.entries(gruposCatalogo).map(([grupo, permissoes]) => <fieldset key={grupo} className="space-y-2 rounded-md border p-3">
-          <legend className="px-1 text-sm font-medium">{grupo}</legend>
-          {permissoes?.map((permissao) => <label key={permissao.codigo} className="flex cursor-pointer items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5 size-4 accent-primary" checked={selecionadas.includes(permissao.codigo)} onChange={(event) => {
-              const next = event.target.checked ? [...selecionadas, permissao.codigo] : selecionadas.filter((codigo) => codigo !== permissao.codigo)
-              setValue('permissoes', next, { shouldDirty: true, shouldValidate: true })
-            }} />
-            <span><span className="block">{permissao.nome}</span><span className="block text-xs text-muted-foreground">{permissao.descricao}</span></span>
-          </label>)}
-        </fieldset>)}
+        {catalogo.isPending ? <p role="status" className="text-sm text-muted-foreground">Carregando permissões…</p> : null}
+        {catalogo.isError ? <div className="space-y-2"><p role="alert" className="text-sm text-destructive">{problemMessage(catalogo.error)}</p><Button type="button" variant="outline" onClick={() => catalogo.refetch()}>Tentar de novo</Button></div> : null}
+        {/* Grupos separados por espaço, sem caixas: o título do grupo mostra quantas estão marcadas. */}
+        <div className="space-y-5 pt-1">
+          {Object.entries(gruposCatalogo).map(([grupo, permissoes = []]) => {
+            const marcadas = permissoes.filter((permissao) => selecionadas.includes(permissao.codigo)).length
+            return <fieldset key={grupo} className="space-y-1">
+              <legend className="flex w-full items-baseline justify-between pb-1 text-xs font-medium text-muted-foreground">
+                {grupo}
+                <span className="tabular-nums">{marcadas} de {permissoes.length}</span>
+              </legend>
+              {permissoes.map((permissao) => <label key={permissao.codigo} className="-mx-2 flex cursor-pointer items-start gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-muted/50">
+                <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-primary" checked={selecionadas.includes(permissao.codigo)} onChange={(event) => {
+                  const next = event.target.checked ? [...selecionadas, permissao.codigo] : selecionadas.filter((codigo) => codigo !== permissao.codigo)
+                  setValue('permissoes', next, { shouldDirty: true, shouldValidate: true })
+                }} />
+                <span><span className="block">{permissao.nome}</span><span className="block text-xs text-pretty text-muted-foreground">{permissao.descricao}</span></span>
+              </label>)}
+            </fieldset>
+          })}
+        </div>
         <FieldError id={errorId('permissoes')} errors={[errors.permissoes]} />
       </fieldset>
     </FieldGroup>

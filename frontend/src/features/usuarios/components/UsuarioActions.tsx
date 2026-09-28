@@ -24,7 +24,7 @@ export function UsuarioActions({ usuario, editHref }: { usuario: Usuario; editHr
       {
         onSuccess: () =>
           toast.success(ativo ? `${usuario.nome} ativado` : `${usuario.nome} inativado`, {
-            description: ativo ? undefined : 'Não consegue mais entrar no sistema.',
+            description: ativo ? undefined : 'Esta pessoa não consegue mais entrar no sistema.',
             action: desfazer ? { label: 'Desfazer', onClick: () => alterar(!ativo, false) } : undefined,
           }),
         onError: (error) => toast.error(problemMessage(error)),

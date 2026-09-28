@@ -97,7 +97,7 @@ export function EmpresaForm({ empresa, onSaved }: EmpresaFormProps) {
               className="border-transparent bg-muted/60 text-muted-foreground tabular-nums focus-visible:bg-transparent"
             />
             <FieldDescription id="empresa-cnpj-ajuda">
-              O CNPJ não pode ser alterado. Para outro CNPJ, cadastre uma nova empresa.
+              Você não pode alterar o CNPJ. Para usar outro, cadastre uma nova empresa.
             </FieldDescription>
           </Field>
         ) : (

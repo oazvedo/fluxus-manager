@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { RecordLink, RecordRow } from '@/shared/components/common/RecordRow'
 import { StatusBadge } from '@/shared/components/common/StatusBadge'
 import { TableSkeletonRows } from '@/shared/components/common/TableStates'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table'
@@ -19,11 +19,9 @@ type EmpresasTableProps = {
 }
 
 export function EmpresasTable({ empresas, loading, message, editHref }: EmpresasTableProps) {
-  const navigate = useNavigate()
-
   return (
     // Larguras fixas: a tabela não "pula" quando um status ou data muda. Em telas estreitas rola na horizontal.
-    <Table className="min-w-2xl table-fixed">
+    <Table aria-label="Empresas" aria-busy={loading || undefined} className="min-w-2xl table-fixed">
       <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead className="text-muted-foreground">Empresa</TableHead>
@@ -44,24 +42,15 @@ export function EmpresasTable({ empresas, loading, message, editHref }: Empresas
             const atualizadaEm = empresa.atualizadoEm ?? empresa.criadoEm
 
             return (
-              <TableRow
-                key={empresa.id}
-                className="h-12 cursor-pointer"
-                // Atalho de mouse: a linha inteira abre a edição. Pelo teclado, o link do nome faz o mesmo.
-                onClick={(event) => {
-                  if ((event.target as HTMLElement).closest('a, button, [role="menuitem"]')) return
-                  navigate(href)
-                }}
-              >
+              <RecordRow key={empresa.id} href={href}>
                 <TableCell>
-                  <Link
-                    to={href}
-                    className="block truncate font-medium underline-offset-4 outline-none hover:underline focus-visible:underline"
-                  >
+                  <RecordLink href={href} title={empresa.razaoSocial}>
                     {empresa.razaoSocial}
-                  </Link>
+                  </RecordLink>
                   {empresa.nomeFantasia ? (
-                    <span className="block truncate text-xs text-muted-foreground">{empresa.nomeFantasia}</span>
+                    <span className="block truncate text-xs text-muted-foreground" title={empresa.nomeFantasia}>
+                      {empresa.nomeFantasia}
+                    </span>
                   ) : null}
                 </TableCell>
                 <TableCell className="tabular-nums">{formatCnpj(empresa.cnpj)}</TableCell>
@@ -76,7 +65,7 @@ export function EmpresasTable({ empresas, loading, message, editHref }: Empresas
                 <TableCell className="text-right">
                   <EmpresaActions empresa={empresa} editHref={href} />
                 </TableCell>
-              </TableRow>
+              </RecordRow>
             )
           })}
       </TableBody>

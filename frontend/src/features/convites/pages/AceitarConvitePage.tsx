@@ -24,10 +24,10 @@ export function AceitarConvitePage() {
 
   let conteudo: ReactNode
   if (!token) conteudo = <Aviso titulo="Link de convite inválido"
-    texto="Abra novamente o link recebido por e-mail. Se ele foi copiado, confira se veio inteiro." />
+    texto="Abra de novo o link do e-mail. Se você copiou o link, confira se ele veio inteiro." />
   else if (aceitoPor) conteudo = <Aviso titulo="Convite aceito" texto={`Entre com ${aceitoPor} e a sua senha para acessar a empresa.`}
     acao={<Link to="/login" state={{ email: aceitoPor }} className={cn(buttonVariants())}>Entrar</Link>} />
-  else if (detalhes.isPending) conteudo = <div aria-busy="true" aria-label="Carregando convite…" className="space-y-3">
+  else if (detalhes.isPending) conteudo = <div role="status" aria-label="Carregando convite…" className="space-y-3">
     <Skeleton className="h-6 w-2/3" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /><Skeleton className="mt-6 h-8 w-full" />
   </div>
   else if (detalhes.isError) conteudo = <ErroDoConvite error={detalhes.error} tentarDeNovo={() => detalhes.refetch()} />
@@ -72,7 +72,7 @@ function AceiteUsuarioExistente({ token, onAceito }: { token: string; onAceito: 
   }
 
   return <div className="space-y-4">
-    <p className="text-sm text-pretty text-muted-foreground">Você já tem conta com este e-mail. Ao aceitar, a empresa passa a aparecer no seu acesso, com a mesma senha.</p>
+    <p className="text-sm text-pretty text-muted-foreground">Você já tem conta com este e-mail. Aceite e você passa a ver esta empresa ao entrar, com a mesma senha.</p>
     {erro ? <p role="alert" className="text-sm text-destructive">{erro}</p> : null}
     <Button className="w-full" onClick={aceitarConvite} disabled={aceitar.isPending} aria-busy={aceitar.isPending || undefined}>Aceitar convite</Button>
   </div>
@@ -107,7 +107,7 @@ function AceiteNovoUsuario({ token, onAceito }: { token: string; onAceito: () =>
       <FieldLabel htmlFor="aceite-senha">Senha</FieldLabel>
       <Input id="aceite-senha" type="password" autoComplete="new-password" aria-invalid={!!errors.senha}
         aria-describedby={errorId('senha') ?? 'aceite-senha-ajuda'} {...register('senha')} />
-      <p id="aceite-senha-ajuda" className="text-xs text-muted-foreground">Ao menos 8 caracteres, com letras e números.</p>
+      <p id="aceite-senha-ajuda" className="text-xs text-muted-foreground">Use pelo menos 8 caracteres, com letras e números.</p>
       <FieldError id={errorId('senha')} errors={[errors.senha]} />
     </Field>
     <Field data-invalid={!!errors.confirmacao}>

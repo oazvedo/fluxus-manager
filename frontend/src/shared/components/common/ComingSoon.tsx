@@ -12,7 +12,7 @@ export function ComingSoon({ title }: { title: string }) {
       </div>
       <div className="space-y-1">
         <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
-        <p className="text-sm text-muted-foreground">Este módulo está em desenvolvimento e ficará disponível em breve.</p>
+        <p className="text-sm text-muted-foreground">Este módulo ainda está em desenvolvimento.</p>
       </div>
       <Link to="/" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
         Voltar ao início

@@ -8,7 +8,7 @@ export function NotFound() {
       <p className="text-5xl font-semibold tracking-tight text-muted-foreground/40">404</p>
       <div className="space-y-1">
         <h1 className="text-lg font-semibold tracking-tight">Página não encontrada</h1>
-        <p className="text-sm text-muted-foreground">O endereço acessado não existe ou foi movido.</p>
+        <p className="text-sm text-muted-foreground">Confira o endereço digitado ou volte ao início.</p>
       </div>
       <Link to="/" className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}>
         Voltar ao início
