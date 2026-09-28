@@ -24,3 +24,12 @@ export const navigation: NavGroup[] = [
     ],
   },
 ]
+
+/** Item de menu correspondente ao caminho: exato em "/", e por segmento nas demais (não confunde /empresas com /empresasX). */
+export function matchesNav(to: string, pathname: string) {
+  return to === '/' ? pathname === '/' : pathname === to || pathname.startsWith(`${to}/`)
+}
+
+export function findNavGroup(pathname: string) {
+  return navigation.find((group) => group.items.some((item) => matchesNav(item.to, pathname)))
+}

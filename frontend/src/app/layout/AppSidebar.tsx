@@ -11,19 +11,19 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/shared/components/ui/sidebar'
-import { navigation } from './navigation'
+import { menuPress } from '@/shared/lib/motion'
+import { matchesNav, navigation } from './navigation'
 import { SessionMenu } from './SessionMenu'
 
 export function AppSidebar() {
   const { pathname } = useLocation()
-  const isActive = (to: string) => (to === '/' ? pathname === '/' : pathname.startsWith(to))
 
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<NavLink to="/" />}>
+            <SidebarMenuButton size="lg" tooltip="Início" className={menuPress} render={<NavLink to="/" />}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-foreground text-sm font-semibold text-background">
                 F
               </div>
@@ -42,18 +42,22 @@ export function AppSidebar() {
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton
-                      isActive={isActive(item.to)}
-                      tooltip={item.title}
-                      render={<NavLink to={item.to} />}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {group.items.map((item) => {
+                  const active = matchesNav(item.to, pathname)
+                  return (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarMenuButton
+                        isActive={active}
+                        tooltip={item.title}
+                        className={`text-sidebar-foreground/80 hover:text-sidebar-foreground ${menuPress}`}
+                        render={<NavLink to={item.to} />}
+                      >
+                        <item.icon aria-hidden="true" />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
