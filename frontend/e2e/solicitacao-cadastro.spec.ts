@@ -12,7 +12,7 @@ const resumo = {
 }
 const detalhe = {
   ...resumo, responsavelTelefone: '11987654321', decididaPor: null, observacaoInterna: null, motivoRecusa: null, empresaId: null,
-  historico: [{ evento: 'Criada', em: '2026-09-27T13:00:00Z', por: null }, { evento: 'EmailVerificado', em: '2026-09-27T13:10:00Z', por: null }],
+  historico: [{ evento: 'Criada', em: '2026-09-27T13:00:00Z', por: null }, { evento: 'Verificada', em: '2026-09-27T13:10:00Z', por: null }],
   emails: [{ tipo: 'Verificacao', status: 'Enviado', tentativas: 1, ultimaTentativaEm: '2026-09-27T13:00:05Z' }],
 }
 

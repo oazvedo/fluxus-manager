@@ -25,16 +25,15 @@ const tipos: Record<string, string> = {
 
 const eventos: Record<string, string> = {
   Criada: 'Solicitação recebida',
-  EmailVerificado: 'E-mail confirmado',
-  Aprovada: 'Aprovada',
-  Recusada: 'Recusada',
-  EmpresaCriada: 'Empresa criada',
-  ConviteEnviado: 'Convite enviado',
-  EmailReenviado: 'E-mail reenviado',
+  VerificacaoReenviada: 'Link de confirmação reenviado',
+  Verificada: 'E-mail confirmado',
   Visualizada: 'Detalhe consultado',
+  Aprovada: 'Aprovada, empresa criada e convite enviado',
+  Recusada: 'Recusada',
+  EmailsReenviados: 'E-mails reenviados',
 }
 
-/** "EmailReenviado" → "Email reenviado": nome legível para eventos que a tela ainda não conhece. */
+/** "EventoNovo" → "Evento novo": nome legível para eventos que a tela ainda não conhece. */
 function legivel(value: string) {
   const texto = value.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
   return texto.charAt(0).toUpperCase() + texto.slice(1)

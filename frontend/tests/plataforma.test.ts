@@ -47,7 +47,7 @@ describe('fila de solicitações', () => {
   })
 
   it('evento ou e-mail novo da API ganha nome legível em vez de sumir', () => {
-    expect(eventoRotulo('EmailVerificado')).toBe('E-mail confirmado')
+    expect(eventoRotulo('Verificada')).toBe('E-mail confirmado')
     expect(eventoRotulo('ConviteReenviado')).toBe('Convite reenviado')
     expect(tipoEmailRotulo('Aprovacao')).toBe('Aprovação e convite')
     expect(tipoEmailRotulo('LembreteAnalise')).toBe('Lembrete analise')
