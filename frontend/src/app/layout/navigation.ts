@@ -1,7 +1,8 @@
-import { Building2, House, MailPlus, ShieldCheck, Store, Users, type LucideIcon } from 'lucide-react'
+import { Building2, House, Inbox, MailPlus, ShieldCheck, Store, Users, type LucideIcon } from 'lucide-react'
 
 export type NavItem = { title: string; to: string; icon: LucideIcon }
-export type NavGroup = { label: string; items: NavItem[] }
+/** `plataforma`: grupo da equipe Fluxus, só para administradores da plataforma. */
+export type NavGroup = { label: string; items: NavItem[]; plataforma?: true }
 
 export const navigation: NavGroup[] = [
   {
@@ -23,11 +24,21 @@ export const navigation: NavGroup[] = [
       { title: 'Convites', to: '/convites', icon: MailPlus },
     ],
   },
+  {
+    label: 'Plataforma',
+    plataforma: true,
+    items: [{ title: 'Solicitações de cadastro', to: '/plataforma/solicitacoes', icon: Inbox }],
+  },
 ]
 
 /** Item de menu correspondente ao caminho: exato em "/", e por segmento nas demais (não confunde /empresas com /empresasX). */
 export function matchesNav(to: string, pathname: string) {
   return to === '/' ? pathname === '/' : pathname === to || pathname.startsWith(`${to}/`)
+}
+
+/** Grupos que a pessoa vê: o da plataforma só com o papel global. */
+export function visibleNavigation(administradorPlataforma: boolean) {
+  return navigation.filter((group) => !group.plataforma || administradorPlataforma)
 }
 
 export function findNavGroup(pathname: string) {

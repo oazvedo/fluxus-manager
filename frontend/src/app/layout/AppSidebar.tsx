@@ -13,11 +13,13 @@ import {
 } from '@/shared/components/ui/sidebar'
 import { BrandSymbol, BrandWordmark } from '@/shared/components/brand/BrandMark'
 import { menuPress } from '@/shared/lib/motion'
-import { matchesNav, navigation } from './navigation'
+import { useSession } from '@/core/auth/session'
+import { matchesNav, visibleNavigation } from './navigation'
 import { SessionMenu } from './SessionMenu'
 
 export function AppSidebar() {
   const { pathname } = useLocation()
+  const groups = visibleNavigation(useSession()?.administradorPlataforma === true)
 
   return (
     <Sidebar variant="inset" collapsible="icon">
@@ -38,7 +40,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {navigation.map((group) => (
+        {groups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
