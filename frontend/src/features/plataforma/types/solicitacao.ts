@@ -25,7 +25,7 @@ export type SolicitacaoDetalhe = SolicitacaoResumo & {
   observacaoInterna: string | null
   motivoRecusa: string | null
   empresaId: string | null
-  historico: { evento: string; em: string; por: string | null }[]
+  historico: { evento: string; em: string; por: { id: string; nome: string } | null }[]
   emails: { tipo: string; status: EntregaStatus; tentativas: number; ultimaTentativaEm: string | null }[]
 }
 

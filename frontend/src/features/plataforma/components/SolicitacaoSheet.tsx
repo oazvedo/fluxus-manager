@@ -125,7 +125,7 @@ function Detalhe({ solicitacao, onClose }: { solicitacao: SolicitacaoDetalhe; on
         <ol className="space-y-3 text-sm">
           {solicitacao.historico.map((item, index) => (
             <li key={`${item.evento}-${item.em}-${index}`} className="space-y-0.5">
-              <p>{eventoRotulo(item.evento)}{item.por ? <span className="text-muted-foreground"> · {item.por}</span> : null}</p>
+              <p>{eventoRotulo(item.evento)}{item.por ? <span className="text-muted-foreground"> · {item.por.nome}</span> : null}</p>
               <time dateTime={item.em} className="block text-muted-foreground tabular-nums">{formatDateTime(item.em)}</time>
             </li>
           ))}
