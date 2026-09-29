@@ -130,13 +130,26 @@ public sealed class AuthServiceTests
             hasher ?? new FakePasswordHasher(), issuer, new FakeRefreshRepository(), new FakeUnitOfWork(), TimeProvider.System,
             Options.Create(new RefreshTokenOptions()), Options.Create(login ?? new LoginOptions()),
             new FakePasswordResetTokenRepository(), new FakeEmailSender(), Options.Create(new FrontendOptions { Url = "http://localhost:5173" }),
-            Options.Create(new PasswordResetOptions()), NullLogger<AuthService>.Instance);
+            Options.Create(new PasswordResetOptions()), new FakeAdministradorPlataformaRepository(), NullLogger<AuthService>.Instance);
 
     private sealed class FakePasswordResetTokenRepository : IPasswordResetTokenRepository
     {
         public Task<PasswordResetToken?> ObterParaUsoAsync(string hash, DateTime agora, CancellationToken cancellationToken = default)
             => Task.FromResult<PasswordResetToken?>(null);
         public void Add(PasswordResetToken token) { }
+    }
+
+    private sealed class FakeAdministradorPlataformaRepository : IAdministradorPlataformaRepository
+    {
+        public Task<bool> EhAdministradorAsync(Guid usuarioId, CancellationToken cancellationToken = default) => Task.FromResult(false);
+        public Task<AdministradorPlataforma?> ObterPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+            => Task.FromResult<AdministradorPlataforma?>(null);
+        public Task<AdministradorPlataforma?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<PagedResult<AdministradorPlataforma>> ListAsync(int page, int pageSize, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public void Add(AdministradorPlataforma entity) => throw new NotSupportedException();
+        public void Update(AdministradorPlataforma entity) => throw new NotSupportedException();
+        public void Remove(AdministradorPlataforma entity) => throw new NotSupportedException();
     }
 
     private sealed class FakeEmailSender : IEmailSender

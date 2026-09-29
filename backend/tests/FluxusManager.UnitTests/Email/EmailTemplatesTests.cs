@@ -53,4 +53,32 @@ public class EmailTemplatesTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => EmailTemplates.RecuperacaoSenha("ana@empresa.com", "Ana", Link, TimeSpan.Zero));
     }
+
+    [Fact]
+    public void EmailsDaSolicitacaoDeCadastro_TrazemEmpresaLinkEPrazo()
+    {
+        var verificacao = EmailTemplates.VerificacaoSolicitacao("ana@acme.com", "Ana", "Acme Ltda", Link, TimeSpan.FromHours(24));
+        var analise = EmailTemplates.SolicitacaoEmAnalise("ana@acme.com", "Ana", "Acme Ltda", Link, 30);
+        var aprovada = EmailTemplates.SolicitacaoAprovada("ana@acme.com", "Ana", "Acme Ltda", Link, TimeSpan.FromHours(72));
+
+        Assert.All(new[] { verificacao, analise, aprovada }, m =>
+        {
+            Assert.Equal("ana@acme.com", m.Para);
+            Assert.Contains("Acme Ltda", m.Assunto);
+            Assert.Contains(Link, m.Texto);
+        });
+        Assert.Contains("24 horas", verificacao.Texto);
+        Assert.Contains("30 dias", analise.Texto);
+        Assert.Contains("72 horas", aprovada.Texto);
+    }
+
+    [Fact]
+    public void SolicitacaoRecusada_TrazOMotivoEscapadoNoHtml()
+    {
+        var mensagem = EmailTemplates.SolicitacaoRecusada("ana@acme.com", "Ana", "Acme Ltda", "CNPJ <inativo> na Receita", Link);
+
+        Assert.Contains("Motivo: CNPJ <inativo> na Receita", mensagem.Texto);
+        Assert.Contains("CNPJ &lt;inativo&gt; na Receita", mensagem.Html);
+        Assert.DoesNotContain("<inativo>", mensagem.Html);
+    }
 }

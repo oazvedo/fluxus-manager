@@ -22,6 +22,7 @@ public class ExceptionFilter(
             NotFoundException e => (StatusCodes.Status404NotFound, "Recurso não encontrado", e.Message),
             ConflictException e => (StatusCodes.Status409Conflict, "Conflito", e.Message),
             BusinessRuleException e => (StatusCodes.Status422UnprocessableEntity, "Regra de negócio violada", e.Message),
+            ExpiredException e => (StatusCodes.Status410Gone, "Prazo encerrado", e.Message),
             _ => (StatusCodes.Status500InternalServerError, "Erro interno", UnexpectedErrorDetail(context)),
         };
 
@@ -30,6 +31,8 @@ public class ExceptionFilter(
 
         var problem = problemDetailsFactory.CreateProblemDetails(
             context.HttpContext, status, title, detail: detail, instance: context.HttpContext.Request.Path);
+        if (context.Exception is DomainException { Codigo: { } codigo })
+            problem.Type = $"/problemas/{codigo}";
 
         context.Result = new ObjectResult(problem) { StatusCode = status };
         context.ExceptionHandled = true;

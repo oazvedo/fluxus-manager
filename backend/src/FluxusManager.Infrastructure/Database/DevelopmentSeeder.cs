@@ -56,5 +56,15 @@ public static class DevelopmentSeeder
             var consultationProfile = Perfil.CriarPadrao(empresa.Id, "Consulta", "Acesso de leitura aos cadastros.", PermissionCatalog.ReadOnly);
             db.AddRange(empresa, adminProfile, consultationProfile, new UsuarioEmpresa(admin.Id, empresa.Id, adminProfile.Id));
         }, cancellationToken);
+
+        // Opt-in explícito (padrão false): o papel global nunca vem de um segredo padrão.
+        if (configuration.GetValue<bool>("DevelopmentSeed:AdministradorPlataforma"))
+            await unitOfWork.ExecuteInTransactionAsync(async ct =>
+            {
+                await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock(5959001)", ct);
+                if (await db.Set<Usuario>().AnyAsync(u => u.Id == AdminId && u.Ativo, ct)
+                    && !await db.Set<AdministradorPlataforma>().AnyAsync(a => a.UsuarioId == AdminId, ct))
+                    db.Add(new AdministradorPlataforma(AdminId));
+            }, cancellationToken);
     }
 }
