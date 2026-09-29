@@ -5,7 +5,7 @@ import { statusOrdem, statusRotulo } from '../lib/rotulos'
 import type { FiltrosSolicitacoes } from '../types/solicitacao'
 
 // Mesmo visual do Input: o select nativo já é acessível pelo teclado (igual ao formulário de convite).
-const selectClassName = 'h-8 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30'
+const selectClassName = 'h-8 w-full min-w-0 rounded-lg border border-input bg-background px-2 py-1 text-base text-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30'
 
 /** Filtros da fila: status e período de recebimento. Cada troca vai para a URL e volta à primeira página. */
 export function SolicitacoesFiltros({ filtros, filtrando, onChange, onClear }: {
