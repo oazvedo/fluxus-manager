@@ -1,5 +1,5 @@
 import type { ReactNode, Ref } from 'react'
-import { CircleAlert, CircleCheck } from 'lucide-react'
+import { CircleAlert, CircleCheck, Info } from 'lucide-react'
 import { Link, type LinkProps } from 'react-router'
 import { enterFromBelow } from '@/shared/lib/motion'
 import { cn } from '@/shared/lib/utils'
@@ -47,7 +47,8 @@ function BrandPanel() {
   return (
     <aside
       aria-label="FluxusManager"
-      className="relative hidden flex-col justify-between overflow-hidden bg-brand-surface p-10 text-brand-surface-foreground lg:flex"
+      // Fixo na altura da tela: em formulários longos a página rola e a frase do painel continua à vista.
+      className="relative hidden flex-col justify-between overflow-hidden bg-brand-surface p-10 text-brand-surface-foreground lg:sticky lg:top-0 lg:flex lg:h-svh"
     >
       <FlowField className="absolute inset-0 size-full [mask-image:linear-gradient(to_bottom,transparent_72px,black_136px),linear-gradient(to_bottom,black_35%,transparent_85%)] [mask-composite:intersect]" />
       <BrandLogo accent="var(--brand-accent)" className="relative" />
@@ -78,9 +79,11 @@ export function AuthLink({ className, ...props }: LinkProps) {
   )
 }
 
-/** Mensagem do formulário inteiro: erro (role="alert") ou confirmação (role="status"). Nunca só pela cor. */
-export function FormNotice({ tone, children }: { tone: 'error' | 'success'; children: ReactNode }) {
-  const Icon = tone === 'error' ? CircleAlert : CircleCheck
+const noticeIcons = { error: CircleAlert, success: CircleCheck, info: Info }
+
+/** Mensagem do formulário inteiro: erro (role="alert"), confirmação ou orientação (role="status"). Nunca só pela cor. */
+export function FormNotice({ tone, children }: { tone: 'error' | 'success' | 'info'; children: ReactNode }) {
+  const Icon = noticeIcons[tone]
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}

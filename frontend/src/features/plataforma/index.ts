@@ -1,0 +1,1 @@
+export { plataformaRoutes } from './routes'

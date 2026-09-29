@@ -1,0 +1,1 @@
+export { solicitacaoCadastroRoutes } from './routes'

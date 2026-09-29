@@ -9,6 +9,8 @@ export type Tokens = {
   permissions: string[]
   refreshToken: string
   refreshTokenExpiresAt: string
+  /** Equipe Fluxus: vê o painel da plataforma. Só controla a interface; a API autoriza cada chamada. */
+  administradorPlataforma?: boolean
 }
 
 export type Session = Tokens & { id: string; email: string }

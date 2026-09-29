@@ -70,6 +70,11 @@ export function LoginPage() {
         <SubmitButton pending={login.isPending} size="lg" className={`w-full ${pressable}`}>Entrar</SubmitButton>
       </form>
       <AuthLink to="/esqueci-senha" className="self-center">Esqueci minha senha</AuthLink>
+      {/* Caminho de quem ainda não tem conta: afastado do formulário, em texto, sem competir com "Entrar". */}
+      <div className="flex flex-col items-center gap-1 border-t pt-6 text-center text-sm">
+        <p className="text-muted-foreground">Sua empresa ainda não usa o Fluxus?</p>
+        <AuthLink to="/solicitar-cadastro" className="font-medium text-foreground underline">Solicitar cadastro da empresa</AuthLink>
+      </div>
     </AuthShell>
   )
 }
