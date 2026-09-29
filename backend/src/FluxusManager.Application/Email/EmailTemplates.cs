@@ -36,6 +36,62 @@ public static class EmailTemplates
         return Montar(para, assunto, "Redefinir senha", paragrafos, "Redefinir senha", link, rodape);
     }
 
+    public static MensagemEmail VerificacaoSolicitacao(string para, string nome, string razaoSocial, string link, TimeSpan validade)
+    {
+        var assunto = $"Confirme o seu e-mail para o cadastro de {razaoSocial} no {Produto}";
+        var paragrafos = new[]
+        {
+            $"Olá, {nome}.",
+            $"Recebemos o pedido de cadastro da empresa {razaoSocial}. Confirme que este e-mail é seu para enviarmos o pedido à análise. O link vale por {Validade(validade)} e só pode ser usado uma vez."
+        };
+        const string rodape = "Se você não fez este pedido, ignore este e-mail: nada será cadastrado.";
+
+        return Montar(para, assunto, "Confirme o seu e-mail", paragrafos, "Confirmar e-mail", link, rodape);
+    }
+
+    public static MensagemEmail SolicitacaoEmAnalise(string para, string nome, string razaoSocial, string link, int validadeDias)
+    {
+        var assunto = $"Pedido de cadastro de {razaoSocial} em análise";
+        var paragrafos = new[]
+        {
+            $"Olá, {nome}.",
+            $"O seu e-mail foi confirmado e o pedido de cadastro da empresa {razaoSocial} está em análise pela equipe do {Produto}. Avisaremos por e-mail quando houver uma decisão.",
+            $"Use o link abaixo para acompanhar o pedido. Ele vale por {validadeDias} dias e só mostra a situação, sem permitir alterações."
+        };
+        const string rodape = "Guarde este e-mail. Se você não fez este pedido, ignore esta mensagem.";
+
+        return Montar(para, assunto, "Pedido em análise", paragrafos, "Acompanhar pedido", link, rodape);
+    }
+
+    public static MensagemEmail SolicitacaoAprovada(string para, string nome, string razaoSocial, string link, TimeSpan validade)
+    {
+        var assunto = $"Cadastro de {razaoSocial} aprovado no {Produto}";
+        var paragrafos = new[]
+        {
+            $"Olá, {nome}.",
+            $"O cadastro da empresa {razaoSocial} foi aprovado e você foi convidado como administrador dela.",
+            $"Abra o link abaixo para aceitar o convite e criar a sua senha, ou entrar com a conta que você já tem. O link vale por {Validade(validade)}."
+        };
+        const string rodape = "Se o link vencer, peça um novo envio à equipe do FluxusManager.";
+
+        return Montar(para, assunto, "Cadastro aprovado", paragrafos, "Aceitar convite", link, rodape);
+    }
+
+    public static MensagemEmail SolicitacaoRecusada(string para, string nome, string razaoSocial, string motivo, string link)
+    {
+        var assunto = $"Pedido de cadastro de {razaoSocial} não aprovado";
+        var paragrafos = new[]
+        {
+            $"Olá, {nome}.",
+            $"Analisamos o pedido de cadastro da empresa {razaoSocial} e ele não foi aprovado.",
+            $"Motivo: {motivo}",
+            "Se a situação mudar, você pode enviar um novo pedido."
+        };
+        const string rodape = "O link acima só mostra a situação do pedido e não permite alterações.";
+
+        return Montar(para, assunto, "Pedido não aprovado", paragrafos, "Ver o pedido", link, rodape);
+    }
+
     private static MensagemEmail Montar(string para, string assunto, string titulo, string[] paragrafos, string acao, string link, string rodape)
     {
         if (!Uri.TryCreate(link, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))

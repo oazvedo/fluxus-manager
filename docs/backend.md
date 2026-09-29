@@ -490,6 +490,102 @@ permissões de vínculo: `usuarios-empresas.visualizar` para consultar e `usuari
 - `Frontend:Url` é obrigatório (URL absoluta HTTP(S) do frontend). Em Development é `http://localhost:5173`; no
   deploy vem de `PUBLIC_URL` em `deploy/.env`. Nunca é montado a partir do `Host` da requisição.
 
+## Solicitação de cadastro de empresa
+
+Um representante pede a entrada da empresa no Fluxus sem ter conta, confirma o e-mail e acompanha a decisão. Um
+administrador da plataforma aprova (cria a empresa) ou recusa. Nada é criado antes da aprovação.
+
+**Estados** (`status`): `AguardandoVerificacao` → `PendenteAnalise` → `Aprovada` ou `Recusada`. Nada volta.
+"Expirado" não é estado: é o link vencido, respondido com 410.
+
+### Rotas públicas
+
+Anônimas, com o limite por IP das rotas públicas e `Cache-Control: no-store`. O token vai sempre no corpo.
+
+| Ação | Verbo e rota | Resposta |
+| --- | --- | --- |
+| Solicitar | `POST /solicitacoes-cadastro` com `{ razaoSocial, nomeFantasia?, cnpj, responsavelNome, responsavelEmail, responsavelTelefone? }` | **202** `{ mensagem }`, sempre a mesma |
+| Confirmar e-mail | `POST /solicitacoes-cadastro/verificar` com `{ token }` | 200 `{ status }` |
+| Pedir novo link | `POST /solicitacoes-cadastro/reenviar-verificacao` com `{ email }` | **202** `{ mensagem }`, sempre a mesma |
+| Acompanhar | `POST /solicitacoes-cadastro/acompanhar` com `{ token }` | 200 `{ status, razaoSocial, criadaEm, verificadaEm?, decididaEm?, motivoRecusa? }` |
+
+- Token desconhecido ou já usado: 404 com `type` `/problemas/token-invalido`. Vencido: 410 com `/problemas/token-expirado`.
+- **Anti-enumeração:** o envio responde igual quando o CNPJ já é cliente (nada é criado nem enviado), quando já
+  existe pedido ativo com o mesmo CNPJ ou e-mail (nada muda) e quando é o mesmo pedido ainda sem confirmação (um
+  link novo é enviado e o anterior deixa de valer). Só erros de formato respondem diferente (400 por campo).
+- Um pedido ativo por CNPJ e por e-mail (índices únicos filtrados). Um pedido de outra pessoa nunca confirmado e
+  com o link vencido não segura o CNPJ: é descartado (exclusão lógica, junto com o histórico e os e-mails dele)
+  quando chega um pedido novo. Se nenhum link chegou a sair (e-mail nunca entregue), o prazo conta do pedido.
+- **Reenvio do link:** no máximo um a cada 2 minutos e 5 por pedido (`SolicitacaoCadastro.IntervaloMinimoReenvio` e
+  `MaxReenviosVerificacao`). Fora disso o pedido de reenvio é ignorado com a mesma resposta, para a rota pública não
+  servir para inundar a caixa de ninguém.
+- O acompanhamento é só leitura e não mostra CNPJ, observação interna nem quem decidiu.
+- A verificação só acontece por `POST`: abrir o link não consome o token (leitores de link de antivírus não o gastam).
+
+### Administrador da plataforma
+
+Papel global, separado das permissões de empresa: a tabela `administradores_plataforma` diz quem é. A policy
+`PlataformaAdmin` consulta o banco a cada requisição, então revogar vale na hora, e nenhuma permissão de tenant
+(nem `empresas.editar`) dá acesso. Não existe endpoint para conceder o papel. Login e refresh devolvem
+`administradorPlataforma` só para a interface decidir o que mostrar.
+
+```bash
+# Com a connection string da API. Executa e encerra, sem subir a API.
+dotnet run --project backend/src/FluxusManager.API -- plataforma promover pessoa@empresa.com
+dotnet run --project backend/src/FluxusManager.API -- plataforma revogar pessoa@empresa.com
+```
+
+A pessoa precisa ter conta ativa. A alteração fica na auditoria com o usuário `cli:plataforma`. Em Development,
+`DevelopmentSeed:AdministradorPlataforma=true` promove também o `admin@fluxus.local` do seed (padrão `false`).
+
+| Ação | Verbo e rota | Resposta |
+| --- | --- | --- |
+| Fila | `GET /plataforma/solicitacoes-cadastro?status=&de=&ate=&page=1&pageSize=20` | 200 paginado (`de`/`ate` em `yyyy-MM-dd`, pela data do pedido) |
+| Detalhe | `GET /plataforma/solicitacoes-cadastro/{id}` | 200 com histórico e entregas de e-mail; a leitura entra no histórico (`Visualizada`) |
+| Aprovar | `POST /plataforma/solicitacoes-cadastro/{id}/aprovar` com `{ observacaoInterna? }` | 200 com o detalhe |
+| Recusar | `POST /plataforma/solicitacoes-cadastro/{id}/recusar` com `{ motivo, observacaoInterna? }` | 200; `motivo` (10–500) vai para o solicitante |
+| Reenviar e-mails | `POST /plataforma/solicitacoes-cadastro/{id}/reenviar-emails` | 200; tenta de novo os não entregues |
+
+- Sem login: 401. Autenticado sem o papel: 403.
+- **Aprovar** só a partir de `PendenteAnalise` (senão 409 `/problemas/status-invalido`). Numa transação com bloqueio
+  da solicitação, cria a empresa, os perfis padrão (`Administrador` com todas as permissões e `Consulta`) e o
+  convite do responsável para o perfil `Administrador`. Repetir ou aprovar em paralelo devolve o resultado já
+  gravado, sem criar outra empresa. CNPJ que virou cliente nesse meio-tempo: 409 `/problemas/cnpj-ja-cadastrado`.
+- O responsável entra pelo fluxo normal de [convites](#convites): se já tem conta, só ganha o vínculo; senão cria
+  a senha no aceite. A aprovação nunca cria senha nem concede acesso sem o aceite.
+- **Recusar** só a partir de `PendenteAnalise`; recusar de novo devolve o mesmo resultado.
+- Valores do detalhe: `historico[].evento` é `Criada`, `VerificacaoReenviada`, `Verificada`, `Visualizada`, `Aprovada`,
+  `Recusada` ou `EmailsReenviados`; `emails[].tipo` é `Verificacao`, `Acompanhamento`, `Aprovacao` ou `Recusa`;
+  `emails[].status` é `Pendente`, `Enviado` ou `Falhou`.
+
+### E-mails e reenvio
+
+Os e-mails da solicitação usam uma fila no banco (`solicitacoes_cadastro_emails`, um registro por tipo), para uma
+falha do servidor de e-mail nunca desfazer o pedido nem a aprovação:
+
+1. O caso de uso grava o e-mail como `Pendente` junto com a mudança de estado e sinaliza a rotina de envio.
+2. `SolicitacaoCadastroEmailWorker` (serviço em segundo plano) envia os pendentes na hora e revisa a fila a cada
+   30 segundos. O token do link é gerado no envio e só o hash é gravado junto com `Enviado`; se o envio falhar, o
+   token é descartado e o e-mail volta como `Falhou` com espera crescente (1, 2, 4… até 60 minutos), por até 8
+   tentativas automáticas.
+3. Aprovar, recusar e reenviar tentam o envio na hora, para o administrador ver o resultado no detalhe
+   (`emailPendente`, `emails[]`). `reenviar-emails` recoloca na fila o que não foi entregue, inclusive depois das
+   tentativas automáticas.
+
+Reenviar nunca cria outra empresa ou convite: o e-mail de aprovação renova o link do convite já criado. Cada envio
+de um link novo invalida o anterior do mesmo tipo. O log da falha registra só o tipo do erro, sem destinatário nem
+token. Um envio marcado `Enviando` há mais de 5 minutos (processo interrompido) volta a ser tentado; dois processos
+não enviam o mesmo e-mail ao mesmo tempo (`xmin` como token de concorrência).
+
+| Chave (`SolicitacoesCadastro`) | Padrão | Observação |
+| --- | --- | --- |
+| `VerificacaoValidadeHoras` | `24` | Prazo do link de confirmação, contado do último envio. |
+| `AcompanhamentoValidadeDias` | `30` | Prazo do link de acompanhamento, contado do último e-mail que o trouxe. |
+| `EnvioAutomatico` | `true` | Liga a rotina em segundo plano. Os testes a desligam e processam a fila quando querem. |
+
+Links: `{Frontend:Url}/solicitar-cadastro/verificar?token=…`, `{Frontend:Url}/solicitar-cadastro/acompanhar?token=…`
+e, na aprovação, o link do convite. Os hashes dos tokens ficam fora da auditoria.
+
 ## E-mail
 
 Services enviam e-mail por `IEmailSender.EnviarAsync(MensagemEmail)` (`Application/Interfaces`). A implementação

@@ -28,6 +28,7 @@ public class AuthService(
     IEmailSender emailSender,
     IOptions<FrontendOptions> frontendOptions,
     IOptions<PasswordResetOptions> passwordResetOptions,
+    IAdministradorPlataformaRepository administradoresPlataforma,
     ILogger<AuthService> logger) : IAuthService
 {
     private DateTime Agora => clock.GetUtcNow().UtcDateTime;
@@ -61,7 +62,7 @@ public class AuthService(
             var empresa = await empresas.GetByIdAsync(vinculo.EmpresaId, cancellationToken);
             if (empresa is { Ativo: true } && vinculo.Perfil is { Ativo: true } perfil && perfil.TenantId == empresa.Id)
             {
-                var response = CriarToken(usuario, empresa.Id, perfil);
+                var response = await CriarTokenAsync(usuario, empresa.Id, perfil, cancellationToken);
                 var secret = SecretToken.Create();
                 var expires = clock.ExpiracaoEmSegundos(TimeSpan.FromDays(refreshOptions.Value.DuracaoDias));
                 refreshTokens.Add(new RefreshToken(usuario.Id, empresa.Id, Guid.CreateVersion7(), SecretToken.Hash(secret), expires));
@@ -83,7 +84,7 @@ public class AuthService(
             || vinculo.Perfil.TenantId != empresaId)
             throw new NotFoundException("Vínculo usuário-empresa ativo", $"{userId}/{empresaId}");
 
-        return CriarToken(usuario, empresaId, vinculo.Perfil);
+        return await CriarTokenAsync(usuario, empresaId, vinculo.Perfil, cancellationToken);
     }
 
     public async Task<TokenResponse?> RefreshAsync(RefreshRequest request, CancellationToken cancellationToken = default)
@@ -198,10 +199,12 @@ public class AuthService(
         }, cancellationToken);
     }
 
-    private TokenResponse CriarToken(Usuario usuario, Guid empresaId, Perfil perfil)
+    private async Task<TokenResponse> CriarTokenAsync(Usuario usuario, Guid empresaId, Perfil perfil, CancellationToken cancellationToken)
     {
         var permissions = perfil.Permissoes.Select(permissao => permissao.Codigo).Distinct(StringComparer.Ordinal).ToArray();
         var (token, expiresIn) = tokenIssuer.Create(usuario.Id, usuario.Email, empresaId, perfil.Nome, permissions);
-        return new TokenResponse(token, "Bearer", expiresIn, empresaId, perfil.Nome, permissions);
+        var administradorPlataforma = await administradoresPlataforma.EhAdministradorAsync(usuario.Id, cancellationToken);
+        return new TokenResponse(token, "Bearer", expiresIn, empresaId, perfil.Nome, permissions,
+            AdministradorPlataforma: administradorPlataforma);
     }
 }

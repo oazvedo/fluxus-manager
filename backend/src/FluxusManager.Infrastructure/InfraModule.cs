@@ -60,6 +60,9 @@ public static class InfraModule
         services.AddScoped<IFilialRepository, FilialRepository>();
         services.AddScoped<IPerfilRepository, PerfilRepository>();
         services.AddScoped<IConviteRepository, ConviteRepository>();
+        services.AddScoped<ISolicitacaoCadastroRepository, SolicitacaoCadastroRepository>();
+        services.AddScoped<ISolicitacaoCadastroEmailRepository, SolicitacaoCadastroEmailRepository>();
+        services.AddScoped<IAdministradorPlataformaRepository, AdministradorPlataformaRepository>();
     }
 
     private static void AddSecurity(IServiceCollection services)
@@ -82,5 +85,6 @@ public static class InfraModule
 
         // Sem estado: cada envio abre a própria conexão SMTP.
         services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddHostedService<SolicitacaoCadastroEmailWorker>();
     }
 }

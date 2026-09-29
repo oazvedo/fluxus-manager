@@ -31,6 +31,8 @@ public class ApiFactory(string environment, bool useTestAuthentication = true, b
         builder.UseSetting("Database:MigrateOnStartup", "false");
         builder.UseSetting("DevelopmentSeed:Enabled", "false");
         builder.UseSetting("RefreshTokens:LimpezaHabilitada", "false");
+        // Os testes disparam a entrega dos e-mails da solicitação de cadastro quando querem (ISolicitacaoCadastroEmails).
+        builder.UseSetting("SolicitacoesCadastro:EnvioAutomatico", "false");
         builder.UseSetting("Filiais:ValidarRaizCnpjDaEmpresa", "false");
         // Só para a validação na subida também em Production; nenhum teste daqui envia e-mail.
         builder.UseSetting("Email:Host", "localhost");
