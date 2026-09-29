@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
-import { Loader2, LogOut, Moon, Sun } from 'lucide-react'
+import { KeyRound, Loader2, LogOut, Moon, Sun } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { notify } from '@/shared/lib/notify'
 import { sair } from '@/core/auth/actions'
 import { useSession } from '@/core/auth/session'
@@ -20,11 +21,12 @@ import { iconHidden, iconSwap, pressable } from '@/shared/lib/motion'
 import { cn } from '@/shared/lib/utils'
 
 /*
- * Rodapé numa linha só: quem está na sessão e as duas ações dela (tema, sair) como ícones.
- * Com a barra recolhida, sobra o avatar, que abre um menu com as mesmas duas ações.
+ * O perfil abre o menu da conta tanto com a barra expandida quanto recolhida.
+ * Tema e sair continuam disponíveis como ações rápidas quando há espaço.
  */
 export function SessionMenu() {
   const session = useSession()
+  const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
   const escuro = theme === 'dark'
   const temaLabel = escuro ? 'Ativar tema claro' : 'Ativar tema escuro'
@@ -47,48 +49,51 @@ export function SessionMenu() {
 
   return (
     <SidebarFooter>
-      {/* Expandida */}
-      <div className="flex items-center gap-2 px-1 group-data-[collapsible=icon]:hidden">
-        <Avatar inicial={inicial} />
-        <div className="grid min-w-0 flex-1 text-xs leading-tight" title={session?.email}>
-          <span className="truncate font-medium text-sidebar-foreground">{session?.email}</span>
-          <span className="truncate text-muted-foreground">{session?.role}</span>
-        </div>
-        <Tooltip>
-          <TooltipTrigger
-            render={<Button variant="ghost" size="icon-sm" aria-label={temaLabel} aria-pressed={escuro} onClick={toggleTheme}
-              className={cn('text-muted-foreground hover:text-sidebar-foreground', pressable)} />}
-          >
-            {temaIcone}
-          </TooltipTrigger>
-          <TooltipContent side="top">{temaLabel}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger
-            render={<Button variant="ghost" size="icon-sm" aria-label="Sair da conta" onClick={() => logout.mutate()}
-              disabled={logout.isPending} aria-busy={logout.isPending || undefined}
-              className={cn('text-muted-foreground hover:text-sidebar-foreground', pressable)} />}
-          >
-            {sairIcone}
-          </TooltipTrigger>
-          <TooltipContent side="top">Sair da conta</TooltipContent>
-        </Tooltip>
-      </div>
-
-      {/* Recolhida */}
       <DropdownMenu>
-        <DropdownMenuTrigger
-          render={<button type="button" aria-label={`Conta de ${session?.email ?? 'usuário'}`}
-            className={cn('hidden self-center rounded-full outline-hidden ring-sidebar-ring focus-visible:ring-2 group-data-[collapsible=icon]:flex', pressable)} />}
-        >
-          <Avatar inicial={inicial} />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent side="right" align="end" className="w-56">
-          {/* No Base UI, o rótulo só existe dentro de um grupo. */}
+        <div className="flex items-center gap-2 px-1">
+          <DropdownMenuTrigger
+            render={<button type="button" aria-label={`Abrir opções da conta de ${session?.email ?? 'usuário'}`}
+              className={cn(
+                'flex min-w-0 flex-1 items-center gap-2 rounded-md text-left outline-hidden ring-sidebar-ring focus-visible:ring-2',
+                'group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center',
+                pressable,
+              )} />}
+          >
+            <Avatar inicial={inicial} />
+            <div className="grid min-w-0 flex-1 text-xs leading-tight group-data-[collapsible=icon]:hidden" title={session?.email}>
+              <span className="truncate font-medium text-sidebar-foreground">{session?.email}</span>
+              <span className="truncate text-muted-foreground">{session?.role}</span>
+            </div>
+          </DropdownMenuTrigger>
+          <Tooltip>
+            <TooltipTrigger
+              render={<Button variant="ghost" size="icon-sm" aria-label={temaLabel} aria-pressed={escuro} onClick={toggleTheme}
+                className={cn('text-muted-foreground hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden', pressable)} />}
+            >
+              {temaIcone}
+            </TooltipTrigger>
+            <TooltipContent side="top">{temaLabel}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={<Button variant="ghost" size="icon-sm" aria-label="Sair da conta" onClick={() => logout.mutate()}
+                disabled={logout.isPending} aria-busy={logout.isPending || undefined}
+                className={cn('text-muted-foreground hover:text-sidebar-foreground group-data-[collapsible=icon]:hidden', pressable)} />}
+            >
+              {sairIcone}
+            </TooltipTrigger>
+            <TooltipContent side="top">Sair da conta</TooltipContent>
+          </Tooltip>
+        </div>
+        <DropdownMenuContent side="top" align="end" className="w-56">
           <DropdownMenuGroup>
             <DropdownMenuLabel className="truncate">{session?.email}</DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => navigate('/conta/trocar-senha')}>
+            <KeyRound aria-hidden="true" />
+            Trocar senha
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={toggleTheme}>{temaIcone}{temaLabel}</DropdownMenuItem>
           <DropdownMenuItem onClick={() => logout.mutate()} disabled={logout.isPending}>{sairIcone}Sair da conta</DropdownMenuItem>
         </DropdownMenuContent>

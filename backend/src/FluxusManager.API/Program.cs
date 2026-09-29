@@ -60,6 +60,7 @@ builder.Services.AddAuthorization(options =>
     foreach (var permission in PermissionCatalog.All)
         options.AddPolicy(permission, policy => policy.RequireAuthenticatedUser().RequireClaim("permissions", permission));
 });
+builder.Services.AddAutorizacaoPlataforma();
 builder.Services.AddInfraModule(builder.Configuration);
 builder.Services.AddRateLimitingPublico(builder.Configuration);
 builder.Services.AddProxyConfiavel(builder.Configuration);
@@ -72,6 +73,13 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await app.Services.MigrateDatabaseAsync();
 
 await app.Services.SeedDevelopmentAsync();
+
+// `dotnet run --project src/FluxusManager.API -- plataforma promover|revogar <email>`: executa e encerra, sem subir a API.
+if (args is ["plataforma", ..])
+{
+    Environment.ExitCode = await app.Services.ExecutarComandoPlataformaAsync(args[1..]);
+    return;
+}
 
 // Atrás do nginx, o IP do cliente vem do X-Forwarded-For (usado pelo rate limiting e pelos logs).
 app.UseForwardedHeaders();

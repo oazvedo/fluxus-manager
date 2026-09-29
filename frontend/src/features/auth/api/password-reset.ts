@@ -7,3 +7,7 @@ export async function solicitarRedefinicaoSenha(email: string) {
 export async function redefinirSenha(token: string, novaSenha: string) {
   await http.post('/auth/reset-password', { token, novaSenha })
 }
+
+export async function trocarSenha(senhaAtual: string, novaSenha: string) {
+  await http.post('/auth/change-password', { senhaAtual, novaSenha })
+}

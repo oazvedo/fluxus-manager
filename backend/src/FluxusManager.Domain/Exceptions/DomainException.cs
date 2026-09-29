@@ -4,7 +4,11 @@ namespace FluxusManager.Domain.Exceptions;
 /// Erro esperado de negócio. A API converte cada tipo num status HTTP (ver ExceptionFilter);
 /// a mensagem é devolvida ao cliente, então deve ser clara e sem dados sensíveis.
 /// </summary>
-public abstract class DomainException(string message, Exception? innerException = null) : Exception(message, innerException);
+public abstract class DomainException(string message, Exception? innerException = null) : Exception(message, innerException)
+{
+    /// <summary>Identifica o problema para o cliente reagir sem ler a mensagem (vira o <c>type</c> do ProblemDetails).</summary>
+    public string? Codigo { get; init; }
+}
 
 /// <summary>Recurso inexistente (ou de outro tenant) → 404.</summary>
 public class NotFoundException(string message) : DomainException(message)
@@ -27,3 +31,6 @@ public class DuplicateKeyException(Exception innerException)
 
 /// <summary>Operação válida no formato, mas que viola uma regra de negócio → 422.</summary>
 public class BusinessRuleException(string message) : DomainException(message);
+
+/// <summary>O recurso existiu, mas o prazo dele acabou (ex.: link vencido) → 410.</summary>
+public class ExpiredException(string message) : DomainException(message);

@@ -22,6 +22,40 @@ namespace FluxusManager.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("FluxusManager.Domain.Entities.AdministradorPlataforma", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("atualizado_em");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<bool>("Excluido")
+                        .HasColumnType("boolean")
+                        .HasColumnName("excluido");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_administradores_plataforma");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_administradores_plataforma_usuario_id")
+                        .HasFilter("excluido = false");
+
+                    b.ToTable("administradores_plataforma", (string)null);
+                });
+
             modelBuilder.Entity("FluxusManager.Domain.Entities.Convite", b =>
                 {
                     b.Property<Guid>("Id")
@@ -451,6 +485,260 @@ namespace FluxusManager.Infrastructure.Migrations
                     b.ToTable("refresh_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastro", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("AcompanhamentoExpiraEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("acompanhamento_expira_em");
+
+                    b.Property<string>("AcompanhamentoTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("acompanhamento_token_hash");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("atualizado_em");
+
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("character(14)")
+                        .HasColumnName("cnpj")
+                        .IsFixedLength();
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<DateTime?>("DecididaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("decidida_em");
+
+                    b.Property<Guid?>("DecididaPorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("decidida_por_id");
+
+                    b.Property<Guid?>("EmpresaId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("empresa_id");
+
+                    b.Property<bool>("Excluido")
+                        .HasColumnType("boolean")
+                        .HasColumnName("excluido");
+
+                    b.Property<string>("MotivoRecusa")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivo_recusa");
+
+                    b.Property<string>("NomeFantasia")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome_fantasia");
+
+                    b.Property<string>("ObservacaoInterna")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("observacao_interna");
+
+                    b.Property<string>("RazaoSocial")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("razao_social");
+
+                    b.Property<string>("ResponsavelEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("responsavel_email");
+
+                    b.Property<string>("ResponsavelNome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("responsavel_nome");
+
+                    b.Property<string>("ResponsavelTelefone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("responsavel_telefone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("VerificacaoExpiraEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verificacao_expira_em");
+
+                    b.Property<string>("VerificacaoTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("verificacao_token_hash");
+
+                    b.Property<DateTime?>("VerificadaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("verificada_em");
+
+                    b.HasKey("Id")
+                        .HasName("pk_solicitacoes_cadastro");
+
+                    b.HasIndex("AcompanhamentoTokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_solicitacoes_cadastro_acompanhamento_token_hash");
+
+                    b.HasIndex("Cnpj")
+                        .IsUnique()
+                        .HasDatabaseName("ix_solicitacoes_cadastro_cnpj")
+                        .HasFilter("status IN ('AguardandoVerificacao', 'PendenteAnalise') AND excluido = false");
+
+                    b.HasIndex("DecididaPorId")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_decidida_por_id");
+
+                    b.HasIndex("EmpresaId")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_empresa_id");
+
+                    b.HasIndex("ResponsavelEmail")
+                        .IsUnique()
+                        .HasDatabaseName("ix_solicitacoes_cadastro_responsavel_email")
+                        .HasFilter("status IN ('AguardandoVerificacao', 'PendenteAnalise') AND excluido = false");
+
+                    b.HasIndex("VerificacaoTokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_solicitacoes_cadastro_verificacao_token_hash");
+
+                    b.HasIndex("Status", "CriadoEm")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_status_criado_em");
+
+                    b.ToTable("solicitacoes_cadastro", (string)null);
+                });
+
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastroEmail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("atualizado_em");
+
+                    b.Property<Guid?>("ConviteId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("convite_id");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<bool>("Excluido")
+                        .HasColumnType("boolean")
+                        .HasColumnName("excluido");
+
+                    b.Property<DateTime>("ProximaTentativaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("proxima_tentativa_em");
+
+                    b.Property<Guid>("SolicitacaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("solicitacao_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Tentativas")
+                        .HasColumnType("integer")
+                        .HasColumnName("tentativas");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo");
+
+                    b.Property<DateTime?>("UltimaTentativaEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultima_tentativa_em");
+
+                    b.Property<uint>("Versao")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.HasKey("Id")
+                        .HasName("pk_solicitacoes_cadastro_emails");
+
+                    b.HasIndex("ConviteId")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_emails_convite_id");
+
+                    b.HasIndex("SolicitacaoId", "Tipo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_solicitacoes_cadastro_emails_solicitacao_id_tipo")
+                        .HasFilter("excluido = false");
+
+                    b.HasIndex("Status", "ProximaTentativaEm")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_emails_status_proxima_tentativa_em");
+
+                    b.ToTable("solicitacoes_cadastro_emails", (string)null);
+                });
+
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastroEvento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("atualizado_em");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<bool>("Excluido")
+                        .HasColumnType("boolean")
+                        .HasColumnName("excluido");
+
+                    b.Property<Guid>("SolicitacaoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("solicitacao_id");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("tipo");
+
+                    b.Property<Guid?>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_solicitacoes_cadastro_eventos");
+
+                    b.HasIndex("UsuarioId")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_eventos_usuario_id");
+
+                    b.HasIndex("SolicitacaoId", "CriadoEm")
+                        .HasDatabaseName("ix_solicitacoes_cadastro_eventos_solicitacao_id_criado_em");
+
+                    b.ToTable("solicitacoes_cadastro_eventos", (string)null);
+                });
+
             modelBuilder.Entity("FluxusManager.Domain.Entities.Usuario", b =>
                 {
                     b.Property<Guid>("Id")
@@ -567,6 +855,16 @@ namespace FluxusManager.Infrastructure.Migrations
                     b.ToTable("usuarios_empresas", (string)null);
                 });
 
+            modelBuilder.Entity("FluxusManager.Domain.Entities.AdministradorPlataforma", b =>
+                {
+                    b.HasOne("FluxusManager.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_administradores_plataforma_usuario_usuario_id");
+                });
+
             modelBuilder.Entity("FluxusManager.Domain.Entities.Convite", b =>
                 {
                     b.HasOne("FluxusManager.Domain.Entities.Empresa", null)
@@ -653,6 +951,53 @@ namespace FluxusManager.Infrastructure.Migrations
                         .HasConstraintName("fk_refresh_tokens_usuario_usuario_id");
                 });
 
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastro", b =>
+                {
+                    b.HasOne("FluxusManager.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("DecididaPorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_solicitacoes_cadastro_usuario_decidida_por_id");
+
+                    b.HasOne("FluxusManager.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_solicitacoes_cadastro_empresas_empresa_id");
+                });
+
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastroEmail", b =>
+                {
+                    b.HasOne("FluxusManager.Domain.Entities.Convite", null)
+                        .WithMany()
+                        .HasForeignKey("ConviteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_solicitacoes_cadastro_emails_convites_convite_id");
+
+                    b.HasOne("FluxusManager.Domain.Entities.SolicitacaoCadastro", null)
+                        .WithMany("Emails")
+                        .HasForeignKey("SolicitacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_solicitacoes_cadastro_emails_solicitacoes_cadastro_solicita");
+                });
+
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastroEvento", b =>
+                {
+                    b.HasOne("FluxusManager.Domain.Entities.SolicitacaoCadastro", null)
+                        .WithMany("Eventos")
+                        .HasForeignKey("SolicitacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_solicitacoes_cadastro_eventos_solicitacoes_cadastro_solicit");
+
+                    b.HasOne("FluxusManager.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_solicitacoes_cadastro_eventos_usuario_usuario_id");
+                });
+
             modelBuilder.Entity("FluxusManager.Domain.Entities.UsuarioEmpresa", b =>
                 {
                     b.HasOne("FluxusManager.Domain.Entities.Empresa", null)
@@ -690,6 +1035,13 @@ namespace FluxusManager.Infrastructure.Migrations
                     b.Navigation("Permissoes");
 
                     b.Navigation("Vinculos");
+                });
+
+            modelBuilder.Entity("FluxusManager.Domain.Entities.SolicitacaoCadastro", b =>
+                {
+                    b.Navigation("Emails");
+
+                    b.Navigation("Eventos");
                 });
 #pragma warning restore 612, 618
         }

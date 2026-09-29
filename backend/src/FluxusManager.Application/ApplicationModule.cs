@@ -35,6 +35,10 @@ public static class ApplicationModule
         services.AddOptions<PasswordResetOptions>().Bind(configuration.GetSection(PasswordResetOptions.SectionName))
             .Validate(o => o.ValidadeMinutos is >= 5 and <= 1440, "RecuperacaoSenha:ValidadeMinutos deve estar entre 5 e 1440.")
             .ValidateOnStart();
+        services.AddOptions<SolicitacaoCadastroOptions>().Bind(configuration.GetSection(SolicitacaoCadastroOptions.SectionName))
+            .Validate(o => o.VerificacaoValidadeHoras is >= 1 and <= 168, "SolicitacoesCadastro:VerificacaoValidadeHoras deve estar entre 1 e 168.")
+            .Validate(o => o.AcompanhamentoValidadeDias is >= 1 and <= 365, "SolicitacoesCadastro:AcompanhamentoValidadeDias deve estar entre 1 e 365.")
+            .ValidateOnStart();
         services.AddOptions<FrontendOptions>().Bind(configuration.GetSection(FrontendOptions.SectionName))
             .Validate(o => Uri.TryCreate(o.Url, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https",
                 "Frontend:Url deve ser a URL absoluta HTTP(S) do frontend.")
@@ -52,6 +56,10 @@ public static class ApplicationModule
         services.AddScoped<IFilialService, FilialService>();
         services.AddScoped<IPerfilService, PerfilService>();
         services.AddScoped<IConviteService, ConviteService>();
+        services.AddScoped<ISolicitacaoCadastroService, SolicitacaoCadastroService>();
+        services.AddScoped<ISolicitacaoCadastroAdminService, SolicitacaoCadastroAdminService>();
+        // Singleton: guarda só o sinal para a rotina de envio; cada entrega abre o próprio escopo.
+        services.AddSingleton<ISolicitacaoCadastroEmails, SolicitacaoCadastroEmails>();
     }
 
     private static void AddValidators(IServiceCollection services)
