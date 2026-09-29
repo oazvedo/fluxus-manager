@@ -88,7 +88,7 @@ test('acompanhamento mostra a recusa com o motivo', async ({ page }) => {
   await page.goto(`/solicitar-cadastro/acompanhar?token=${token}`)
   await expect(page.getByText('Solicitação recusada')).toBeVisible()
   await expect(page.getByText('O CNPJ está baixado na Receita Federal.')).toBeVisible()
-  await expect(page.getByRole('list', { name: 'Etapas da solicitação' }).getByRole('listitem')).toHaveCount(4)
+  await expect(page.getByRole('list', { name: 'Etapas da solicitação' }).getByRole('listitem')).toHaveCount(3)
 })
 
 test('sem papel de plataforma não vê o menu nem a fila, mesmo com permissões da empresa', async ({ page }) => {

@@ -47,7 +47,8 @@ function BrandPanel() {
   return (
     <aside
       aria-label="FluxusManager"
-      className="relative hidden flex-col justify-between overflow-hidden bg-brand-surface p-10 text-brand-surface-foreground lg:flex"
+      // Fixo na altura da tela: em formulários longos a página rola e a frase do painel continua à vista.
+      className="relative hidden flex-col justify-between overflow-hidden bg-brand-surface p-10 text-brand-surface-foreground lg:sticky lg:top-0 lg:flex lg:h-svh"
     >
       <FlowField className="absolute inset-0 size-full [mask-image:linear-gradient(to_bottom,transparent_72px,black_136px),linear-gradient(to_bottom,black_35%,transparent_85%)] [mask-composite:intersect]" />
       <BrandLogo accent="var(--brand-accent)" className="relative" />

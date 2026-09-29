@@ -85,12 +85,15 @@ function Resumo({ acompanhamento }: { acompanhamento: Acompanhamento }) {
         <AuthLink to="/login">Ir para o login</AuthLink>
       </div>
     case 'Recusada':
-      return <div role="status" className="space-y-2 rounded-lg border bg-muted/60 px-3 py-2.5 text-sm">
-        <p className="font-medium">Solicitação recusada</p>
-        {acompanhamento.motivoRecusa ? (
-          <blockquote className="text-pretty whitespace-pre-line text-muted-foreground">{acompanhamento.motivoRecusa}</blockquote>
-        ) : null}
-        <p className="text-muted-foreground">Se os dados mudarem, você pode fazer uma nova solicitação.</p>
+      return <div className="space-y-3">
+        <div role="status" className="space-y-1.5 rounded-lg border bg-muted/60 px-3 py-2.5 text-sm">
+          <p className="font-medium">Solicitação recusada</p>
+          {/* O motivo é o que a pessoa veio ler: em cor de texto, não secundária. */}
+          {acompanhamento.motivoRecusa ? (
+            <blockquote className="text-pretty whitespace-pre-line">{acompanhamento.motivoRecusa}</blockquote>
+          ) : null}
+        </div>
+        <AuthLink to="/solicitar-cadastro">Fazer uma nova solicitação</AuthLink>
       </div>
   }
 }

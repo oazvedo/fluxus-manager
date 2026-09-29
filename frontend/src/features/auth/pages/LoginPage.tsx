@@ -69,10 +69,10 @@ export function LoginPage() {
       </form>
       <AuthLink to="/esqueci-senha" className="self-center">Esqueci minha senha</AuthLink>
       {/* Caminho de quem ainda não tem conta: afastado do formulário, em texto, sem competir com "Entrar". */}
-      <p className="mt-4 text-center text-sm text-pretty text-muted-foreground">
-        Sua empresa ainda não usa o Fluxus?{' '}
+      <div className="flex flex-col items-center gap-1 border-t pt-6 text-center text-sm">
+        <p className="text-muted-foreground">Sua empresa ainda não usa o Fluxus?</p>
         <AuthLink to="/solicitar-cadastro" className="font-medium text-foreground underline">Solicitar cadastro da empresa</AuthLink>
-      </p>
+      </div>
     </AuthShell>
   )
 }

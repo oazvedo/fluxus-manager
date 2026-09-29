@@ -95,14 +95,14 @@ describe('linha do tempo do acompanhamento', () => {
   const situacoes = (a: Acompanhamento) => etapasDaSolicitacao(a).map((etapa) => etapa.situacao)
 
   it('marca uma etapa atual por vez até a decisão', () => {
-    expect(situacoes(base)).toEqual(['feito', 'atual', 'pendente', 'pendente'])
+    expect(situacoes(base)).toEqual(['feito', 'atual', 'pendente'])
     const verificada = { ...base, status: 'PendenteAnalise' as const, verificadaEm: '2026-09-28T11:00:00Z' }
-    expect(situacoes(verificada)).toEqual(['feito', 'feito', 'atual', 'pendente'])
+    expect(situacoes(verificada)).toEqual(['feito', 'feito', 'atual'])
   })
 
   it('termina em aprovada ou recusada, sem etapa atual', () => {
     const decidida = { ...base, verificadaEm: '2026-09-28T11:00:00Z', decididaEm: '2026-09-29T09:00:00Z' }
-    expect(situacoes({ ...decidida, status: 'Aprovada' })).toEqual(['feito', 'feito', 'feito', 'feito'])
-    expect(situacoes({ ...decidida, status: 'Recusada' })).toEqual(['feito', 'feito', 'feito', 'recusado'])
+    expect(situacoes({ ...decidida, status: 'Aprovada' })).toEqual(['feito', 'feito', 'feito'])
+    expect(situacoes({ ...decidida, status: 'Recusada' })).toEqual(['feito', 'feito', 'recusado'])
   })
 })

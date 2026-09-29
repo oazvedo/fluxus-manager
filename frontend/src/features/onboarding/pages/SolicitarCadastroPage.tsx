@@ -129,7 +129,7 @@ export function SolicitarCadastroPage() {
 
 /** Título de cada grupo: pequeno e discreto, separa sem desenhar caixas. */
 function Legenda({ children }: { children: ReactNode }) {
-  return <FieldLegend className="mb-0 text-xs! font-medium tracking-wide text-muted-foreground uppercase">{children}</FieldLegend>
+  return <FieldLegend className="mb-4 text-xs! font-medium tracking-wide text-muted-foreground uppercase">{children}</FieldLegend>
 }
 
 type CampoProps = {
